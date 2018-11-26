@@ -1,0 +1,22 @@
+{
+  "name": "polyphona",
+  "version": "0.1.0",
+  "description": "A familiar, portable music editor for your desktop.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/florimondmanca/polyphona.git"
+  },
+  "author": "Florimond Manca, Alexandre de Boutray, Selim Tirellil, Jihane Bennis, Etienne Paternoster, Rachel Guibert",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/florimondmanca/polyphona/issues"
+  },
+  "homepage": "https://github.com/florimondmanca/polyphona#readme",
+  "devDependencies": {
+    "electron": "^3.0.10"
+  }
+}
