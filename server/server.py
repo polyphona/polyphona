@@ -18,14 +18,15 @@ class GetSongListRessource(object):
     def on_get(self, req, resp):
         user_id = req.get_param('user_id')
         resp.status = falcon.HTTP_200
-        # DB request
+#        song_list = database.songsByUser(user_id)
         resp.body = ('Hello world ! getsonglist\n\n')
 
 class GetSongRessource(object):
     def on_get(self, req, resp):
         user_id = req.get_param('user_id')
+        song_name = req.get_param('song_name')
         resp.status = falcon.HTTP_200
-        # DB request
+#        raw_json = database.getSongByTitle(song_name)
         resp.body = ('Hello world ! getsong\n\n')
 
 class CreateSongRessource(object):
@@ -41,15 +42,14 @@ class CreateSongRessource(object):
             json_file = json.loads(body.decode('utf-8'))
         except(ValueError, UnicodeDecodeError):
             print("Data formating error.")
-        # DB request
-#        database.addSong(json_file, used_id)
+#        database.addSong(used_id, json_file)
 
 class CreateUserRessource(object):
     def on_get(self, req, resp):
         user_id = req.get_param('user_id')
         password = req.get_param('password')
         resp.status = falcon.HTTP_200
-        # DB request
+#        database.addUser(user_id, password)
         resp.body = ('Hello world ! createsong\n\n')
 
 
