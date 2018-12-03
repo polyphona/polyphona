@@ -1,38 +1,23 @@
 <template>
+  <div>
     <table class="table table-bordered">
-      <thead>
-        <tr>
-          <th scope="col">B</th>
-          <th scope="col">B</th>
-          <th scope="col">B</th>
-          <th scope="col">B</th>
-        </tr>
-      </thead>
-        <tbody>
-            <tr>
-                <td class="cell">
-                  <button class="btn btn-danger"></button>
-                  
-                </td>
-                <td class="cell">
-                  bonjour
-                </td>
-                <td class="cell">
-                  bonjour
-                </td>
-                <td class="cell">
-                  bonjour
-                </td>
-            </tr>
-        </tbody>
+      <tbody>
+      <tr>
+        <cell></cell>
+        <cell></cell>
+        <cell></cell>
+        <cell></cell>
+      </tr>
+      </tbody>
     </table>
+  </div>
 </template>
 <script>
-export default {
-  name: 'custom-track'}
+  import Cell from './Cell.vue'
+  export default {
+    name: 'custom-track',
+    components: {Cell}
+  }
 </script>
 <style>
-.cell{
-  width: 3%
-}
 </style>
