@@ -5,6 +5,9 @@
 #  - All songs from user. -> list of song names
 #  - Give me this song. -> dict (json)
 #  - Is user valid ? -> boolean
+#  - Create song : user, json -> None (may fail if invalid user or song name already taken)
+#  - Create user : user, password -> None (may fail if user name is already taken)
+#
 
 import falcon
 
