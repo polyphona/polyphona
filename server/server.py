@@ -1,4 +1,10 @@
 # server.py
+# use : gunicorn server:app
+#
+# DB requets :
+#  - All songs from user. -> list of song names
+#  - Give me this song. -> dict (json)
+#  - Is user valid ? -> boolean
 
 import falcon
 
