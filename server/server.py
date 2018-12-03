@@ -10,19 +10,62 @@
 #
 
 import falcon
+import json
+#import database
 
 
-class Listener(object):
+class GetSongListRessource(object):
     def on_get(self, req, resp):
+        user_id = req.get_param('user_id')
         resp.status = falcon.HTTP_200
-        resp.body = ('Hello world !\n\n')
+        # DB request
+        resp.body = ('Hello world ! getsonglist\n\n')
+
+class GetSongRessource(object):
+    def on_get(self, req, resp):
+        user_id = req.get_param('user_id')
+        resp.status = falcon.HTTP_200
+        # DB request
+        resp.body = ('Hello world ! getsong\n\n')
+
+class CreateSongRessource(object):
+    def on_get(self, req, resp):
+        user_id = req.get_param('user_id')
+        resp.status = falcon.HTTP_200
+        body = req.stream.read()
+        resp.body = ('Hello world ! createsong\n\n')
+        if not body:
+            print("Nothing to read from the CreateSong request.")
+            pass
+        try:
+            json_file = json.loads(body.decode('utf-8'))
+        except(ValueError, UnicodeDecodeError):
+            print("Data formating error.")
+        # DB request
+#        database.addSong(json_file, used_id)
+
+class CreateUserRessource(object):
+    def on_get(self, req, resp):
+        user_id = req.get_param('user_id')
+        password = req.get_param('password')
+        resp.status = falcon.HTTP_200
+        # DB request
+        resp.body = ('Hello world ! createsong\n\n')
 
 
 app = falcon.API()
 
-listener = Listener()
+get_song_list = GetSongListRessource()
+app.add_route('/get_song_list', get_song_list)
 
-app.add_route('/qsd', listener)
+get_song = GetSongRessource()
+app.add_route('/get_song', get_song)
+
+create_song = CreateSongRessource()
+app.add_route('/create_song', create_song)
+
+create_user = CreateUserRessource()
+app.add_route('/create_user', create_user)
 
 
 """
