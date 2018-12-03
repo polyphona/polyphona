@@ -1,26 +1,25 @@
-# Polyphona
+# polyphona
 
-A familiar, portable music editor for your desktop. 
+> An electron-vue project
 
-## Install
+#### Build Setup
 
-Make sure you have [Node] and [npm] installed, then:
-
-```bash
+``` bash
+# install dependencies
 npm install
+
+# serve with hot reload at localhost:9080
+npm run dev
+
+# build electron application for production
+npm run build
+
+
+# lint all JS/Vue component files in `src/`
+npm run lint
+
 ```
 
-## Quick start
+---
 
-To run the Electron app, run:
-
-```
-npm start
-```
-
-This is equivalent to `$ electron .`.
-
-To get started with Electron, read [Writing your first Electron app](https://electronjs.org/docs/tutorial/first-app).
-
-[Node]: https://nodejs.org/en/
-[npm]: https://www.npmjs.com/get-npm
+This project was generated with [electron-vue](https://github.com/SimulatedGREG/electron-vue)@[8fae476](https://github.com/SimulatedGREG/electron-vue/tree/8fae4763e9d225d3691b627e83b9e09b56f6c935) using [vue-cli](https://github.com/vuejs/vue-cli). Documentation about the original structure can be found [here](https://simulatedgreg.gitbooks.io/electron-vue/content/index.html).
