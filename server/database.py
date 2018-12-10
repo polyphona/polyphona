@@ -7,8 +7,10 @@ if __name__ == "__main__":
     #If database is empty, create tables
     cursor.execute('''CREATE TABLE IF NOT EXISTS songs 
                       (SongID integer primary key not null,
-                      Json text,
-                      User text)''')
+                      SongName text,
+                      Created datetime,
+                      Updated datetime,
+                      TracksJson text)''')
     cursor.execute('''CREATE TABLE IF NOT EXISTS users
                       (UserName text primary key not null,
                       Password text)''')
@@ -20,7 +22,6 @@ if __name__ == "__main__":
                       (Token text primary key not null,
                       UserID text,
                       RefreshDate datetime)''')
-
     conn.commit()
     conn.close()
 
@@ -31,17 +32,32 @@ def addSong(Json_song, userName):
     cursor = conn.cursor()
     cursor.execute("INSERT INTO songs (Json, User) VALUES (?,?)", ( Json_song, userName ))
 
-def addUser():
+def addUser(username, password):  #Backend has to check if the username doesn't exist
     conn = sqlite3.connect('polyphona_db.db')
     cursor = conn.cursor()
+    cursor.execute("INSERT INTO users (UserName, Password) VALUES (?,?)", ( username, password ))
 
-def getSongByTitle():
+def getSongByID(song_ID):
     conn = sqlite3.connect('polyphona_db.db')
     cursor = conn.cursor()
+    cursor.execute("SELECT * FROM songs WHERE SongID = ? ", ( song_ID ))
+    return cursor.fetchone()
 
-def songsByUser():
+def getSongsByUser(userName):
+    """ Return list of songs where the user is contributing 
+    userName : string
+        Name of user
+    Returns
+    -------------
+        list of songs
+    """
     conn = sqlite3.connect('polyphona_db.db')
     cursor = conn.cursor()
+    cursor.execute('''SELECT *
+                      FROM songs, song_user_links
+                      ON songs.SongID = song_user_links.SongID
+                      WHERE UserName = ? ''', ( userName ))
+    return cursor.fetchall()
 
 
 def connectUser(userName,password):
