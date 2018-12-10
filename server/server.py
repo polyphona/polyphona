@@ -2,11 +2,32 @@
 # use : gunicorn server:app
 #
 # DB requets :
-#  - All songs from user. -> list of song names
-#  - Give me this song. -> dict (json)
-#  - Is user valid ? -> boolean
-#  - Create song : user, json -> None (may fail if invalid user or song name already taken)
-#  - Create user : user, password -> None (may fail if user name is already taken)
+#  - Create user : username (unique), first name, last name, password
+#    -> create new user instance
+#    -> true or false (false if the username is already taken)
+#  - Check username : username
+#    -> true or false (just check if the username is taken)
+#  - Check user : username, password
+#    -> true or false
+#
+#  - Check token : token
+#    -> username or None
+#  - Check user token : user
+#    -> token or None (return token if there already is a token for this user)
+#  - Create token : username, token
+#    -> True or False (token taken or wrong username)
+#
+#  - Get song by id : song_id
+#    -> dict or None
+#  - Get songs by user : username
+#    -> list of dict or None
+#
+#  - Create song : username, song_name
+#    -> song_id or None
+#  - Update song : username
+#    -> list of dict or None
+#  - Delete song : song_id
+#    -> True or False
 #
 
 import falcon
