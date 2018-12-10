@@ -16,9 +16,10 @@ export default class Track {
   }
 
   getCellList = () => {
-    let trackList = Array(this.length)
+    let trackList = Array.from({length: this.length}, (v, k) => ({activated: false}))
     for (let note of this.notes) {
-      trackList[note.startCell] = true
+      trackList[note.startCell].activated = true
     }
+    return trackList
   }
 }

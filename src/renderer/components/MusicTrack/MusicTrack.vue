@@ -3,7 +3,7 @@
     <table class="table table-bordered">
       <tbody>
       <tr>
-        <cell v-for="(cell, index) in track.getCellList()" :id="index"></cell>
+        <cell v-for="(cell, index) in track.getCellList()" :key="index" :id="index" :cell="cell" @switch-cell-state="switchCellState"></cell>
       </tr>
       </tbody>
     </table>
@@ -19,6 +19,13 @@
     data () {
       return {
         track: new Track(4, 1)
+      }
+    },
+    methods: {
+      switchCellState (input) {
+        if (input.cell.activated) {
+          this.track.addNote(input.id)
+        }
       }
     }
   }

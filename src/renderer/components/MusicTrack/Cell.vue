@@ -1,5 +1,5 @@
 <template>
-  <td class="cell" v-bind:class="{'table-primary': noteState}" @click="switchState">
+  <td class="cell" v-bind:class="{'table-primary': localCell.activated}" @click="switchState">
   </td>
 </template>
 
@@ -7,16 +7,18 @@
   export default {
     name: 'Cell',
     props: {
-      id: Number
+      id: Number,
+      cell: Object
     },
     data () {
       return {
-        noteState: false
+        localCell: this.cell
       }
     },
     methods: {
       switchState () {
-        this.noteState = !this.noteState
+        this.localCell.activated = !this.localCell.activated
+        this.$emit('switch-cell-state', {cell: this.localCell, id: this.id})
       }
     }
   }
