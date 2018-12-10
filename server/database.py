@@ -12,6 +12,14 @@ if __name__ == "__main__":
     cursor.execute('''CREATE TABLE IF NOT EXISTS users
                       (UserName text primary key not null,
                       Password text)''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS song_user_links
+                      (LinkID integer primary key not null,
+                      SongID integer,
+                      UserName text)''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS tokens
+                      (Token text primary key not null,
+                      UserID text,
+                      RefreshDate datetime)''')
 
     conn.commit()
     conn.close()
