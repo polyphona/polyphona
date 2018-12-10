@@ -3,7 +3,7 @@
 </template>
 
 <script>
-  import CustomTrack from './CustomTrack.vue'
+  import CustomTrack from './MusicTrack/MusicTrack.vue'
 
   export default {
     name: 'landing-page',
