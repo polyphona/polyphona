@@ -4,13 +4,17 @@
     <p>
       <router-link to="login">Login</router-link>
     </p>
+    <custom-track></custom-track>
   </div>
 </template>
 
 <script>
-  import Vue from 'vue'
+  import CustomTrack from './MusicTrack/MusicTrack.vue'
 
-  export default Vue.component('Home', {})
+  export default {
+    name: 'Home',
+    components: { CustomTrack }
+  }
 </script>
 
 <style lang="scss" scoped>
