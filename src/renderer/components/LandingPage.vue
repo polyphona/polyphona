@@ -1,5 +1,5 @@
 <template>
-<custom-track></custom-track>
+  <custom-track id="track"></custom-track>
 </template>
 
 <script>
@@ -11,5 +11,9 @@
   }
 </script>
 
-<style>
+<style lang="scss" scoped>
+  #track {
+    height: 100vh;
+  }
 </style>
+

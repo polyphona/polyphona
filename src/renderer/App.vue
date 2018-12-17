@@ -12,4 +12,8 @@
 
 <style lang="scss">
   @import "../../node_modules/bootstrap/scss/bootstrap.scss";
+  html, body, #app {
+    width: 100%;
+    height: 100%;
+  }
 </style>
