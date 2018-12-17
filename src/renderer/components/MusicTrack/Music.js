@@ -1,25 +1,36 @@
-class Note {
-  constructor (startCell) {
-    this.startCell = startCell
+export class Note {
+  constructor (startTime, duration, pitch) {
+    this.startTime = startTime
+    this.duration = duration
+    this.pitch = pitch
   }
 }
 
-export default class Track {
-  constructor (length = 4, tempo = 1) {
-    this.length = length
-    this.tempo = tempo
+export class NoteCanvasAdapter {
+  toBox (renderContext, note) {
+    return {
+      x: renderContext.percentPerQuarter * note.startTime,
+      y: renderContext.percentPerInterval * note.pitch,
+      width: renderContext.percentPerQuarter * note.duration,
+      height: renderContext.percentPerInterval
+    }
+  }
+
+  toNote (renderContext, box) {
+    return new Note(
+      Math.floor(box.x / renderContext.percentPerQuarter),
+      box.width / renderContext.percentPerQuarter,
+      Math.floor(box.y / renderContext.percentPerInterval)
+    )
+  }
+}
+
+export class Track {
+  constructor () {
     this.notes = []
   }
 
-  addNote = (startCell) => {
-    this.notes.push(new Note(startCell))
-  }
-
-  getCellList = () => {
-    let trackList = Array.from({length: this.length}, (v, k) => ({activated: false}))
-    for (let note of this.notes) {
-      trackList[note.startCell].activated = true
-    }
-    return trackList
+  addNote = (note) => {
+    this.notes.push(note)
   }
 }
