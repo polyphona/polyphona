@@ -18,7 +18,7 @@ export class NoteCanvasAdapter {
 
   toNote (renderContext, box) {
     return new Note(
-      box.x / renderContext.percentPerQuarter,
+      Math.floor(box.x / renderContext.percentPerQuarter),
       box.width / renderContext.percentPerQuarter,
       Math.floor(box.y / renderContext.percentPerInterval)
     )

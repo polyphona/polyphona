@@ -77,6 +77,7 @@
       ctx.rect(newBox.x, newBox.y, newBox.width, newBox.height)
       ctx.fillStyle = this.color
       ctx.fill()
+      ctx.stroke()
     }
   }
 </script>

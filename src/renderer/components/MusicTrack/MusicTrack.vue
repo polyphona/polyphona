@@ -14,7 +14,7 @@
   </div>
 </template>
 <script>
-  import {Track, Note, NoteCanvasAdapter} from './Music.js'
+  import {Track, NoteCanvasAdapter} from './Music.js'
   import NoteCanvas from './NoteCanvas.vue'
   import NoteBox from './NoteBox.vue'
 
@@ -25,13 +25,11 @@
     components: {NoteCanvas, NoteBox},
     data () {
       const track = new Track(4, 1)
-      track.addNote(new Note(0.5, 4, 3))
-      track.addNote(new Note(2, 1, 0))
       return {
         track,
         renderContext: {
           percentPerQuarter: 10,
-          percentPerInterval: 10
+          percentPerInterval: 25
         }
       }
     },
