@@ -59,6 +59,7 @@ def deleteSong(song_id):
     result = cursor.fetchall()
     if len(result) == 1 :
         cursor.execute('''DELETE FROM songs WHERE SongID = ?''', str(song_id))
+        cursor.execute('''DELETE FROM song_user_links WHERE SongID = ?''', str(song_id))
         conn.commit()
         return True
     else :
@@ -126,7 +127,7 @@ def getSongsByUser(user_name):
         result = cursor.fetchall()
         list_of_songs = []
         for song in result:
-            list_of_songs.append(strings2dict(song[0],song[1], song[2], song[3], song[4]))
+            list_of_songs.append(strings2dict(song[0], song[1], song[2], song[3], song[4]))
         return list_of_songs
     else:
         return None
