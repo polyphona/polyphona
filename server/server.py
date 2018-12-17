@@ -9,7 +9,6 @@ from uuid import uuid4
 import database
 
 
-app = falcon.API()
 
 
 class GetSongListRessource(object):
@@ -24,8 +23,6 @@ class GetSongListRessource(object):
         resp.status = falcon.HTTP_200
         resp.body = (json_resp.dump())
 
-get_song_list = GetSongListRessource()
-app.add_route('/users/{username}/songs', get_song_list)
 
 
 class RetrieveSongRessource(object):
@@ -40,9 +37,6 @@ class RetrieveSongRessource(object):
             raise falcon.HTTP_404("song_id unknown.")
         resp.status = falcon.HTTP_200
         resp.body = (json_resp.dump())
-
-retreive_song = RetrieveSongRessource()
-app.add_route('/songs/{song_id}', retreive_song)
 
 
 class CreateSongRessource(object):
@@ -64,9 +58,6 @@ class CreateSongRessource(object):
         if not database.createSongUserLink(song_id, json_in["username"]):
             raise falcon.HTTP_500("Server error: could not link song with user.")
         resp.status = falcon.HTTP_200
-
-create_song = CreateSongRessource()
-app.add_route('/songs', create_song)
 
 
 class SongRessource(object):
@@ -105,9 +96,6 @@ class SongRessource(object):
             raise falcon.HTTP_500("Server error: could not delete song.")
         resp.status = falcon.HTTP_200
 
-update_delete_song = SongRessource()
-app.add_route('/songs/{song_id}', update_delete_song)
-
 
 class CreateTokenRessource(object):
     def on_post(self, req, resp):
@@ -135,9 +123,6 @@ class CreateTokenRessource(object):
         resp.body = json.dumps(json_out, ensure_ascii=False)
         resp.status = falcon.HTTP_200
 
-create_token = CreateTokenRessource()
-app.add_route('/tokens', create_token)
-
 
 class DeleteTokenRessource(object):
     def on_delete(self, req, resp):
@@ -147,9 +132,31 @@ class DeleteTokenRessource(object):
             raise falcon.HTTP_500("Failed to delete token.")
         resp.status = falcon.HTTP_204
 
-delete_token = DeleteTokenRessource()
-app.add_route('/tokens/{token}', delete_token)
 
+def createAPI():
+    app = falcon.API()
+
+    get_song_list = GetSongListRessource()
+    app.add_route('/users/{username}/songs', get_song_list)
+
+    retreive_song = RetrieveSongRessource()
+    app.add_route('/songs/{song_id}', retreive_song)
+
+    create_song = CreateSongRessource()
+    app.add_route('/songs', create_song)
+
+    update_delete_song = SongRessource()
+    app.add_route('/songs/{song_id}', update_delete_song)
+
+    create_token = CreateTokenRessource()
+    app.add_route('/tokens', create_token)
+
+    delete_token = DeleteTokenRessource()
+    app.add_route('/tokens/{token}', delete_token)
+
+    return app
+
+app = createAPI()
 
 
 
