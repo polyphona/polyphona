@@ -1,6 +1,6 @@
 # server.py
 # use : gunicorn server:app
-#
+# api : https://hackmd.io/eNiNVR6eR1mJH2kOebtE5g#
 #
 
 import falcon
@@ -19,6 +19,8 @@ class GetSongListRessource(object):
             resp.status = falcon.HTTP_404
             raise falcon.HTTP_404("Username unknown.")
         json_resp = database.getSongsByUser(username)
+        if json_resp is None:
+            raise falcon.HTTP_500("Server error: failed to retreive songs.")
         resp.status = falcon.HTTP_200
         resp.body = (json_resp.dump())
 
