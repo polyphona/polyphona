@@ -103,6 +103,11 @@ def deleteToken(token):
     else : 
         return False
 
+def deleteObsoleteTokens():
+    cursor.execute('''DELETE FROM tokens WHERE RefreshDate <=  ?''', datetime.datetime.now())
+    conn.commit()
+    return True
+
 def getSongByID(song_id):
     if SongIdExists(song_id):
         cursor.execute("SELECT * FROM songs WHERE SongID = ? ", str(song_id))
