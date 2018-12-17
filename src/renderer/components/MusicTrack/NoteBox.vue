@@ -1,7 +1,7 @@
 <script>
   /*
   NOTE: NoteBox is not a "real" Vue component; it has no template nor styles, so it does
-  note render to the DOM.
+  not render to the DOM.
   Instead, it provides a render() function directly which draws the note box to the canvas.
    */
 
