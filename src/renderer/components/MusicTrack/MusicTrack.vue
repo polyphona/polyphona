@@ -1,6 +1,5 @@
 <template>
   <div class="wrapper">
-    <h1>My music track</h1>
     <note-canvas @canvas-click="onClickCanvas">
       <note-box
         v-for="box in noteBoxes"
