@@ -9,6 +9,37 @@ from uuid import uuid4
 import database
 
 
+def raiseMacro(error_code, str):
+    print(str)
+    raise falcon.HTTPError(error_code, str)
+    pass
+
+
+class UserRessource(object):
+    def on_post(self, req, resp):
+        try:
+            json_in = json.loads(req.stream.read().decode('utf-8'))
+        except:
+            print("unreadable json.")
+            raise falcon.HTTPError(falcon.HTTP_400, "unreadable json.")
+        if 'username' not in json_in.keys():
+            print("Missing username field.")
+            raise falcon.HTTPError(falcon.HTTP_400, "Missing username field.")
+        if 'first_name' not in json_in.keys():
+            print("Missing first_name field.")
+            raise falcon.HTTPError(falcon.HTTP_400, "Missing first_name field.")
+        if 'last_name' not in json_in.keys():
+            print("Missing last_name field.")
+            raise falcon.HTTPError(falcon.HTTP_400, "Missing last_name field.")
+        if 'password' not in json_in.keys():
+            print("Missing password field.")
+            raise falcon.HTTPError(falcon.HTTP_400, "Missing password field.")
+        if not database.IsUserNameFree(json_in['username']):
+            print("Username already taken.")
+            raise falcon.HTTPError(falcon.HTTP_403, "Username already taken.")
+        if not database.createUser(json_in['username'], json_in['first_name'], json_in['last_name'], json_in['password']):
+            raise falcon.HTTPError(falcon.HTTP_500, "Unexpected server error.")
+        resp.status = falcon.HTTP_201
 
 
 class GetSongListRessource(object):
@@ -129,6 +160,9 @@ class TokenRessource(object):
 
 def createAPI():
     app = falcon.API()
+
+    user_ressource = UserRessource()
+    app.add_route('/users/', user_ressource)
 
     get_song_list = GetSongListRessource()
     app.add_route('/users/{username}/songs', get_song_list)
