@@ -24,11 +24,10 @@ class GetSongListRessource(object):
         resp.body = (json_resp.dump())
 
 
-
-class RetrieveSongRessource(object):
+class SongRessource(object):
     def on_get(self, req, resp, song_id):
         token = req.get_param('token')
-        if not database.checkToken(token):
+        if not database.IsTokenValid(token):
             raise falcon.HTTPError(falcon.HTTP_401, "Invalid token.")
         json_resp = database.getSongByID(song_id)
         if json_resp is None:
@@ -38,29 +37,6 @@ class RetrieveSongRessource(object):
         resp.status = falcon.HTTP_200
         resp.body = (json_resp.dump())
 
-
-class CreateSongRessource(object):
-    def on_post(self, req, resp):
-        token = req.get_param('token')
-        if database.checkToken(token) is None:
-            raise falcon.HTTPError(falcon.HTTP_401, "Invalid token.")
-        try:
-            json_in = json.loads(req.stream.read(self._CHUNK_SIZE_BYTES))
-        except:
-            raise falcon.HTTPError(falcon.HTTP_400, "unreadable json.")
-        if 'name' not in json_in.keys():
-            raise falcon.HTTPError(falcon.HTTP_400, "Missing name field.")
-        if 'tracks' not in json_in.keys():
-            raise falcon.HTTPError(falcon.HTTP_400, "Missing tracks field.")
-        song_id = database.createSong(json_in["name"], json_in["tracks"])
-        if song_id is None:
-            raise falcon.HTTPError(falcon.HTTP_500, "Server error: could not create song.")
-        if not database.createSongUserLink(song_id, json_in["username"]):
-            raise falcon.HTTPError(falcon.HTTP_500, "Server error: could not link song with user.")
-        resp.status = falcon.HTTP_200
-
-
-class SongRessource(object):
     def on_put(self, req, resp, song_id):
         token = req.get_param('token')
         if database.IsTokenValid(token) is None:
@@ -77,6 +53,25 @@ class SongRessource(object):
             raise falcon.HTTPError(falcon.HTTP_400, "Missing tracks field.")
         if not database.updateSong(song_id, json_in["name"], json_in["tracks"]):
             raise falcon.HTTPError(falcon.HTTP_500, "Server error: could not update song.")
+        resp.status = falcon.HTTP_200
+
+    def on_post(self, req, resp, song_id):
+        token = req.get_param('token')
+        if database.checkToken(token) is None:
+            raise falcon.HTTPError(falcon.HTTP_401, "Invalid token.")
+        try:
+            json_in = json.loads(req.stream.read(self._CHUNK_SIZE_BYTES))
+        except:
+            raise falcon.HTTPError(falcon.HTTP_400, "unreadable json.")
+        if 'name' not in json_in.keys():
+            raise falcon.HTTPError(falcon.HTTP_400, "Missing name field.")
+        if 'tracks' not in json_in.keys():
+            raise falcon.HTTPError(falcon.HTTP_400, "Missing tracks field.")
+        song_id = database.createSong(json_in["name"], json_in["tracks"])
+        if song_id is None:
+            raise falcon.HTTPError(falcon.HTTP_500, "Server error: could not create song.")
+        if not database.createSongUserLink(song_id, json_in["username"]):
+            raise falcon.HTTPError(falcon.HTTP_500, "Server error: could not link song with user.")
         resp.status = falcon.HTTP_200
 
     def on_delete(self, req, resp, song_id):
@@ -97,8 +92,8 @@ class SongRessource(object):
         resp.status = falcon.HTTP_200
 
 
-class CreateTokenRessource(object):
-    def on_post(self, req, resp):
+class TokenRessource(object):
+    def on_post(self, req, resp, token):
         try:
             json_in = json.loads(req.stream.read(self._CHUNK_SIZE_BYTES))
         except:
@@ -123,14 +118,13 @@ class CreateTokenRessource(object):
         resp.body = json.dumps(json_out, ensure_ascii=False)
         resp.status = falcon.HTTP_200
 
-
-class DeleteTokenRessource(object):
-    def on_delete(self, req, resp):
-        if database.IsTokenValid(new_token) is None:
+    def on_delete(self, req, resp, token):
+        if database.IsTokenValid(token) is None:
             raise falcon.HTTPError(falcon.HTTP_404, "Invalid token.")
         if not database.deleteToken(token):
             raise falcon.HTTPError(falcon.HTTP_500, "Failed to delete token.")
         resp.status = falcon.HTTP_204
+
 
 
 def createAPI():
@@ -139,20 +133,11 @@ def createAPI():
     get_song_list = GetSongListRessource()
     app.add_route('/users/{username}/songs', get_song_list)
 
-    retreive_song = RetrieveSongRessource()
-    app.add_route('/songs/{song_id}', retreive_song)
-
-    create_song = CreateSongRessource()
-    app.add_route('/songs', create_song)
-
     update_delete_song = SongRessource()
     app.add_route('/songs/{song_id}', update_delete_song)
 
-    create_token = CreateTokenRessource()
-    app.add_route('/tokens', create_token)
-
-    delete_token = DeleteTokenRessource()
-    app.add_route('/tokens/{token}', delete_token)
+    token_ressource = TokenRessource()
+    app.add_route('/tokens/{token}', token_ressource)
 
     return app
 
