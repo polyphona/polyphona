@@ -78,6 +78,9 @@ def createUser(user_name, first_name, last_name, password):
     else:
         return False
 
+def getUserInfo(user_name):
+    return ""
+
 def createSongUserLink(song_id, user_name):
     if SongIdExists(song_id) and not(IsUserNameFree(user_name)):
         cursor.execute('''INSERT INTO song_user_links (SongID, UserName)
