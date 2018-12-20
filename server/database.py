@@ -68,7 +68,7 @@ def deleteSong(song_id):
 def createUser(user_name, first_name, last_name, password):
     if IsUserNameFree(user_name):
         cursor.execute('''INSERT INTO users (UserName, FirstName, LastName, Password)
-                          VALUES (?,?,?,?)''', ([user_name], [first_name], [last_name], [password]))
+                          VALUES (?,?,?,?)''', (user_name, first_name, last_name, password))
         conn.commit()
         return True
     else:
