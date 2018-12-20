@@ -55,9 +55,9 @@ class SongRessource(object):
             raise falcon.HTTPError(falcon.HTTP_500, "Server error: could not update song.")
         resp.status = falcon.HTTP_200
 
-    def on_post(self, req, resp, song_id):
+    def on_post(self, req, resp):
         token = req.get_param('token')
-        if database.checkToken(token) is None:
+        if database.IsTokenValid(token) is None:
             raise falcon.HTTPError(falcon.HTTP_401, "Invalid token.")
         try:
             json_in = json.loads(req.stream.read(self._CHUNK_SIZE_BYTES))
@@ -93,7 +93,7 @@ class SongRessource(object):
 
 
 class TokenRessource(object):
-    def on_post(self, req, resp, token):
+    def on_post(self, req, resp):
         try:
             json_in = json.loads(req.stream.read(self._CHUNK_SIZE_BYTES))
         except:
@@ -135,9 +135,11 @@ def createAPI():
 
     update_delete_song = SongRessource()
     app.add_route('/songs/{song_id}', update_delete_song)
+    app.add_route('/songs/', update_delete_song)
 
     token_ressource = TokenRessource()
     app.add_route('/tokens/{token}', token_ressource)
+    app.add_route('/tokens/', token_ressource)
 
     return app
 
