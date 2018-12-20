@@ -7,6 +7,9 @@ cursor = conn.cursor()
 
 if __name__ == "__main__":
     #If database is empty, create tables
+    createDatabaseTable()
+
+def createDatabaseTable():
     cursor.execute('''CREATE TABLE IF NOT EXISTS songs 
                       (SongID integer primary key not null,
                       SongName text,
@@ -27,6 +30,7 @@ if __name__ == "__main__":
                       UserName text references users,
                       RefreshDate datetime)''')
     conn.commit()
+    return True
 
 
 def createSong(song_name, tracks_json):

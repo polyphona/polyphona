@@ -155,6 +155,8 @@ class TokenRessource(object):
 def createAPI():
     app = falcon.API()
 
+    database.createDatabaseTable()
+
     user_ressource = UserRessource()
     app.add_route('/users/', user_ressource)
 
