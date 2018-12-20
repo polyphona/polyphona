@@ -34,10 +34,15 @@
       color: {
         type: String,
         default: '#f00'
+      },
+      layer: {
+        type: String,
+        default: 'background'
       }
     },
     data () {
       return {
+        strokeWidth: 10,
         oldBox: {
           x: 0,
           y: 0,
@@ -47,8 +52,11 @@
       }
     },
     computed: {
+      context () {
+        return this.provider[this.layer]
+      },
       calculatedBox () {
-        const ctx = this.provider.context
+        const ctx = this.context
         const box = {
           x: percentWidthToPix(this.x, ctx),
           y: percentHeightToPix(this.y, ctx),
@@ -59,25 +67,49 @@
         return box
       }
     },
+    methods: {
+      clearOldBox (ctx) {
+        const oldBox = this.oldBox
+        ctx.clearRect(oldBox.x, oldBox.y, oldBox.width, oldBox.height)
+      }
+    },
     render () {
+      const ctx = this.context
+
       // It is *possible* that the canvas context may not be injected yet
-      if (!this.provider.context) {
+      if (!ctx) {
         return
       }
-      const ctx = this.provider.context
+
       ctx.beginPath()
 
-      const oldBox = this.oldBox
+      this.clearOldBox(ctx)
+
       const newBox = this.calculatedBox
 
-      // Clear old box
-      ctx.clearRect(oldBox.x, oldBox.y, oldBox.width, oldBox.height)
+      if (!newBox.width) {
+        return
+      }
 
       // Draw the new box
-      ctx.rect(newBox.x, newBox.y, newBox.width, newBox.height)
+      ctx.rect(
+        newBox.x,
+        newBox.y,
+        newBox.width,
+        newBox.height
+      )
+      ctx.save()
+      ctx.clip()
       ctx.fillStyle = this.color
+      ctx.lineWidth = this.strokeWidth
       ctx.fill()
       ctx.stroke()
+      ctx.restore()
+    },
+    destroyed () {
+      // When note component is destroyed, un-draw it from the canvas
+      const ctx = this.context
+      this.clearOldBox(ctx)
     }
   }
 </script>
