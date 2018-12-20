@@ -24,13 +24,13 @@
     name: 'custom-track',
     components: {NoteCanvas, NoteBox},
     methods: {},
-    computed: Object.assign({
+    computed: {
       noteBoxes () {
         return this.listNotes.map(
           (note) => canvasAdapter.toBox(this.renderContext, note)
         )
-      }
-    }, mapGetters(['listNotes']))
+      },
+      ...mapGetters(['listNotes'])}
   }
 </script>
 <style lang="scss" scoped>

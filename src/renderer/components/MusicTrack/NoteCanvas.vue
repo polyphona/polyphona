@@ -30,7 +30,7 @@
 
       }
     },
-    methods: Object.assign({
+    methods: {
       onClick (event) {
         const canvas = this.$refs['note-canvas']
         const canvasLeft = canvas.offsetLeft
@@ -39,9 +39,11 @@
         const y = 100 * (event.pageY - canvasTop) / canvas.height
         const box = {x, y, width: 10, height: 10}
         const note = canvasAdapter.toNote(this.renderContext, box)
+        console.log('Hello ! I\'m here ' + JSON.stringify(note))
         this.addNote(note)
-      }
-    }, mapActions(['addNote'])),
+      },
+      ...mapActions(['addNote'])
+    },
     provide () {
       // Allow child components to `inject: ['provider']`
       // and have access to it.

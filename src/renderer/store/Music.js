@@ -31,6 +31,7 @@ export class Track {
   }
 
   addNote = (note) => {
+    console.log('there')
     this.notes.push(note)
   }
 }

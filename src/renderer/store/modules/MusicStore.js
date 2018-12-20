@@ -6,6 +6,7 @@ const state = {
 
 const mutations = {
   ADD_NOTE (state, note) {
+    console.log('here')
     state.currentTrack.addNote(note)
   }
 }
@@ -15,7 +16,7 @@ const getters = {
 }
 
 const actions = {
-  addNote: ({commit}, note) => commit('ADD_NOTE', note)
+  addNote: ({commit}, note) => { console.log('hiya'); commit('ADD_NOTE', note) }
 }
 
 export default {
