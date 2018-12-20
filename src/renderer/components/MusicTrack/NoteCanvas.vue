@@ -7,26 +7,41 @@
 </template>
 
 <script>
+  import {mapActions} from 'vuex'
+  import {NoteCanvasAdapter} from '@/store/Music'
+
+  const canvasAdapter = new NoteCanvasAdapter()
+
   export default {
     name: 'NoteCanvas',
     data () {
       return {
         provider: {
           context: null
+        },
+        renderContext: {
+          // Percentage of the canvas filled by a quarter note,
+          // i.e. 1/4th of a bar
+          percentPerQuarter: 10,
+          // Percentage of the canvas filled by a note interval,
+          // i.e. the difference in pitch between A and A#
+          percentPerInterval: 25
         }
+
       }
     },
-    methods: {
+    methods: Object.assign({
       onClick (event) {
         const canvas = this.$refs['note-canvas']
         const canvasLeft = canvas.offsetLeft
         const canvasTop = canvas.offsetTop
-        this.$emit('canvas-click', {
-          x: 100 * (event.pageX - canvasLeft) / canvas.width,
-          y: 100 * (event.pageY - canvasTop) / canvas.height
-        })
+        const x = 100 * (event.pageX - canvasLeft) / canvas.width
+        const y = 100 * (event.pageY - canvasTop) / canvas.height
+        const box = {x, y, width: 10, height: 10}
+        const note = canvasAdapter.toNote(this.renderContext, box)
+        this.addNote(note)
       }
-    },
+    }, mapActions(['addNote'])),
     provide () {
       // Allow child components to `inject: ['provider']`
       // and have access to it.
