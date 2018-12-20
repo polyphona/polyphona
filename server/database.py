@@ -32,9 +32,9 @@ if __name__ == "__main__":
 def createSong(song_name, tracks_json):
     current_time = datetime.datetime.now()
     cursor.execute('''INSERT INTO songs (SongName, Created, Updated, TracksJson)
-                      VALUES (?,?,?,?)''', ( song_name, current_time, current_time, tracks_json ))
+                      VALUES (?,?,?,?)''', ( [song_name], current_time, current_time, [tracks_json] ))
     conn.commit()
-    cursor.execute("SELECT SongID FROM songs WHERE Created = ? and SongName = ? ", (current_time, song_name))
+    cursor.execute("SELECT SongID FROM songs WHERE Created = ? and SongName = ? ", (current_time, [song_name]))
     result = cursor.fetchall()
     if len(result) == 1:
         return result[0][0]
@@ -48,7 +48,7 @@ def updateSong(song_id, song_name, tracks_json):
                           SET SongName = ?,
                               Updated = ?,
                               TracksJson = ?,
-                          WHERE SongID = ?''', (song_name, current_time, tracks_json, song_id))
+                          WHERE SongID = ?''', ([song_name], current_time, [tracks_json], song_id))
         conn.commit()
         return getSongByID(song_id)
     else :
@@ -68,7 +68,7 @@ def deleteSong(song_id):
 def createUser(user_name, first_name, last_name, password):
     if IsUserNameFree(user_name):
         cursor.execute('''INSERT INTO users (UserName, FirstName, LastName, Password)
-                          VALUES (?,?,?,?)''', (user_name, first_name, last_name, password))
+                          VALUES (?,?,?,?)''', ([user_name], [first_name], [last_name], [password]))
         conn.commit()
         return True
     else:
@@ -77,7 +77,7 @@ def createUser(user_name, first_name, last_name, password):
 def createSongUserLink(song_id, user_name):
     if SongIdExists(song_id) and not(IsUserNameFree(user_name)):
         cursor.execute('''INSERT INTO song_user_links (SongID, UserName)
-                          VALUES (?,?)''', (str(song_id), user_name))
+                          VALUES (?,?)''', (str(song_id), [user_name]))
         conn.commit()
         return True
     else :
@@ -87,17 +87,17 @@ def createToken(user_name, token):
     if IsUserNameFree(user_name) and IsTokenValid(token):
         cursor.execute('''INSERT INTO tokens (Token, UserName, RefreshDate)
                           VALUES (?,?,?)''',
-                          (token, user_name, datetime.datetime.now() + datetime.timedelta(minutes=15)))
+                          ([token], [user_name], datetime.datetime.now() + datetime.timedelta(minutes=15)))
         conn.commit()
         return True
     else : 
         return False
 
 def deleteToken(token):
-    cursor.execute("SELECT Token FROM tokens WHERE Token = ?", token)
+    cursor.execute("SELECT Token FROM tokens WHERE Token = ?", [token])
     result = cursor.fetchall()
     if len(result) == 1 :
-        cursor.execute('''DELETE FROM tokens WHERE Token = ?''', token)
+        cursor.execute('''DELETE FROM tokens WHERE Token = ?''', [token])
         conn.commit()
         return True
     else : 
@@ -128,7 +128,7 @@ def getSongsByUser(user_name):
         cursor.execute('''SELECT *
                           FROM songs, song_user_links
                           ON songs.SongID = song_user_links.SongID
-                          WHERE UserName = ? ''', user_name)
+                          WHERE UserName = ? ''', [user_name])
         result = cursor.fetchall()
         list_of_songs = []
         for song in result:
@@ -141,7 +141,7 @@ def checkUser(user_name,password):
     if IsUserNameFree(user_name):
         return False
     else :
-        cursor.execute("SELECT Password FROM users WHERE UserName=?", user_name)
+        cursor.execute("SELECT Password FROM users WHERE UserName=?", [user_name])
         if cursor.fetchone()[0] == password:
             return True
         else :
@@ -155,7 +155,7 @@ def SongIdExists(song_id):
         return False
 
 def IsUserNameFree(user_name):
-    cursor.execute("SELECT count(UserName) FROM users WHERE UserName=?", user_name)
+    cursor.execute("SELECT count(UserName) FROM users WHERE UserName=?", [user_name])
     if cursor.fetchone()[0] == 0:
         return True
     else:
@@ -170,7 +170,7 @@ def IsTokenValid(token):
         return None
 
 def checkUserToken(user_name):
-    cursor.execute("SELECT Token, RefreshDate FROM tokens WHERE UserName=?", user_name)
+    cursor.execute("SELECT Token, RefreshDate FROM tokens WHERE UserName=?", [user_name])
     result = cursor.fetchall()
     if len(result) > 0:
         count = 0
