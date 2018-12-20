@@ -88,10 +88,10 @@ def createSongUserLink(song_id, user_name):
         return False
 
 def createToken(user_name, token):
-    if IsUserNameFree(user_name) and IsTokenValid(token):
+    if not IsUserNameFree(user_name) and IsTokenValid(token) is None:
         cursor.execute('''INSERT INTO tokens (Token, UserName, RefreshDate)
                           VALUES (?,?,?)''',
-                          ([token], [user_name], datetime.datetime.now() + datetime.timedelta(minutes=15)))
+                          (token, user_name, datetime.datetime.now() + datetime.timedelta(minutes=15)))
         conn.commit()
         return True
     else : 
