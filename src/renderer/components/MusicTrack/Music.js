@@ -4,6 +4,13 @@ export class Note {
     this.duration = duration
     this.pitch = pitch
   }
+
+  equals (note) {
+    if (note.startTime === this.startTime && note.duration === this.duration && note.pitch === this.pitch) {
+      return true
+    }
+    return false
+  }
 }
 
 export class NoteCanvasAdapter {
@@ -32,5 +39,11 @@ export class Track {
 
   addNote = (note) => {
     this.notes.push(note)
+  }
+
+  deleteNote = (note) => {
+    const index = this.notes.indexOf(note)
+    console.log(index)
+    this.notes.splice(index, 1)
   }
 }

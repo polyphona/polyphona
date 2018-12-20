@@ -1,16 +1,17 @@
 <template>
-  <div class="wrapper">
-    <note-canvas @canvas-click="onClickCanvas">
-      <note-box
-        v-for="box in noteBoxes"
-        :x="box.x"
-        :y="box.y"
-        :width="box.width"
-        :height="box.height"
-        :color="'#0f0'"
-      ></note-box>
-    </note-canvas>
-  </div>
+    <div class="wrapper">
+        <note-canvas @canvas-click="onClickCanvas">
+            <note-box
+                    v-for="box in noteBoxes"
+                    :x="box.x"
+                    :y="box.y"
+                    :width="box.width"
+                    :height="box.height"
+                    :color="'#0f0'"
+                    @box-click="onClickBox"
+            ></note-box>
+        </note-canvas>
+    </div>
 </template>
 <script>
   import {Track, NoteCanvasAdapter} from './Music.js'
@@ -37,10 +38,24 @@
       }
     },
     methods: {
-      onClickCanvas ({x, y}) {
+      onClickCanvas: function ({x, y}) {
+        console.log('onclick-canvas event')
         const box = {x, y, width: 10, height: 10}
         const note = canvasAdapter.toNote(this.renderContext, box)
-        this.track.addNote(note)
+        const trueNote = this.track.notes.find((value) => note.equals(value))
+        if (trueNote) {
+          console.log('if loop')
+          this.track.deleteNote(trueNote)
+        } else {
+          this.track.addNote(note)
+        }
+      },
+      onClickBox ({box}) {
+        const i = this.track.noteBoxes.index(box)
+        this.track.deleteNote(this.track.notes[i])
+        this.track.noteBoxes.splice(i, 1)
+        console.log('onclick-box event')
+        console.log(box)
       }
     },
     computed: {
@@ -53,9 +68,9 @@
   }
 </script>
 <style lang="scss" scoped>
-  .wrapper {
-    display: grid;
-    grid-template-rows: auto 1fr;
-    grid-template-columns: 1fr;
-  }
+    .wrapper {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        grid-template-columns: 1fr;
+    }
 </style>

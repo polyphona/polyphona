@@ -46,6 +46,18 @@
         }
       }
     },
+    methods: {
+      onClick () {
+        console.log('onclick-box event in NoteBox')
+        this.$emit('box-click', {
+          box: this.calculatedBox()
+        })
+      },
+      clear (ctx) {
+        const oldBox = this.oldBox
+        ctx.clearRect(oldBox.x, oldBox.y, oldBox.width, oldBox.height)
+      }
+    },
     computed: {
       calculatedBox () {
         const ctx = this.provider.context
@@ -67,17 +79,17 @@
       const ctx = this.provider.context
       ctx.beginPath()
 
-      const oldBox = this.oldBox
+      this.clear(ctx)
       const newBox = this.calculatedBox
-
-      // Clear old box
-      ctx.clearRect(oldBox.x, oldBox.y, oldBox.width, oldBox.height)
 
       // Draw the new box
       ctx.rect(newBox.x, newBox.y, newBox.width, newBox.height)
       ctx.fillStyle = this.color
       ctx.fill()
       ctx.stroke()
+    },
+    destroyed () {
+      this.clear(this.provider.context)
     }
   }
 </script>
