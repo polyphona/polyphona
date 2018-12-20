@@ -1,6 +1,13 @@
 export const NoteTooSmallException = () => {
 }
 
+/* Examples:
+clip(10.3, 1) => 10
+clip(12, 5) => 10
+clip(15.01, 2.5) => 15.0
+*/
+const clip = (value, increment) => Math.floor(value / increment) * increment
+
 export class Note {
   constructor (startTime, duration, pitch) {
     this.startTime = startTime
@@ -33,10 +40,10 @@ export class NoteCanvasAdapter {
 
   clip (renderContext, box) {
     return {
-      x: Math.floor(box.x / renderContext.percentPerQuarter) * renderContext.percentPerQuarter,
-      y: Math.floor(box.y / renderContext.percentPerInterval) * renderContext.percentPerInterval,
-      width: Math.floor(box.width / renderContext.percentPerQuarter) * renderContext.percentPerQuarter,
-      height: box.height
+      x: clip(box.x, renderContext.percentPerQuarter),
+      y: clip(box.y, renderContext.percentPerInterval),
+      width: clip(box.width, renderContext.percentPerQuarter),
+      height: clip(box.height, renderContext.percentPerInterval)
     }
   }
 }
