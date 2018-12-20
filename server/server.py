@@ -14,13 +14,17 @@ def raiseErrorMacro(error_code, str):
     raise falcon.HTTPError(error_code, str)
     pass
 
+def extractJson(req):
+    try:
+        json_in = json.loads(req.stream.read().decode('utf-8'))
+    except:
+        raiseErrorMacro(falcon.HTTP_400, "unreadable json.")
+    return json_in
+
 
 class UserRessource(object):
     def on_post(self, req, resp):
-        try:
-            json_in = json.loads(req.stream.read().decode('utf-8'))
-        except:
-            raiseErrorMacro(falcon.HTTP_400, "unreadable json.")
+        json_in = extractJson(req)
         if 'username' not in json_in.keys():
             raiseErrorMacro(falcon.HTTP_400, "Missing username field.")
         if 'first_name' not in json_in.keys():
@@ -68,10 +72,7 @@ class SongRessource(object):
             raiseErrorMacro(falcon.HTTP_401, "Invalid token.")
         if database.getSongById(song_id) is None:
             raiseErrorMacro(falcon.HTTP_400, "Invalid song id.")
-        try:
-            json_in = json.loads(req.stream.read(self._CHUNK_SIZE_BYTES))
-        except:
-            raiseErrorMacro(falcon.HTTP_400, "unreadable json.")
+        json_in = extractJson(req)
         if 'name' not in json_in.keys():
             raiseErrorMacro(falcon.HTTP_400, "Missing name field.")
         if 'tracks' not in json_in.keys():
@@ -84,10 +85,7 @@ class SongRessource(object):
         token = req.get_param('token')
         if database.IsTokenValid(token) is None:
             raiseErrorMacro(falcon.HTTP_401, "Invalid token.")
-        try:
-            json_in = json.loads(req.stream.read(self._CHUNK_SIZE_BYTES))
-        except:
-            raiseErrorMacro(falcon.HTTP_400, "unreadable json.")
+        json_in = extractJson(req)
         if 'name' not in json_in.keys():
             raiseErrorMacro(falcon.HTTP_400, "Missing name field.")
         if 'tracks' not in json_in.keys():
@@ -119,10 +117,7 @@ class SongRessource(object):
 
 class TokenRessource(object):
     def on_post(self, req, resp):
-        try:
-            json_in = json.loads(req.stream.read(self._CHUNK_SIZE_BYTES))
-        except:
-            raiseErrorMacro(falcon.HTTP_400, "unreadable json.")
+        json_in = extractJson(req)
         if 'username' not in json_in.keys():
             raiseErrorMacro(falcon.HTTP_400, "Missing username field.")
         if 'password' not in json_in.keys():
