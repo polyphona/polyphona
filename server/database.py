@@ -162,7 +162,7 @@ def IsUserNameFree(user_name):
         return False
 
 def IsTokenValid(token):
-    cursor.execute("SELECT UserName FROM tokens WHERE Token=?", token)
+    cursor.execute("SELECT UserName FROM tokens WHERE Token=?", [token])
     result = cursor.fetchall()
     if len(result) == 1 :
         return result[0][0]
