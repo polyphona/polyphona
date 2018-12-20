@@ -4,6 +4,9 @@
     <p>
       <router-link to="login">Login</router-link>
     </p>
+    <p>
+      <router-link to="register">Create an account</router-link>
+    </p>
     <custom-track></custom-track>
   </div>
 </template>
