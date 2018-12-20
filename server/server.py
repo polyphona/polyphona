@@ -129,7 +129,7 @@ class TokenRessource(object):
             new_token = str(uuid4())
         if database.IsTokenValid(new_token) is not None:
             raiseErrorMacro(falcon.HTTP_508, "Cannot generate token.")
-        if not database.createToken(username, new_token):
+        if not database.createToken(json_in["username"], new_token):
             raiseErrorMacro(falcon.HTTP_500, "Failed to validate token (unexcepted).")
         json_out = {
             "token" : new_token, 
