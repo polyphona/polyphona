@@ -10,7 +10,7 @@
   const percentHeightToPix = (percent, ctx) => Math.floor((ctx.canvas.height / 100) * percent)
 
   export default {
-    inject: ['provider'],
+    inject: ['layers'],
     props: {
       // Top-left corner coordinates (percentage of canvas dimensions)
       x: {
@@ -53,7 +53,7 @@
     },
     computed: {
       context () {
-        return this.provider[this.layer]
+        return this.layers[this.layer]
       },
       calculatedBox () {
         const ctx = this.context

@@ -21,7 +21,7 @@
         dragging: false,
         clicking: false,
         canvasDimensions: null,
-        provider: {
+        layers: {
           background: null,
           foreground: null
         }
@@ -29,19 +29,18 @@
     },
     mounted () {
       // Canvas are only accessible once the component is mounted in the DOM
-      Object.keys(this.provider).forEach((layer) => this.setUpCanvas(layer))
+      Object.keys(this.layers).forEach((layer) => this.setUpCanvas(layer))
     },
     provide () {
-      // Allow child components to `inject: ['provider']`
-      // and have access to it.
+      // Allow child components to access the layers via `inject: ['layers']`.
       return {
-        provider: this.provider
+        layers: this.layers
       }
     },
     methods: {
       setUpCanvas (layer) {
         const canvas = this.$refs[layer]
-        this.provider[layer] = canvas.getContext('2d')
+        this.layers[layer] = canvas.getContext('2d')
         // Store the first layer's parent's dimensions to use the same dimensions
         // for all layers.
         if (!this.canvasDimensions) {
