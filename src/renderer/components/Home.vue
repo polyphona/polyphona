@@ -4,16 +4,19 @@
     <p>
       <router-link to="login">Login</router-link>
     </p>
-    <custom-track></custom-track>
+    <p>
+      <router-link to="register">Create an account</router-link>
+    </p>
+    <song-editor></song-editor>
   </div>
 </template>
 
 <script>
-  import CustomTrack from './MusicTrack/MusicTrack.vue'
+  import SongEditor from './SongEditor/SongEditor.vue'
 
   export default {
     name: 'Home',
-    components: { CustomTrack }
+    components: { SongEditor }
   }
 </script>
 
