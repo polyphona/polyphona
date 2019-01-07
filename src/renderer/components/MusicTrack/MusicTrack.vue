@@ -23,6 +23,18 @@
   export default {
     name: 'custom-track',
     components: {NoteCanvas, NoteBox},
+    data () {
+      return {
+        renderContext: {
+          // Percentage of the canvas filled by a quarter note,
+          // i.e. 1/4th of a bar
+          percentPerQuarter: 10,
+          // Percentage of the canvas filled by a note interval,
+          // i.e. the difference in pitch between A and A#
+          percentPerInterval: 25
+        }
+      }
+    },
     methods: {},
     computed: {
       noteBoxes () {

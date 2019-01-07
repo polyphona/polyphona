@@ -38,12 +38,10 @@
         const y = 100 * (event.pageY - canvasTop) / canvas.height
         const box = {x, y, width: 10, height: 10}
         const note = canvasAdapter.toNote(this.renderContext, box)
-        console.log('Hello ! I\'m here ' + JSON.stringify(note))
         this.addNote(note)
       },
       addNote (note) {
-        console.log('Yo')
-        this.$store.dispatch('MusicStore/addNotehgfhgf', note)
+        this.$store.dispatch('MusicStore/addNote', note)
       }
     },
     provide () {
