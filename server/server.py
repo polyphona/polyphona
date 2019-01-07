@@ -21,6 +21,14 @@ def extractJson(req):
         raiseErrorMacro(falcon.HTTP_400, "unreadable json.")
     return json_in
 
+def strToInt(str):
+    rtn = 0
+    try:
+        rtn = int(str)
+    except:
+        raiseErrorMacro(falcon.HTTP_400, "Invalid song ID.")
+    return rtn
+
 
 class UserRessource(object):
     def on_post(self, req, resp):
@@ -53,8 +61,11 @@ class GetSongListRessource(object):
         resp.body = (json.dumps(json_resp))
 
 
+
+
 class SongRessource(object):
-    def on_get(self, req, resp, song_id):
+    def on_get(self, req, resp, song_id_str):
+        song_id = strToInt(song_id_str)
         token = req.get_param('token')
         if not database.IsTokenValid(token):
             raiseErrorMacro(falcon.HTTP_401, "Invalid token.")
@@ -66,12 +77,20 @@ class SongRessource(object):
         resp.status = falcon.HTTP_200
         resp.body = (json_resp.dump())
 
-    def on_put(self, req, resp, song_id):
+    def on_put(self, req, resp, song_id_str):
+        song_id = strToInt(song_id_str)
         token = req.get_param('token')
-        if database.IsTokenValid(token) is None:
+        username = database.IsTokenValid(token)
+        if username is None:
             raiseErrorMacro(falcon.HTTP_401, "Invalid token.")
-        if database.getSongById(song_id) is None:
-            raiseErrorMacro(falcon.HTTP_400, "Invalid song id.")
+        songs = database.getSongsByUser(username)
+        if songs is None:
+            raiseErrorMacro(falcon.HTTP_500, "Server error: username disappeared.")
+        song_id_list = []
+        for song in songs:
+            song_id_list.append(song["id"])
+        if song_id not in song_id_list:
+            raiseErrorMacro(falcon.HTTP_404, "Song ID unknown.")
         json_in = extractJson(req)
         if 'name' not in json_in.keys():
             raiseErrorMacro(falcon.HTTP_400, "Missing name field.")
@@ -97,7 +116,8 @@ class SongRessource(object):
             raiseErrorMacro(falcon.HTTP_500, "Server error: could not link song with user.")
         resp.status = falcon.HTTP_201
 
-    def on_delete(self, req, resp, song_id):
+    def on_delete(self, req, resp, song_id_str):
+        song_id = strToInt(song_id_str)
         token = req.get_param('token')
         username = database.IsTokenValid(token)
         if username is None:
@@ -107,12 +127,12 @@ class SongRessource(object):
             raiseErrorMacro(falcon.HTTP_500, "Server error: username disappeared.")
         song_id_list = []
         for song in songs:
-            song_id_list.append(song["song_id"])
+            song_id_list.append(song["id"])
         if song_id not in song_id_list:
-            raiseErrorMacro(falcon.HTTP_403, "No rights to this song.")
+            raiseErrorMacro(falcon.HTTP_404, "Song ID unknown.")
         if not database.deleteSong(song_id):
             raiseErrorMacro(falcon.HTTP_500, "Server error: could not delete song.")
-        resp.status = falcon.HTTP_200
+        resp.status = falcon.HTTP_204
 
 
 class TokenRessource(object):
@@ -159,7 +179,7 @@ def createAPI():
     app.add_route('/users/{username}/songs', get_song_list)
 
     update_delete_song = SongRessource()
-    app.add_route('/songs/{song_id}', update_delete_song)
+    app.add_route('/songs/{song_id_str}', update_delete_song)
     app.add_route('/songs/', update_delete_song)
 
     token_ressource = TokenRessource()
