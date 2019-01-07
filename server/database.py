@@ -1,15 +1,12 @@
-import sqlite3
 import datetime
 import json
+import sqlite3
 
 conn = sqlite3.connect('polyphona_db.db')
 cursor = conn.cursor()
 
-if __name__ == "__main__":
-    #If database is empty, create tables
-    createDatabaseTable()
 
-def createDatabaseTable():
+def create_database_table():
     cursor.execute('''CREATE TABLE IF NOT EXISTS songs 
                       (SongID integer primary key not null,
                       SongName text,
@@ -33,10 +30,10 @@ def createDatabaseTable():
     return True
 
 
-def createSong(song_name, tracks_json):
+def create_song(song_name, tracks_json):
     current_time = datetime.datetime.now()
     cursor.execute('''INSERT INTO songs (SongName, Created, Updated, TracksJson)
-                      VALUES (?,?,?,?)''', ( song_name, current_time, current_time, tracks_json ))
+                      VALUES (?,?,?,?)''', (song_name, current_time, current_time, tracks_json))
     conn.commit()
     cursor.execute("SELECT SongID FROM songs WHERE Created = ? and SongName = ? ", (current_time, song_name))
     result = cursor.fetchall()
@@ -45,32 +42,35 @@ def createSong(song_name, tracks_json):
     else:
         return None
 
-def updateSong(song_id, song_name, tracks_json):
+
+def update_song(song_id, song_name, tracks_json):
     current_time = datetime.datetime.now()
-    if SongIdExists(song_id):
+    if song_id_exists(song_id):
         cursor.execute('''UPDATE songs
                           SET SongName = ?,
                               Updated = ?,
                               TracksJson = ?
                           WHERE SongID = ?''', (song_name, current_time, tracks_json, song_id))
         conn.commit()
-        return getSongByID(song_id)
-    else :
+        return get_song_by_id(song_id)
+    else:
         return None
 
-def deleteSong(song_id):
+
+def delete_song(song_id):
     cursor.execute("SELECT SongID FROM songs WHERE SongID = ?", (song_id,))
     result = cursor.fetchall()
-    if len(result) == 1 :
+    if len(result) == 1:
         cursor.execute('''DELETE FROM songs WHERE SongID = ?''', (song_id,))
         cursor.execute('''DELETE FROM song_user_links WHERE SongID = ?''', (song_id,))
         conn.commit()
         return True
-    else :
+    else:
         return False
 
-def createUser(user_name, first_name, last_name, password):
-    if IsUserNameFree(user_name):
+
+def create_user(user_name, first_name, last_name, password):
+    if is_user_name_free(user_name):
         cursor.execute('''INSERT INTO users (UserName, FirstName, LastName, Password)
                           VALUES (?,?,?,?)''', (user_name, first_name, last_name, password))
         conn.commit()
@@ -78,60 +78,67 @@ def createUser(user_name, first_name, last_name, password):
     else:
         return False
 
-def getUserInfo(user_name):
+
+def get_user_info(user_name):
     return ""
 
-def createSongUserLink(song_id, user_name):
-    if SongIdExists(song_id) and not(IsUserNameFree(user_name)):
+
+def create_song_user_link(song_id, user_name):
+    if song_id_exists(song_id) and not (is_user_name_free(user_name)):
         cursor.execute('''INSERT INTO song_user_links (SongID, UserName)
                           VALUES (?,?)''', (song_id, user_name))
         conn.commit()
         return True
-    else :
+    else:
         return False
 
-def createToken(user_name, token):
-    if not IsUserNameFree(user_name) and IsTokenValid(token) is None:
+
+def create_token(user_name, token):
+    if not is_user_name_free(user_name) and is_token_valid(token) is None:
         cursor.execute('''INSERT INTO tokens (Token, UserName, RefreshDate)
                           VALUES (?,?,?)''',
-                          (token, user_name, datetime.datetime.now() + datetime.timedelta(minutes=15)))
+                       (token, user_name, datetime.datetime.now() + datetime.timedelta(minutes=15)))
         conn.commit()
         return True
-    else : 
+    else:
         return False
 
-def deleteToken(token):
+
+def delete_token(token):
     cursor.execute("SELECT Token FROM tokens WHERE Token = ?", [token])
     result = cursor.fetchall()
-    if len(result) == 1 :
+    if len(result) == 1:
         cursor.execute('''DELETE FROM tokens WHERE Token = ?''', [token])
         conn.commit()
         return True
-    else : 
+    else:
         return False
 
-def deleteObsoleteTokens():
+
+def delete_obsolete_tokens():
     cursor.execute('''DELETE FROM tokens WHERE RefreshDate <=  ?''', datetime.datetime.now())
     conn.commit()
     return True
 
-def getSongByID(song_id):
-    if SongIdExists(song_id):
+
+def get_song_by_id(song_id):
+    if song_id_exists(song_id):
         cursor.execute("SELECT * FROM songs WHERE SongID = ? ", (song_id,))
         result = cursor.fetchone()
-        return strings2dict(result[0],result[1], result[2], result[3], result[4])
+        return strings2dict(result[0], result[1], result[2], result[3], result[4])
     else:
         return None
 
-def getSongsByUser(user_name):
-    """ Return list of songs where the user is contributing 
+
+def get_songs_by_user(user_name):
+    """Return list of songs where the user is contributing
     user_name : string
         Name of user
     Returns
     -------------
         list of dictionaries
     """
-    if not(IsUserNameFree(user_name)):
+    if not (is_user_name_free(user_name)):
         cursor.execute('''SELECT *
                           FROM songs, song_user_links
                           ON songs.SongID = song_user_links.SongID
@@ -144,39 +151,44 @@ def getSongsByUser(user_name):
     else:
         return None
 
-def checkUser(user_name,password):
-    if IsUserNameFree(user_name):
+
+def check_user(user_name, password):
+    if is_user_name_free(user_name):
         return False
-    else :
+    else:
         cursor.execute("SELECT Password FROM users WHERE UserName=?", [user_name])
         if cursor.fetchone()[0] == password:
             return True
-        else :
+        else:
             return False
 
-def SongIdExists(song_id):
+
+def song_id_exists(song_id):
     cursor.execute("SELECT count(SongID) FROM songs WHERE SongID=?", (song_id,))
     if cursor.fetchone()[0] == 1:
         return True
     else:
         return False
 
-def IsUserNameFree(user_name):
+
+def is_user_name_free(user_name):
     cursor.execute("SELECT count(UserName) FROM users WHERE UserName=?", [user_name])
     if cursor.fetchone()[0] == 0:
         return True
     else:
         return False
 
-def IsTokenValid(token):
+
+def is_token_valid(token):
     cursor.execute("SELECT UserName FROM tokens WHERE Token=?", [token])
     result = cursor.fetchall()
-    if len(result) == 1 :
+    if len(result) == 1:
         return result[0][0]
-    else :
+    else:
         return None
 
-def checkUserToken(user_name):
+
+def check_user_token(user_name):
     cursor.execute("SELECT Token, RefreshDate FROM tokens WHERE UserName=?", [user_name])
     result = cursor.fetchall()
     if len(result) > 0:
@@ -186,9 +198,10 @@ def checkUserToken(user_name):
                 count += 1
                 sole_valid_token = token_date[0]
         if count == 1:
-            return sole_valid_token 
-    else :
+            return sole_valid_token
+    else:
         return None
+
 
 def strings2dict(song_id, song_name, created, updated, tracks):
     output = {}
@@ -198,3 +211,8 @@ def strings2dict(song_id, song_name, created, updated, tracks):
     output['updated'] = str(updated)
     output['tracks'] = json.loads(tracks)
     return output
+
+
+if __name__ == "__main__":
+    # If database is empty, create tables
+    create_database_table()

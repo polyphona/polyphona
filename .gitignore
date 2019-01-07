@@ -4,9 +4,11 @@ dist/web/*
 build/*
 !build/icons
 node_modules/
-.db
 npm-debug.log
 npm-debug.log.*
 thumbs.db
 !.gitkeep
 .idea/
+*.db
+__pycache__/
+*.py[odc]

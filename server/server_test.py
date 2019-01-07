@@ -12,9 +12,10 @@
 # - POST /users                 -OK
 #
 
-from falcon import testing
 import json
 import pytest
+from falcon import testing
+from falcon import testing
 
 import server
 
@@ -39,14 +40,14 @@ test_song_01 = {
             "notes": [
                 {
                     "midi": 10,
-                    "time": 10, 
+                    "time": 10,
                     "note": "A2",
                     "velocity": 64,
                     "duration": 16,
                     "instrumentNumber": 8
                 }
             ],
-            "startTime": 0,              
+            "startTime": 0,
             "duration": 10,
             "instrument": "Cello",
         }
@@ -69,7 +70,7 @@ test_song_02 = {
                     "instrumentNumber": 8
                 }
             ],
-            "startTime": 0,              
+            "startTime": 0,
             "duration": 10,
             "instrument": "Drums",
         }
@@ -99,12 +100,13 @@ test_song_03 = {
                     "instrumentNumber": 8
                 }
             ],
-            "startTime": 0,              
+            "startTime": 0,
             "duration": 10,
             "instrument": "Shotagonu",
         }
     ]
 }
+
 
 @pytest.fixture()
 def client():
@@ -114,11 +116,11 @@ def client():
 
 ### ## # USERS # ## ###
 # Let's create a new user in the blank database
-def testCreateUserSmith(client):
+def test_create_user_smith(client):
     payload = {
-        "username": test_username, 
-        "first_name": test_first_name, 
-        "last_name": test_last_name, 
+        "username": test_username,
+        "first_name": test_first_name,
+        "last_name": test_last_name,
         "password": test_password
     }
     result = client.simulate_post('/users', json=payload)
@@ -131,11 +133,11 @@ def testCreateUserSmith(client):
 
 
 # Let's try creating a new user with the same username
-def testCreateUserSmith2(client):
+def test_create_user_smith2(client):
     payload = {
-        "username": test_username, 
-        "first_name": "smith2", 
-        "last_name": "smith2", 
+        "username": test_username,
+        "first_name": "smith2",
+        "last_name": "smith2",
         "password": test_password_wrong
     }
     result = client.simulate_post('/users', json=payload)
@@ -148,9 +150,9 @@ def testCreateUserSmith2(client):
 
 
 ### ## # TOKENS # ## ###
-def testCreateTokenWrongUsername(client):
+def test_create_token_wrong_username(client):
     payload = {
-        "username": test_username_wrong, 
+        "username": test_username_wrong,
         "password": test_password
     }
     result = client.simulate_post('/tokens', json=payload)
@@ -160,9 +162,10 @@ def testCreateTokenWrongUsername(client):
     assert result.status_code == 400
     pass
 
-def testCreateTokenWrongPassword(client):
+
+def test_create_token_wrong_password(client):
     payload = {
-        "username": test_username, 
+        "username": test_username,
         "password": test_password_wrong
     }
     result = client.simulate_post('/tokens', json=payload)
@@ -172,7 +175,8 @@ def testCreateTokenWrongPassword(client):
     assert result.status_code == 400
     pass
 
-def testCreateTokenNoUsername(client):
+
+def test_create_token_no_username(client):
     payload = {
         "password": test_password
     }
@@ -183,9 +187,10 @@ def testCreateTokenNoUsername(client):
     assert result.status_code == 400
     pass
 
-def testCreateTokenNoPassword(client):
+
+def test_create_token_no_password(client):
     payload = {
-        "username": test_username, 
+        "username": test_username,
     }
     result = client.simulate_post('/tokens', json=payload)
     print("Status: {} ({})".format(result.status, result.status_code))
@@ -194,7 +199,8 @@ def testCreateTokenNoPassword(client):
     assert result.status_code == 400
     pass
 
-def testCreateTokenCorruptJson(client):
+
+def test_create_token_corrupt_json(client):
     payload = "{\"username\": \"smith\"}"
     result = client.simulate_post('/tokens', body=payload)
     print("Status: {} ({})".format(result.status, result.status_code))
@@ -204,7 +210,7 @@ def testCreateTokenCorruptJson(client):
     pass
 
 
-def testDeleteTokenWrongToken(client):
+def test_delete_token_wrong_token(client):
     result = client.simulate_delete('/tokens/TOKENNONE')
     print("Status: {} ({})".format(result.status, result.status_code))
     print("Result:")
@@ -212,9 +218,10 @@ def testDeleteTokenWrongToken(client):
     assert result.status_code == 404
     pass
 
-def testCreateToken(client):
+
+def test_create_token(client):
     payload = {
-        "username": "smith", 
+        "username": "smith",
         "password": "123"
     }
     result = client.simulate_post('/tokens', json=payload)
@@ -232,7 +239,7 @@ def testCreateToken(client):
 
 ### ## # LIST SONGS # ## ###
 # List songs, but there is none
-def testListSongsNone(client):
+def test_list_songs_none(client):
     result = client.simulate_get('/users/{}/songs'.format(test_username))
     json_in = result.json
     print("Status: {} ({})".format(result.status, result.status_code))
@@ -245,7 +252,7 @@ def testListSongsNone(client):
 
 
 # List songs, but wrong user
-def testListSongsWrongUser(client):
+def test_list_songs_wrong_user(client):
     result = client.simulate_get('/users/{}/songs'.format(test_username_wrong))
     print("Status: {} ({})".format(result.status, result.status_code))
     print("Result:")
@@ -256,7 +263,7 @@ def testListSongsWrongUser(client):
 
 ### ## # CREATE SONG # ## ###
 # Create song, but invalid token
-def testPostSongWrongToken(client):
+def test_post_song_wrong_token(client):
     parameters = {
         "token": "TOKENNONE"
     }
@@ -267,7 +274,7 @@ def testPostSongWrongToken(client):
 
 
 # Create song, but corrupt payload
-def testPostSongCorruptJson(client):
+def test_post_song_corrupt_json(client):
     parameters = {
         "token": pytest.token
     }
@@ -279,7 +286,7 @@ def testPostSongCorruptJson(client):
 
 
 # Create song, successful
-def testPostSong1(client):
+def test_post_song_1(client):
     parameters = {
         "token": pytest.token
     }
@@ -290,7 +297,7 @@ def testPostSong1(client):
 
 
 # Create second song just for the kick of it
-def testPostSong2(client):
+def test_post_song_2(client):
     parameters = {
         "token": pytest.token
     }
@@ -299,9 +306,10 @@ def testPostSong2(client):
     assert result.status_code == 201
     pass
 
+
 ### ## # LIST SONGS AGAIN # ## ###
 # List songs, 2 songs expected
-def testListSongsSuccess(client):
+def test_list_songs_success(client):
     result = client.simulate_get('/users/{}/songs'.format(test_username))
     json_in = result.json
     print("Status: {} ({})".format(result.status, result.status_code))
@@ -315,11 +323,10 @@ def testListSongsSuccess(client):
     assert test_song_02["name"] in song_names
     pytest.song_id1 = json_in[0]["id"]
     pytest.song_id2 = json_in[1]["id"]
-    pass
 
 
 # Retrieve song, check it's been well saved
-def testRetrieveSongCheckCreate(client):
+def test_retrieve_song_check_create(client):
     parameters = {
         "token": pytest.token
     }
@@ -336,7 +343,7 @@ def testRetrieveSongCheckCreate(client):
 
 ### ## # Update SONG # ## ###
 # Update song, but invalid token
-def testPutSongWrongToken(client):
+def test_put_song_wrong_token(client):
     parameters = {
         "token": "TOKENNONE"
     }
@@ -347,7 +354,7 @@ def testPutSongWrongToken(client):
 
 
 # Update song, but invalid song id
-def testPutSongWrongID(client):
+def test_put_song_wrong_id(client):
     parameters = {
         "token": pytest.token
     }
@@ -357,12 +364,10 @@ def testPutSongWrongID(client):
     pass
 
 
-
 # Update song, but no right to song id
 # TODO: need an additionnal user ....
 
-# Update song, but corrupt json
-def testPutSongCorruptJson(client):
+def test_update_song_corrupt_json(client):
     parameters = {
         "token": pytest.token
     }
@@ -373,7 +378,7 @@ def testPutSongCorruptJson(client):
 
 
 # Update song, success
-def testPutSong(client):
+def test_put_song(client):
     parameters = {
         "token": pytest.token
     }
@@ -385,7 +390,7 @@ def testPutSong(client):
 
 ### ## # DELETE SONG # ## ###
 # Delete song, wrong token
-def testDeleteSongWrongToken(client):
+def test_delete_song_wrong_token(client):
     parameters = {
         "token": "TOKENNONE"
     }
@@ -394,8 +399,9 @@ def testDeleteSongWrongToken(client):
     assert result.status_code == 401
     pass
 
+
 # Delete song, wrong song id
-def testDeleteSongWrongToken(client):
+def test_delete_song_wrong_token(client):
     parameters = {
         "token": pytest.token
     }
@@ -404,8 +410,9 @@ def testDeleteSongWrongToken(client):
     assert result.status_code == 404
     pass
 
+
 # Delete song, success
-def testDeleteSong(client):
+def test_delete_song(client):
     parameters = {
         "token": pytest.token
     }
@@ -417,7 +424,7 @@ def testDeleteSong(client):
 
 ### ## # RETRIEVE SONG # ## ###
 # Retrieve song, wrong token
-def testRetrieveSongWrongToken(client):
+def test_retrieve_song_wrong_token(client):
     parameters = {
         "token": "TOKENNONE"
     }
@@ -426,8 +433,9 @@ def testRetrieveSongWrongToken(client):
     assert result.status_code == 401
     pass
 
+
 # Retrieve song, wrong song ID
-def testRetrieveSongWrongID(client):
+def test_retrieve_song_wrong_id(client):
     parameters = {
         "token": pytest.token
     }
@@ -436,8 +444,9 @@ def testRetrieveSongWrongID(client):
     assert result.status_code == 404
     pass
 
+
 # Retrieve song, old song ID
-def testRetrieveSongOldID(client):
+def test_retrieve_song_old_id(client):
     parameters = {
         "token": pytest.token
     }
@@ -446,8 +455,9 @@ def testRetrieveSongOldID(client):
     assert result.status_code == 404
     pass
 
+
 # Retrieve song, success
-def testRetrieveSong(client):
+def test_retrieve_song(client):
     parameters = {
         "token": pytest.token
     }
@@ -462,9 +472,8 @@ def testRetrieveSong(client):
     pass
 
 
-
 ### ## # DELETE TOKEN # ## ###
-def testDeleteToken(client):
+def test_delete_token(client):
     print("Token = {}".format(pytest.token))
     result = client.simulate_delete('/tokens/{}'.format(pytest.token))
     print("Status: {} ({})".format(result.status, result.status_code))
