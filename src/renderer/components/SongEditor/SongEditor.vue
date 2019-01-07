@@ -76,7 +76,7 @@
         const trueNote = this.track.notes.find((value) => note.equals(value))
         if (trueNote) {
           console.log('if loop')
-          this.deleteNote(trueNote)
+          this.track.deleteNote(trueNote)
         } else {
           this.addNoteFromBox(box)
         }
@@ -97,6 +97,13 @@
       },
       onCanvasMouseLeave () {
         this.newBox = null
+      },
+      onClickBox ({box}) {
+        const i = this.track.noteBoxes.index(box)
+        this.track.deleteNote(this.track.notes[i])
+        this.track.noteBoxes.splice(i, 1)
+        console.log('onclick-box event')
+        console.log(box)
       }
     },
     computed: {
