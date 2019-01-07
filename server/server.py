@@ -75,7 +75,7 @@ class SongRessource(object):
             resp.status = falcon.HTTP_404
             raiseErrorMacro(falcon.HTTP_404, "song_id unknown.")
         resp.status = falcon.HTTP_200
-        resp.body = (json_resp.dump())
+        resp.body = (json.dumps(json_resp))
 
     def on_put(self, req, resp, song_id_str):
         song_id = strToInt(song_id_str)
