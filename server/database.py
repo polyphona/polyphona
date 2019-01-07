@@ -51,19 +51,19 @@ def updateSong(song_id, song_name, tracks_json):
         cursor.execute('''UPDATE songs
                           SET SongName = ?,
                               Updated = ?,
-                              TracksJson = ?,
-                          WHERE SongID = ?''', ([song_name], current_time, [tracks_json], song_id))
+                              TracksJson = ?
+                          WHERE SongID = ?''', (song_name, current_time, tracks_json, song_id))
         conn.commit()
         return getSongByID(song_id)
     else :
         return None
 
 def deleteSong(song_id):
-    cursor.execute("SELECT SongID FROM songs WHERE SongID = ?", str(song_id))
+    cursor.execute("SELECT SongID FROM songs WHERE SongID = ?", (song_id,))
     result = cursor.fetchall()
     if len(result) == 1 :
-        cursor.execute('''DELETE FROM songs WHERE SongID = ?''', str(song_id))
-        cursor.execute('''DELETE FROM song_user_links WHERE SongID = ?''', str(song_id))
+        cursor.execute('''DELETE FROM songs WHERE SongID = ?''', (song_id,))
+        cursor.execute('''DELETE FROM song_user_links WHERE SongID = ?''', (song_id,))
         conn.commit()
         return True
     else :
@@ -84,7 +84,7 @@ def getUserInfo(user_name):
 def createSongUserLink(song_id, user_name):
     if SongIdExists(song_id) and not(IsUserNameFree(user_name)):
         cursor.execute('''INSERT INTO song_user_links (SongID, UserName)
-                          VALUES (?,?)''', (str(song_id), user_name))
+                          VALUES (?,?)''', (song_id, user_name))
         conn.commit()
         return True
     else :
@@ -117,7 +117,7 @@ def deleteObsoleteTokens():
 
 def getSongByID(song_id):
     if SongIdExists(song_id):
-        cursor.execute("SELECT * FROM songs WHERE SongID = ? ", str(song_id))
+        cursor.execute("SELECT * FROM songs WHERE SongID = ? ", (song_id,))
         result = cursor.fetchone()
         return strings2dict(result[0],result[1], result[2], result[3], result[4])
     else:
@@ -155,7 +155,7 @@ def checkUser(user_name,password):
             return False
 
 def SongIdExists(song_id):
-    cursor.execute("SELECT count(SongID) FROM songs WHERE SongID=?", str(song_id))
+    cursor.execute("SELECT count(SongID) FROM songs WHERE SongID=?", (song_id,))
     if cursor.fetchone()[0] == 1:
         return True
     else:

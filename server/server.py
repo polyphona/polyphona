@@ -96,7 +96,7 @@ class SongRessource(object):
             raiseErrorMacro(falcon.HTTP_400, "Missing name field.")
         if 'tracks' not in json_in.keys():
             raiseErrorMacro(falcon.HTTP_400, "Missing tracks field.")
-        if not database.updateSong(song_id, json_in["name"], json_in["tracks"]):
+        if not database.updateSong(song_id, json_in["name"], json.dumps(json_in["tracks"])):
             raiseErrorMacro(falcon.HTTP_500, "Server error: could not update song.")
         resp.status = falcon.HTTP_200
 
