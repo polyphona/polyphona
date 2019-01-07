@@ -33,7 +33,7 @@
   const canvasAdapter = new NoteCanvasAdapter()
 
   export default {
-    name: 'custom-track',
+    name: 'song-editor',
     components: {NoteCanvas, NoteBox},
     data () {
       const track = new Track(4, 1)
