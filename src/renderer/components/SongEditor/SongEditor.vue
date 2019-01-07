@@ -22,6 +22,7 @@
                 :width="box.width"
                 :height="box.height"
                 :color="'#0f0'"
+                @box-click="onClickBox"
         ></note-box>
     </note-canvas>
 </template>
@@ -63,18 +64,6 @@
           throw e
         }
       },
-      deleteNoteFromBox (box) {
-        try {
-          const note = canvasAdapter.toNote(this.renderContext, box)
-          this.track.deleteNote(note)
-          return note
-        } catch (e) {
-          if (e instanceof NoteTooSmallException) {
-            return
-          }
-          throw e
-        }
-      },
       onCanvasClick ({x, y}) {
         let box = {
           x,
@@ -87,7 +76,7 @@
         const trueNote = this.track.notes.find((value) => note.equals(value))
         if (trueNote) {
           console.log('if loop')
-          this.deleteNoteFromBox(trueNote)
+          this.deleteNote(trueNote)
         } else {
           this.addNoteFromBox(box)
         }

@@ -68,6 +68,12 @@
       }
     },
     methods: {
+      onClick () {
+        console.log('onclick-box event in NoteBox')
+        this.$emit('box-click', {
+          box: this.calculatedBox()
+        })
+      },
       clearOldBox (ctx) {
         const oldBox = this.oldBox
         ctx.clearRect(oldBox.x, oldBox.y, oldBox.width, oldBox.height)
