@@ -3,12 +3,15 @@ import Vuex from 'vuex'
 
 import { createPersistedState, createSharedMutations } from 'vuex-electron'
 
-import modules from './modules'
+// import modules from './modules'
+import MusicStore from './modules/MusicStore'
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
-  modules,
+  modules: {
+    MusicStore: MusicStore
+  },
   plugins: [
     createPersistedState(),
     createSharedMutations()

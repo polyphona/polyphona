@@ -7,7 +7,6 @@
 </template>
 
 <script>
-  import {mapActions} from 'vuex'
   import {NoteCanvasAdapter} from '@/store/Music'
 
   const canvasAdapter = new NoteCanvasAdapter()
@@ -42,7 +41,10 @@
         console.log('Hello ! I\'m here ' + JSON.stringify(note))
         this.addNote(note)
       },
-      ...mapActions(['addNote'])
+      addNote (note) {
+        console.log('Yo')
+        this.$store.dispatch('MusicStore/addNotehgfhgf', note)
+      }
     },
     provide () {
       // Allow child components to `inject: ['provider']`

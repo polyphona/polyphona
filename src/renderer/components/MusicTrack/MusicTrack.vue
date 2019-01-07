@@ -2,19 +2,19 @@
   <div class="wrapper">
     <note-canvas>
       <note-box
-        v-for="box in noteBoxes"
-        :x="box.x"
-        :y="box.y"
-        :width="box.width"
-        :height="box.height"
-        :color="'#0f0'"
+          v-for="box in noteBoxes"
+          :x="box.x"
+          :y="box.y"
+          :width="box.width"
+          :height="box.height"
+          :color="'#0f0'"
       ></note-box>
     </note-canvas>
   </div>
 </template>
 <script>
   import {NoteCanvasAdapter} from '@/store/Music.js'
-  import {mapGetters} from 'vuex'
+  // import {mapGetters} from 'vuex'
   import NoteCanvas from './NoteCanvas.vue'
   import NoteBox from './NoteBox.vue'
 
@@ -26,11 +26,11 @@
     methods: {},
     computed: {
       noteBoxes () {
-        return this.listNotes.map(
+        return this.$store.getters['MusicStore/listNotes'].map(
           (note) => canvasAdapter.toBox(this.renderContext, note)
         )
-      },
-      ...mapGetters(['listNotes'])}
+      }
+    }
   }
 </script>
 <style lang="scss" scoped>
