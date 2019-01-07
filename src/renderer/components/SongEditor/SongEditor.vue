@@ -1,7 +1,15 @@
 <template>
   <div id="song-editor">
-    <p>
+    <p style="display: flex;">
       <button @click="togglePlay">{{ playing ? '❙❙' : '►️'}}️</button>
+      <select v-model="octave">
+        <option :value="1">1</option>
+        <option :value="2">2</option>
+        <option :value="3">3</option>
+        <option :value="4">4</option>
+        <option :value="5">5</option>
+        <option :value="6">6</option>
+      </select>
     </p>
     <note-canvas
       id="note-canvas"
@@ -56,6 +64,21 @@
           percentPerTick: 100 / (4 * division),
           // Percentage of the canvas filled by a note interval, from 0 to 100
           percentPerInterval: 100 / 12
+        },
+        scale: {
+          0: 'C',
+          1: 'C#',
+          2: 'D',
+          3: 'D#',
+          4: 'E',
+          5: 'F',
+          6: 'F#',
+          7: 'G',
+          8: 'G#',
+          9: 'A',
+          10: 'A#',
+          11: 'B',
+          12: 'C'
         }
       }
     },
@@ -71,32 +94,20 @@
         }
         this.playing = !this.playing
       },
+      _toTransportTime (canvasTime) {
+        const quarter = Math.floor(canvasTime / this.division)
+        const sixteenth = 4 / this.division * (canvasTime % this.division)
+        return `0:${quarter}:${sixteenth}`
+      },
       _play (offset) {
         // Notation: "bar:quarter:sixteenth"
         // See: https://github.com/Tonejs/Tone.js/wiki/Time#transport-time
         this.track.notes.forEach((note) => {
-          const quarters = Math.floor(note.startTime / this.division)
-          const sixteenths = 4 / this.division * (note.startTime % this.division)
-          const scale = {
-            0: 'C',
-            1: 'C#',
-            2: 'D',
-            3: 'D#',
-            4: 'E',
-            5: 'F',
-            6: 'F#',
-            7: 'G',
-            8: 'G#',
-            9: 'A',
-            10: 'A#',
-            11: 'B',
-            12: 'C'
-          }
           const trigger = (time) => {
-            const pitch = scale[note.pitch] + this.octave
-            this.synth.triggerAttackRelease(pitch, '8n', time)
+            const pitch = this.scale[note.pitch] + this.octave
+            this.synth.triggerAttackRelease(pitch, this._toTransportTime(note.duration), time)
           }
-          Tone.Transport.schedule(trigger, `0:${quarters}:${sixteenths}`)
+          Tone.Transport.schedule(trigger, this._toTransportTime(note.startTime))
         })
         // Loop one measure
         Tone.Transport.loopEnd = '1m'
