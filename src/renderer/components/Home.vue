@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="home">
     <h1>Polyphona</h1>
     <p>
       <router-link to="login">Login</router-link>
@@ -21,4 +21,7 @@
 </script>
 
 <style lang="scss" scoped>
+  #home {
+    height: 100%;
+  }
 </style>

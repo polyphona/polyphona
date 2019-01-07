@@ -19,30 +19,30 @@ export class Note {
 export class NoteCanvasAdapter {
   toBox (renderContext, note) {
     return {
-      x: renderContext.percentPerQuarter * note.startTime,
+      x: renderContext.percentPerTick * note.startTime,
       y: renderContext.percentPerInterval * note.pitch,
-      width: renderContext.percentPerQuarter * note.duration,
+      width: renderContext.percentPerTick * note.duration,
       height: renderContext.percentPerInterval
     }
   }
 
   toNote (renderContext, box) {
-    const width = Math.floor(box.width / renderContext.percentPerQuarter)
-    if (!width) {
+    const duration = Math.floor(box.width / renderContext.percentPerTick)
+    if (!duration) {
       throw new NoteTooSmallException()
     }
     return new Note(
-      Math.floor(box.x / renderContext.percentPerQuarter),
-      width,
+      Math.floor(box.x / renderContext.percentPerTick),
+      duration,
       Math.floor(box.y / renderContext.percentPerInterval)
     )
   }
 
   clip (renderContext, box) {
     return {
-      x: clip(box.x, renderContext.percentPerQuarter),
+      x: clip(box.x, renderContext.percentPerTick),
       y: clip(box.y, renderContext.percentPerInterval),
-      width: clip(box.width, renderContext.percentPerQuarter),
+      width: clip(box.width, renderContext.percentPerTick),
       height: clip(box.height, renderContext.percentPerInterval)
     }
   }
