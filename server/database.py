@@ -36,9 +36,9 @@ def createDatabaseTable():
 def createSong(song_name, tracks_json):
     current_time = datetime.datetime.now()
     cursor.execute('''INSERT INTO songs (SongName, Created, Updated, TracksJson)
-                      VALUES (?,?,?,?)''', ( [song_name], current_time, current_time, [tracks_json] ))
+                      VALUES (?,?,?,?)''', ( song_name, current_time, current_time, tracks_json ))
     conn.commit()
-    cursor.execute("SELECT SongID FROM songs WHERE Created = ? and SongName = ? ", (current_time, [song_name]))
+    cursor.execute("SELECT SongID FROM songs WHERE Created = ? and SongName = ? ", (current_time, song_name))
     result = cursor.fetchall()
     if len(result) == 1:
         return result[0][0]
@@ -84,7 +84,7 @@ def getUserInfo(user_name):
 def createSongUserLink(song_id, user_name):
     if SongIdExists(song_id) and not(IsUserNameFree(user_name)):
         cursor.execute('''INSERT INTO song_user_links (SongID, UserName)
-                          VALUES (?,?)''', (str(song_id), [user_name]))
+                          VALUES (?,?)''', (str(song_id), user_name))
         conn.commit()
         return True
     else :
@@ -193,7 +193,7 @@ def checkUserToken(user_name):
 def strings2dict(song_id, song_name, created, updated, tracks):
     output = {}
     output['id'] = song_id
-    output['song_name'] = song_name
+    output['name'] = song_name
     output['created'] = str(created)
     output['updated'] = str(updated)
     output['tracks'] = json.loads(tracks)
