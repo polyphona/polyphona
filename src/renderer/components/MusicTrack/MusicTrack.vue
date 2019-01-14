@@ -14,7 +14,6 @@
 </template>
 <script>
   import {NoteCanvasAdapter} from '@/store/Music.js'
-  // import {mapGetters} from 'vuex'
   import NoteCanvas from './NoteCanvas.vue'
   import NoteBox from './NoteBox.vue'
 
