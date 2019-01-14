@@ -8,19 +8,36 @@
             @mousemove="onMouseMove"
             @mouseleave="onMouseLeave"
     ></canvas>
-    <!-- Children components will be mounted here -->
-    <slot></slot>
+    <note-box
+        v-if="newBox"
+        :x="newBox.x"
+        :y="newBox.y"
+        :width="newBox.width"
+        :height="newBox.height"
+        :color="'#afa'"
+        layer="foreground"
+    ></note-box>
+    <note-box
+        v-for="box in noteBoxes"
+        :x="box.x"
+        :y="box.y"
+        :width="box.width"
+        :height="box.height"
+        :color="'#0f0'"
+    ></note-box>
   </div>
 </template>
 
 <script>
   import {NoteCanvasAdapter} from '@/store/Music'
   import {NoteTooSmallException} from '../../store/Music'
+  import NoteBox from './NoteBox'
 
   const canvasAdapter = new NoteCanvasAdapter()
 
   export default {
     name: 'NoteCanvas',
+    components: {NoteBox},
     data () {
       return {
         newBox: null,
@@ -49,6 +66,13 @@
       // Allow child components to access the layers via `inject: ['layers']`.
       return {
         layers: this.layers
+      }
+    },
+    computed: {
+      noteBoxes () {
+        return this.$store.getters['MusicStore/listNotes'].map(
+          (note) => canvasAdapter.toBox(this.renderContext, note)
+        )
       }
     },
     methods: {
