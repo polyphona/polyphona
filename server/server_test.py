@@ -111,7 +111,7 @@ test_song_03 = {
 @pytest.fixture()
 def client():
     # Initialize falcon instance
-    return testing.TestClient(server.createAPI())
+    return testing.TestClient(server.create_api())
 
 
 ### ## # USERS # ## ###
@@ -145,7 +145,7 @@ def test_create_user_smith2(client):
     print("Result:")
     print(result)
     # Rejected because of same username
-    assert result.status_code == 403
+    assert result.status_code == 400
     pass
 
 
