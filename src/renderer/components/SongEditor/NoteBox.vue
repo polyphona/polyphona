@@ -110,7 +110,6 @@
       // When note component is destroyed, un-draw it from the canvas
       const ctx = this.context
       this.clearOldBox(ctx)
-      console.log('cleared', this)
     }
   }
 </script>
