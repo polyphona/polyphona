@@ -6,6 +6,10 @@
     <h1>Sign in</h1>
     <p class="text-muted">Enter your Polyphona account details to sign in.</p>
 
+    <div class="alert alert-danger" v-if="error" role="alert">
+      {{ error }}
+    </div>
+
     <form @submit.prevent="onSubmit">
       <div class="form-group">
         <label for="username">Username</label>
@@ -13,7 +17,7 @@
           <div class="input-group-prepend">
             <span class="input-group-text">👤</span>
           </div>
-          <input id="username" type="text" class="form-control" placeholder="Username" required/>
+          <input v-model="username" id="username" type="text" class="form-control" placeholder="Username" required/>
         </div>
       </div>
 
@@ -23,7 +27,7 @@
           <div class="input-group-prepend">
             <span class="input-group-text">🔒</span>
           </div>
-          <input id="password" type="password" class="form-control" placeholder="Password" required/>
+          <input v-model="password" id="password" type="password" class="form-control" placeholder="Password" required/>
         </div>
       </div>
 
@@ -39,9 +43,21 @@
 
   export default Vue.extend({
     name: 'LoginForm',
+    data () {
+      return {
+        username: '',
+        password: '',
+        error: null
+      }
+    },
     methods: {
       onSubmit () {
-        alert('TODO')
+        this.error = null
+        this.$store.dispatch('auth/login', {username: this.username, password: this.password}).then(() => {
+          this.$router.push('/')
+        }).catch(() => {
+          this.error = 'Could not login with the provided credentials.'
+        })
       }
     }
   })
