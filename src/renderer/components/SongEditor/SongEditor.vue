@@ -17,6 +17,7 @@
         ></note-box>
         <note-box
                 v-for="box in noteBoxes"
+                :key="box.id"
                 :x="box.x"
                 :y="box.y"
                 :width="box.width"
@@ -72,12 +73,10 @@
         }
         console.log(this.track.notes)
         box = canvasAdapter.clip(this.renderContext, box)
-        // console.log(this.track.notes)
         const note = canvasAdapter.toNote(this.renderContext, box)
-        const trueNote = this.track.notes.find((value) => note.equals(value))
-        console.log('true note', trueNote)
-        if (trueNote) {
-          this.track.deleteNote(trueNote)
+        const existingNote = this.track.notes.find((value) => note.equals(value))
+        if (existingNote) {
+          this.track.deleteNote(existingNote)
         } else {
           this.addNoteFromBox(box)
         }

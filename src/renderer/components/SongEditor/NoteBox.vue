@@ -74,7 +74,7 @@
           box: this.calculatedBox()
         })
       },
-      clearOldBox (ctx) {
+      clearOldBox: function (ctx) {
         const oldBox = this.oldBox
         ctx.clearRect(oldBox.x, oldBox.y, oldBox.width, oldBox.height)
       }
@@ -88,7 +88,7 @@
       }
 
       ctx.beginPath()
-
+      // ???Does nothing if there is no box, clears box if already exists
       this.clearOldBox(ctx)
 
       const newBox = this.calculatedBox
@@ -113,6 +113,7 @@
     },
     destroyed () {
       // When note component is destroyed, un-draw it from the canvas
+      console.log('destroyed', this)
       const ctx = this.context
       this.clearOldBox(ctx)
     }

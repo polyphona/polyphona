@@ -13,9 +13,11 @@ export class Note {
     this.startTime = startTime
     this.duration = duration
     this.pitch = pitch
+    this.id = undefined
   }
 
   equals (note) {
+    // TODO Renommer Collide => Vérifier intervalle parmi ceux recouverts par les autres notes
     if (note.startTime === this.startTime && note.duration === this.duration && note.pitch === this.pitch) {
       return true
     }
@@ -26,6 +28,7 @@ export class Note {
 export class NoteCanvasAdapter {
   toBox (renderContext, note) {
     return {
+      id: note.id,
       x: renderContext.percentPerQuarter * note.startTime,
       y: renderContext.percentPerInterval * note.pitch,
       width: renderContext.percentPerQuarter * note.duration,
@@ -58,15 +61,18 @@ export class NoteCanvasAdapter {
 export class Track {
   constructor () {
     this.notes = []
+    this.lastId = 0
   }
 
   addNote = (note) => {
+    // TODO Ajouter Check anciennes notes
+    note.id = this.lastId
+    this.lastId++
     this.notes.push(note)
   }
 
   deleteNote = (note) => {
     const index = this.notes.indexOf(note)
-    console.log(index)
     this.notes.splice(index, 1)
   }
 }
