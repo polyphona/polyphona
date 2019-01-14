@@ -10,7 +10,7 @@ import database
 
 
 
-def extract_json(req):
+def validate_json(req):
     try:
         json_in = json.loads(req.stream.read().decode('utf-8'))
     except json.JSONDecodeError:
@@ -19,18 +19,19 @@ def extract_json(req):
         return json_in
 
 
-def strToInt(str):
+def validate_int(value):
     rtn = 0
     try:
-        rtn = int(str)
+        rtn = int(value)
     except:
         raise falcon.HTTPError(falcon.HTTP_400, "Invalid song ID.")
     return rtn
 
+
 class UserResource(object):
 
     def on_post(self, req, resp):
-        json_in = extract_json(req)
+        json_in = validate_json(req)
 
         for field in 'username', 'first_name', 'last_name', 'password':
             if field not in json_in:
@@ -61,7 +62,7 @@ class GetSongListResource(object):
 
 class SongResource(object):
     def on_get(self, req, resp, song_id_str):
-        song_id = strToInt(song_id_str)
+        song_id = validate_int(song_id_str)
         token = req.get_param('token')
         if not database.is_token_valid(token):
             raise falcon.HTTPError(falcon.HTTP_401, "Invalid token.")
@@ -74,7 +75,7 @@ class SongResource(object):
         resp.body = (json.dumps(json_resp))
 
     def on_put(self, req, resp, song_id_str):
-        song_id = strToInt(song_id_str)
+        song_id = validate_int(song_id_str)
         token = req.get_param('token')
         username = database.is_token_valid(token)
         if username is None:
@@ -87,7 +88,7 @@ class SongResource(object):
             song_id_list.append(song["id"])
         if song_id not in song_id_list:
             raise falcon.HTTPError(falcon.HTTP_404, "Song ID unknown.")
-        json_in = extract_json(req)
+        json_in = validate_json(req)
         if 'name' not in json_in.keys():
             raise falcon.HTTPError(falcon.HTTP_400, "Missing name field.")
         if 'tracks' not in json_in.keys():
@@ -100,7 +101,7 @@ class SongResource(object):
         token = req.get_param('token')
         if database.is_token_valid(token) is None:
             raise falcon.HTTPError(falcon.HTTP_401, "Invalid token.")
-        json_in = extract_json(req)
+        json_in = validate_json(req)
         if 'name' not in json_in.keys():
             raise falcon.HTTPError(falcon.HTTP_400, "Missing name field.")
         if 'tracks' not in json_in.keys():
@@ -113,7 +114,7 @@ class SongResource(object):
         resp.status = falcon.HTTP_201
 
     def on_delete(self, req, resp, song_id_str):
-        song_id = strToInt(song_id_str)
+        song_id = validate_int(song_id_str)
         token = req.get_param('token')
         username = database.is_token_valid(token)
         if username is None:
@@ -134,7 +135,7 @@ class SongResource(object):
 class TokenResource(object):
 
     def on_post(self, req, resp):
-        json_in = extract_json(req)
+        json_in = validate_json(req)
         if 'username' not in json_in.keys():
             raise falcon.HTTPError(falcon.HTTP_400, "Missing username field.")
         if 'password' not in json_in.keys():
