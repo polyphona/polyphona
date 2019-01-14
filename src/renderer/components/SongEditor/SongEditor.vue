@@ -26,9 +26,9 @@
   </note-canvas>
 </template>
 <script>
-  import {Track, NoteCanvasAdapter, NoteTooSmallException} from './Music.js'
   import NoteCanvas from './NoteCanvas.vue'
   import NoteBox from './NoteBox.vue'
+  import {NoteCanvasAdapter, NoteTooSmallException, Track} from '../../store/Music'
 
   const canvasAdapter = new NoteCanvasAdapter()
 
@@ -93,7 +93,7 @@
     },
     computed: {
       noteBoxes () {
-        return this.track.notes.map(
+        return this.$store.getters['MusicStore/listNotes'].map(
           (note) => canvasAdapter.toBox(this.renderContext, note)
         )
       }
