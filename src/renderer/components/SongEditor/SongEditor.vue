@@ -22,7 +22,6 @@
                 :width="box.width"
                 :height="box.height"
                 :color="'#0f0'"
-                @box-click="onClickBox"
         ></note-box>
     </note-canvas>
 </template>
@@ -71,11 +70,13 @@
           width: this.renderContext.percentPerQuarter,
           height: this.renderContext.percentPerInterval
         }
+        console.log(this.track.notes)
         box = canvasAdapter.clip(this.renderContext, box)
+        // console.log(this.track.notes)
         const note = canvasAdapter.toNote(this.renderContext, box)
         const trueNote = this.track.notes.find((value) => note.equals(value))
+        console.log('true note', trueNote)
         if (trueNote) {
-          console.log('if loop')
           this.track.deleteNote(trueNote)
         } else {
           this.addNoteFromBox(box)
@@ -97,13 +98,6 @@
       },
       onCanvasMouseLeave () {
         this.newBox = null
-      },
-      onClickBox ({box}) {
-        const i = this.track.noteBoxes.index(box)
-        this.track.deleteNote(this.track.notes[i])
-        this.track.noteBoxes.splice(i, 1)
-        console.log('onclick-box event')
-        console.log(box)
       }
     },
     computed: {
