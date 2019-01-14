@@ -16,9 +16,9 @@ export class Note {
     this.id = undefined
   }
 
-  equals (note) {
-    // TODO Renommer Collide => Vérifier intervalle parmi ceux recouverts par les autres notes
-    if (note.startTime === this.startTime && note.duration === this.duration && note.pitch === this.pitch) {
+  collides (note) {
+    if (note.pitch === this.pitch && ((note.startTime <= this.startTime && note.startTime + note.duration >= this.startTime + this.duration) ||
+      (note.startTime >= this.startTime && note.startTime + note.duration <= this.startTime + this.duration))) {
       return true
     }
     return false
@@ -65,7 +65,6 @@ export class Track {
   }
 
   addNote = (note) => {
-    // TODO Ajouter Check anciennes notes
     note.id = this.lastId
     this.lastId++
     this.notes.push(note)

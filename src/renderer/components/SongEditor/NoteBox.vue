@@ -69,7 +69,6 @@
     },
     methods: {
       onClick () {
-        console.log('onclick-box event in NoteBox')
         this.$emit('box-click', {
           box: this.calculatedBox()
         })
@@ -88,7 +87,6 @@
       }
 
       ctx.beginPath()
-      // ???Does nothing if there is no box, clears box if already exists
       this.clearOldBox(ctx)
 
       const newBox = this.calculatedBox
@@ -113,7 +111,6 @@
     },
     destroyed () {
       // When note component is destroyed, un-draw it from the canvas
-      console.log('destroyed', this)
       const ctx = this.context
       this.clearOldBox(ctx)
     }

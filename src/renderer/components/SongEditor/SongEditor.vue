@@ -71,12 +71,13 @@
           width: this.renderContext.percentPerQuarter,
           height: this.renderContext.percentPerInterval
         }
-        console.log(this.track.notes)
         box = canvasAdapter.clip(this.renderContext, box)
         const note = canvasAdapter.toNote(this.renderContext, box)
-        const existingNote = this.track.notes.find((value) => note.equals(value))
-        if (existingNote) {
-          this.track.deleteNote(existingNote)
+        const collidingNotes = this.track.notes.filter((value) => note.collides(value))
+        if (collidingNotes[0]) {
+          for (var i = 0; i < collidingNotes.length; i++) {
+            this.track.deleteNote(collidingNotes[i])
+          }
         } else {
           this.addNoteFromBox(box)
         }
