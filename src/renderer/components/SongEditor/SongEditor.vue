@@ -1,15 +1,20 @@
 <template>
   <div id="song-editor">
     <p style="display: flex;">
-      <button @click="togglePlay">{{ playing ? '❙❙' : '►️'}}️</button>
-      <select v-model="octave">
-        <option :value="1">1</option>
-        <option :value="2">2</option>
-        <option :value="3">3</option>
-        <option :value="4">4</option>
-        <option :value="5">5</option>
-        <option :value="6">6</option>
-      </select>
+      <span class="form-field">
+        <button @click="togglePlay">{{ playing ? '❙❙' : '►️'}}️</button>
+      </span>
+      <span class="form-field">
+        <label for="octave">Octave:</label>
+        <select id="octave" v-model="octave">
+          <option :value="1">1</option>
+          <option :value="2">2</option>
+          <option :value="3">3</option>
+          <option :value="4">4</option>
+          <option :value="5">5</option>
+          <option :value="6">6</option>
+        </select>
+      </span>
     </p>
     <note-canvas
       id="note-canvas"
@@ -39,7 +44,7 @@
   </div>
 </template>
 <script>
-  import {Track, NoteCanvasAdapter, NoteTooSmallException} from './Music.js'
+  import {Track, NoteCanvasAdapter, NoteTooSmallException, SCALE} from './Music.js'
   import NoteCanvas from './NoteCanvas.vue'
   import NoteBox from './NoteBox.vue'
   import Tone from 'tone'
@@ -52,34 +57,21 @@
     data () {
       const track = new Track()
       const division = 4
+      const scale = SCALE
       return {
         track,
         newBox: null,
         playing: false,
-        synth: new Tone.MonoSynth().toMaster(),
+        synth: new Tone.PluckSynth().toMaster(),
         octave: 4,
         division,
         renderContext: {
           // Percentage of the canvas filled by one tick, from 0 to 100.
           percentPerTick: 100 / (4 * division),
           // Percentage of the canvas filled by a note interval, from 0 to 100
-          percentPerInterval: 100 / 12
+          percentPerInterval: 100 / Object.keys(scale).length
         },
-        scale: {
-          0: 'C',
-          1: 'C#',
-          2: 'D',
-          3: 'D#',
-          4: 'E',
-          5: 'F',
-          6: 'F#',
-          7: 'G',
-          8: 'G#',
-          9: 'A',
-          10: 'A#',
-          11: 'B',
-          12: 'C'
-        }
+        scale
       }
     },
     mounted () {
@@ -178,5 +170,9 @@
   #note-canvas {
     width: 100%;
     height: 100%;
+  }
+
+  .form-field {
+    margin: 1em;
   }
 </style>
