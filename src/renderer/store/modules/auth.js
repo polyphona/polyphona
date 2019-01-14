@@ -1,8 +1,4 @@
-import axios from 'axios'
-
-const http = axios.create({
-  baseURL: 'http://localhost:8000'
-})
+import http from '@/utils/http'
 
 const TOKEN_STORAGE_ITEM = 'polyphona-token'
 const USER_STORAGE_ITEM = 'polyphona-user'
@@ -32,7 +28,7 @@ const actions = {
     await context.dispatch('login', {username, password})
   },
   login (context, {username, password}) {
-    return http.post('http://localhost:8000/tokens/', {username, password}).then((resp) => {
+    return http.post('/tokens/', {username, password}).then((resp) => {
       const {token, user} = resp.data()
       context.commit('setToken', token)
       context.commit('setUser', user)
