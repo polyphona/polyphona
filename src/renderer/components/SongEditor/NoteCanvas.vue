@@ -2,22 +2,53 @@
   <div class="wrapper">
     <canvas ref="background" class="background"></canvas>
     <canvas ref="foreground" class="foreground"
-      @click="onClick"
-      @mousedown="onMouseDown"
-      @mouseup="onMouseUp"
-      @mousemove="onMouseMove"
-      @mouseleave="onMouseLeave"
+            @click="onClick"
+            @mousedown="onMouseDown"
+            @mouseup="onMouseUp"
+            @mousemove="onMouseMove"
+            @mouseleave="onMouseLeave"
     ></canvas>
-    <!-- Children components will be mounted here -->
-    <slot></slot>
+    <note-box
+        v-if="newBox"
+        :x="newBox.x"
+        :y="newBox.y"
+        :width="newBox.width"
+        :height="newBox.height"
+        :color="'#afa'"
+        layer="foreground"
+    ></note-box>
+    <note-box
+        v-for="box in noteBoxes"
+        :x="box.x"
+        :y="box.y"
+        :width="box.width"
+        :height="box.height"
+        :color="'#0f0'"
+    ></note-box>
   </div>
 </template>
 
 <script>
+  import {NoteCanvasAdapter} from '@/store/Music'
+  import {NoteTooSmallException} from '../../store/Music'
+  import NoteBox from './NoteBox'
+
+  const canvasAdapter = new NoteCanvasAdapter()
+
   export default {
     name: 'NoteCanvas',
+    components: {NoteBox},
     data () {
       return {
+        newBox: null,
+        renderContext: {
+          // Percentage of the canvas filled by a quarter note,
+          // i.e. 1/4th of a bar.
+          percentPerQuarter: 10,
+          // Percentage of the canvas filled by a note interval,
+          // i.e. the difference in pitch between A and A#
+          percentPerInterval: 20
+        },
         dragging: false,
         clicking: false,
         canvasDimensions: null,
@@ -35,6 +66,13 @@
       // Allow child components to access the layers via `inject: ['layers']`.
       return {
         layers: this.layers
+      }
+    },
+    computed: {
+      noteBoxes () {
+        return this.$store.getters['MusicStore/listNotes'].map(
+          (note) => canvasAdapter.toBox(this.renderContext, note)
+        )
       }
     },
     methods: {
@@ -64,33 +102,56 @@
           y: 100 * (event.pageY - canvasTop) / canvas.height
         }
       },
+      addNoteFromBox (box) {
+        try {
+          const note = canvasAdapter.toNote(this.renderContext, box)
+          this.$store.dispatch('MusicStore/addNote', note)
+          return note
+        } catch (e) {
+          if (e instanceof NoteTooSmallException) {
+            return
+          }
+          throw e
+        }
+      },
       onClick (event) {
         if (!this.clicking) {
           return
         }
-        this.$emit('canvas-click', this.toCanvasPercentPosition(event))
+        let box = {
+          ...this.toCanvasPercentPosition(event),
+          width: this.renderContext.percentPerQuarter,
+          height: this.renderContext.percentPerInterval
+        }
+        box = canvasAdapter.clip(this.renderContext, box)
+        this.addNoteFromBox(box)
         this.clicking = false
       },
       onMouseDown (event) {
         this.clicking = true
         this.dragging = true
-        this.$emit('canvas-mousedown', this.toCanvasPercentPosition(event))
+        const height = this.renderContext.percentPerInterval
+        const width = 0
+        const box = {...this.toCanvasPercentPosition(event), width, height}
+        this.newBox = canvasAdapter.clip(this.renderContext, box)
       },
       onMouseMove (event) {
         this.clicking = false
         if (!this.dragging) {
           return
         }
-        this.$emit('canvas-mousedrag', this.toCanvasPercentPosition(event))
+        this.newBox.width = this.toCanvasPercentPosition(event).x - this.newBox.x
+        this.newBox = canvasAdapter.clip(this.renderContext, this.newBox)
       },
       onMouseUp (event) {
         this.dragging = false
-        this.$emit('canvas-mouseup', this.toCanvasPercentPosition(event))
+        this.addNoteFromBox(this.newBox)
+        this.newBox = null
       },
       onMouseLeave (event) {
         this.dragging = false
         this.clicking = false
-        this.$emit('canvas-mouseleave', this.toCanvasPercentPosition(event))
+        this.newBox = null
       }
     }
   }
@@ -99,9 +160,11 @@
 <style lang="scss" scoped>
   .wrapper {
     position: relative;
+
     .background {
       background: gold;
     }
+
     .foreground {
       position: absolute;
       top: 0;
