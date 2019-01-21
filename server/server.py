@@ -182,10 +182,10 @@ class TokenResource(object):
 
 
 
-def create_api():
+def create_api(database_path):
     app = falcon.API()
 
-    database.create_database_table()
+    database.create_database_table(database_path)
 
     user_resource = UserResource()
     app.add_route('/users/', user_resource)
@@ -204,4 +204,4 @@ def create_api():
     return app
 
 
-app = create_api()
+app = create_api('polyphona_db.db')

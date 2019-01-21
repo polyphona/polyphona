@@ -16,6 +16,8 @@ import json
 import pytest
 from falcon import testing
 from falcon import testing
+from database import *
+import os
 
 import server
 
@@ -23,7 +25,7 @@ import server
 def pytest_namespace():
     return {'token': ''}
 
-
+database_path = 'fake_db.db'
 test_username = 'smith'
 test_first_name = 'smith'
 test_last_name = 'smith'
@@ -106,12 +108,19 @@ test_song_03 = {
         }
     ]
 }
+try:
+    os.remove(database_path)
+except():
+    pass
+
+def setup_module(module):
+    create_database_table(database_path)
 
 
 @pytest.fixture()
 def client():
     # Initialize falcon instance
-    return testing.TestClient(server.create_api())
+    return testing.TestClient(server.create_api(database_path))
 
 
 ### ## # USERS # ## ###
