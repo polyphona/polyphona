@@ -2,28 +2,29 @@
   <div class="wrapper">
     <canvas ref="background" class="background"></canvas>
     <canvas ref="foreground" class="foreground"
-      @click="onClick"
-      @mousedown="onMouseDown"
-      @mouseup="onMouseUp"
-      @mousemove="onMouseMove"
-      @mouseleave="onMouseLeave"
+            @click="onClick"
+            @mousedown="onMouseDown"
+            @mouseup="onMouseUp"
+            @mousemove="onMouseMove"
+            @mouseleave="onMouseLeave"
     ></canvas>
     <note-box
-        v-if="newBox"
-        :x="newBox.x"
-        :y="newBox.y"
-        :width="newBox.width"
-        :height="newBox.height"
-        :color="'#afa'"
-        layer="foreground"
+      v-if="newBox"
+      :x="newBox.x"
+      :y="newBox.y"
+      :width="newBox.width"
+      :height="newBox.height"
+      :color="'#afa'"
+      layer="foreground"
     ></note-box>
     <note-box
-        v-for="box in noteBoxes"
-        :x="box.x"
-        :y="box.y"
-        :width="box.width"
-        :height="box.height"
-        :color="'#0f0'"
+      v-for="box in noteBoxes"
+      :key="box.id"
+      :x="box.x"
+      :y="box.y"
+      :width="box.width"
+      :height="box.height"
+      :color="'#0f0'"
     ></note-box>
   </div>
 </template>
@@ -118,7 +119,13 @@
           height: this.renderContext.percentPerInterval
         }
         box = canvasAdapter.clip(this.renderContext, box)
-        this.addNoteFromBox(box)
+        const note = canvasAdapter.toNote(this.renderContext, box)
+        const collidingNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.collides(value))
+        if (collidingNotes.length > 0) {
+          collidingNotes.forEach((note) => this.$store.dispatch('MusicStore/deleteNote', note))
+        } else {
+          this.addNoteFromBox(box)
+        }
         this.clicking = false
       },
       onMouseDown (event) {

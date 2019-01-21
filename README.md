@@ -1,58 +1,71 @@
-
-
 # Polyphona
 
 A familiar, portable music editor for your desktop. 
 
-#### Build Setup
+## Install
 
-Make sure you have [Node] ad [npm] installed.
+### Client
+
+Make sure you have [Node] ad [npm] installed, then run:
 
 ``` bash
-# install dependencies
 npm install
-
-# serve with hot reload at localhost:9080
-npm run dev
-
-# build electron application for production
-npm run build
-
-
-# lint all JS/Vue component files in `src/`
-npm run lint
-
 ```
 
+### Server
 
-#### Back Setup
-## Requirements
-All requirements are in the requirements.txt file, usable through pip:
-``` bash
-pip install -r requirements
+Install dependencies using pip (preferably in a virtual environment):
+
+```bash
+pip install -r requirements.txt
 ```
 
-## Presentation
-The server is composed of a web server, written in python, using Falcon and running on gunicorn (or similar service); and a database, also written in python and using sqlite3.
-The database itself is stored in a file named `server/polyphona_db.db`, if no file is found a new one will be created upon the launch of the server.
+## Usage
 
-## Running the server
-To run the server locally, use:
-``` bash
+### Presentation of the backend server
+
+The server stores songs and user data. The desktop app uses its REST API
+to display and manipulate data.
+
+It consists in:
+
+- A web application server, written in Python using Falcon and running on Gunicorn (or a similar process manager);
+- A database module, also written in Python and backed by SQLite3.
+
+The database itself is stored in a file named `server/polyphona_db.db`.
+If no file is found a new one will be created upon the launch of the server.
+
+### Running the server
+
+To run the server locally, `cd` to the `server` directory and use:
+
+```bash
 gunicorn server:app
 ```
 
 For more advanced use cases, please refer to the gunicorn documentation or whatever service you want to use instead.
 
-## Test
+### Running the desktop app
+
+To run the desktop app, run:
+
+```bash
+npm run dev
+```
+
+in the root directory.
+
+## Tests
+
 The server includes a `server_test.py` file, that allows for thorough testing through pytest.
-To run the test, you need to first delete the database file (or rename it if it is contains valuable data), then simply run:
+
+To run the test, you need to first delete the database file (or rename it if it is contains valuable data), then run:
+
 ``` bash
 pytest
 ```
 
-
-
+## Resources
 
 To get started with Electron, read [Writing your first Electron app](https://electronjs.org/docs/tutorial/first-app).
 

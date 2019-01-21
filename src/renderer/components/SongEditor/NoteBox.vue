@@ -68,7 +68,12 @@
       }
     },
     methods: {
-      clearOldBox (ctx) {
+      onClick () {
+        this.$emit('box-click', {
+          box: this.calculatedBox()
+        })
+      },
+      clearOldBox: function (ctx) {
         const oldBox = this.oldBox
         ctx.clearRect(oldBox.x, oldBox.y, oldBox.width, oldBox.height)
       }
@@ -82,7 +87,6 @@
       }
 
       ctx.beginPath()
-
       this.clearOldBox(ctx)
 
       const newBox = this.calculatedBox
@@ -90,7 +94,6 @@
       if (!newBox.width) {
         return
       }
-
       // Draw the new box
       ctx.rect(
         newBox.x,

@@ -20,6 +20,9 @@ const state = {
 const mutations = {
   ADD_NOTE (state, note) {
     state.currentTrack.addNote(note)
+  },
+  DELETE_NOTE (state, note) {
+    state.currentTrack.deleteNote(note)
   }
 }
 
@@ -33,6 +36,9 @@ const getters = {
 const actions = {
   addNote (context, note) {
     context.commit('ADD_NOTE', note)
+  },
+  deleteNote (context, note) {
+    context.commit('DELETE_NOTE', note)
   }
 }
 

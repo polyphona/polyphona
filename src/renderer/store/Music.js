@@ -13,12 +13,22 @@ export class Note {
     this.startTime = startTime
     this.duration = duration
     this.pitch = pitch
+    this.id = undefined
+  }
+
+  /* True if the note collides with existing note with the same pitch */
+  collides (note) {
+    const samePitch = note.pitch === this.pitch
+    const endNoteCollide = note.startTime <= this.startTime && note.startTime + note.duration >= this.startTime + this.duration
+    const startNoteCollide = note.startTime >= this.startTime && note.startTime + note.duration <= this.startTime + this.duration
+    return samePitch && (endNoteCollide || startNoteCollide)
   }
 }
 
 export class NoteCanvasAdapter {
   toBox (renderContext, note) {
     return {
+      id: note.id,
       x: renderContext.percentPerTick * note.startTime,
       y: renderContext.percentPerInterval * note.pitch,
       width: renderContext.percentPerTick * note.duration,
@@ -51,10 +61,18 @@ export class NoteCanvasAdapter {
 export class Track {
   constructor () {
     this.notes = []
+    this.lastId = 0
   }
 
   addNote = (note) => {
+    note.id = this.lastId
+    this.lastId++
     this.notes.push(note)
+  }
+
+  deleteNote = (note) => {
+    const index = this.notes.indexOf(note)
+    this.notes.splice(index, 1)
   }
 }
 
