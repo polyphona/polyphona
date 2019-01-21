@@ -110,7 +110,7 @@ test_song_03 = {
 }
 try:
     os.remove(database_path)
-except():
+except:
     pass
 
 def setup_module(module):
