@@ -20,61 +20,27 @@
   </div>
 </template>
 <script>
-  import Tone from 'tone'
-
   import NoteCanvas from './NoteCanvas.vue'
 
   export default {
     name: 'song-editor',
     components: {NoteCanvas},
-    data () {
-      return {
-        newBox: null,
-        playing: false,
-        synth: new Tone.PluckSynth().toMaster(),
-        octave: 4
-      }
-    },
-    mounted () {
-      Tone.Transport.bpm.value = 120
-    },
     methods: {
       togglePlay () {
-        if (this.playing) {
-          Tone.Transport.stop()
-        } else {
-          this._play()
-        }
-        this.playing = !this.playing
-      },
-      _toTransportTime (canvasTime) {
-        // Notation: "bar:quarter:sixteenth"
-        // See: https://github.com/Tonejs/Tone.js/wiki/Time#transport-time
-        const quarter = Math.floor(canvasTime / this.musicContext.division)
-        const sixteenth = 4 / this.musicContext.division * (canvasTime % this.musicContext.division)
-        return `0:${quarter}:${sixteenth}`
-      },
-      _play (offset) {
-        this.track.notes.forEach((note) => {
-          const trigger = (time) => {
-            const pitch = this.musicContext.scale[note.pitch] + this.octave
-            this.synth.triggerAttackRelease(pitch, this._toTransportTime(note.duration), time)
-          }
-          Tone.Transport.schedule(trigger, this._toTransportTime(note.startTime))
-        })
-        // Loop one measure ad eternam
-        Tone.Transport.loopEnd = '1m'
-        Tone.Transport.loop = true
-        // Start the song now, but offset by `offset`.
-        Tone.Transport.start(Tone.Transport.now(), offset)
+        this.$store.dispatch('MusicStore/togglePlay')
       }
     },
     computed: {
-      track () {
-        return this.$store.getters['MusicStore/getTrack']
+      octave: {
+        get () {
+          return this.$store.getters['MusicStore/getOctave']
+        },
+        set (value) {
+          this.$store.dispatch('MusicStore/updateOctave', value)
+        }
       },
-      musicContext () {
-        return this.$store.getters['MusicStore/getMusicContext']
+      playing () {
+        return this.$store.getters['MusicStore/getPlaying']
       }
     }
   }
