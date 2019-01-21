@@ -185,7 +185,7 @@ class TokenResource(object):
 
 
 def create_api():
-    cors = CORS(allow_origins_list=['*'])
+    cors = CORS(allow_all_origins=True)
     app = falcon.API(middleware=[cors.middleware])
 
     database.create_database_table()
