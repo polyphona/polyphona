@@ -20,8 +20,6 @@ Install dependencies using pip (preferably in a virtual environment):
 pip install -r requirements.txt
 ```
 
-## Presentation
-
 ## Usage
 
 ### Presentation of the backend server
