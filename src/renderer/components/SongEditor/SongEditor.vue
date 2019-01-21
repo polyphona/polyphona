@@ -48,13 +48,13 @@
         this.playing = !this.playing
       },
       _toTransportTime (canvasTime) {
+        // Notation: "bar:quarter:sixteenth"
+        // See: https://github.com/Tonejs/Tone.js/wiki/Time#transport-time
         const quarter = Math.floor(canvasTime / this.musicContext.division)
         const sixteenth = 4 / this.musicContext.division * (canvasTime % this.musicContext.division)
         return `0:${quarter}:${sixteenth}`
       },
       _play (offset) {
-        // Notation: "bar:quarter:sixteenth"
-        // See: https://github.com/Tonejs/Tone.js/wiki/Time#transport-time
         this.track.notes.forEach((note) => {
           const trigger = (time) => {
             const pitch = this.musicContext.scale[note.pitch] + this.octave
@@ -62,9 +62,10 @@
           }
           Tone.Transport.schedule(trigger, this._toTransportTime(note.startTime))
         })
-        // Loop one measure
+        // Loop one measure ad eternam
         Tone.Transport.loopEnd = '1m'
         Tone.Transport.loop = true
+        // Start the song now, but offset by `offset`.
         Tone.Transport.start(Tone.Transport.now(), offset)
       }
     },
