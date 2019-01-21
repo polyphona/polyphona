@@ -1,31 +1,32 @@
 <template>
-  <div class="wrapper">
-    <canvas ref="background" class="background"></canvas>
-    <canvas ref="foreground" class="foreground"
-            @click="onClick"
-            @mousedown="onMouseDown"
-            @mouseup="onMouseUp"
-            @mousemove="onMouseMove"
-            @mouseleave="onMouseLeave"
-    ></canvas>
-    <note-box
-        v-if="newBox"
-        :x="newBox.x"
-        :y="newBox.y"
-        :width="newBox.width"
-        :height="newBox.height"
-        :color="'#afa'"
-        layer="foreground"
-    ></note-box>
-    <note-box
-        v-for="box in noteBoxes"
-        :x="box.x"
-        :y="box.y"
-        :width="box.width"
-        :height="box.height"
-        :color="'#0f0'"
-    ></note-box>
-  </div>
+    <div class="wrapper">
+        <canvas ref="background" class="background"></canvas>
+        <canvas ref="foreground" class="foreground"
+                @click="onClick"
+                @mousedown="onMouseDown"
+                @mouseup="onMouseUp"
+                @mousemove="onMouseMove"
+                @mouseleave="onMouseLeave"
+        ></canvas>
+        <note-box
+                v-if="newBox"
+                :x="newBox.x"
+                :y="newBox.y"
+                :width="newBox.width"
+                :height="newBox.height"
+                :color="'#afa'"
+                layer="foreground"
+        ></note-box>
+        <note-box
+                v-for="box in noteBoxes"
+                :key="box.id"
+                :x="box.x"
+                :y="box.y"
+                :width="box.width"
+                :height="box.height"
+                :color="'#0f0'"
+        ></note-box>
+    </div>
 </template>
 
 <script>
@@ -124,7 +125,15 @@
           height: this.renderContext.percentPerInterval
         }
         box = canvasAdapter.clip(this.renderContext, box)
-        this.addNoteFromBox(box)
+        const note = canvasAdapter.toNote(this.renderContext, box)
+        const collidingNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.collides(value))
+        if (collidingNotes[0]) {
+          for (var i = 0; i < collidingNotes.length; i++) {
+            this.$store.dispatch('MusicStore/deleteNote', collidingNotes[i])
+          }
+        } else {
+          this.addNoteFromBox(box)
+        }
         this.clicking = false
       },
       onMouseDown (event) {
@@ -158,18 +167,18 @@
 </script>
 
 <style lang="scss" scoped>
-  .wrapper {
-    position: relative;
+    .wrapper {
+        position: relative;
 
-    .background {
-      background: gold;
-    }
+        .background {
+            background: gold;
+        }
 
-    .foreground {
-      position: absolute;
-      top: 0;
-      left: 0;
-      background: transparent;
+        .foreground {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: transparent;
+        }
     }
-  }
 </style>
