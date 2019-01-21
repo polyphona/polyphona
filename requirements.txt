@@ -1,3 +1,4 @@
 falcon
+falcon-cors
 gunicorn
 pytest
