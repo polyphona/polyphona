@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, BrowserWindow } from 'electron'
+import {app, BrowserWindow, Menu} from 'electron'
 
 /**
  * Set `__static` path to static files in production
@@ -24,6 +24,66 @@ function createWindow () {
     useContentSize: true,
     width: 1000
   })
+
+  const menuTemplate = [{
+    label: 'Files',
+    submenu: [
+      {
+        label: 'New',
+        accelerator: 'CmdOrCtrl+N',
+        click: () => {
+          var newWindow = new BrowserWindow({
+            height: 563,
+            useContentSize: true,
+            width: 1000
+          })
+          newWindow.loadURL(winURL)
+        }
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Save'
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Open'
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Export as MIDI'
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Quit',
+        click: () => {
+          app.quit()
+        }
+      }
+    ]
+  },
+  {
+    label: 'Edit',
+    submenu: [
+      {role: 'undo'},
+      {role: 'redo'},
+      {type: 'separator'}]
+  },
+  {
+    label: 'View',
+    submenu: [
+      {role: 'reload'}]
+  }
+  ]
+  const menu = Menu.buildFromTemplate(menuTemplate)
+  Menu.setApplicationMenu(menu)
 
   mainWindow.loadURL(winURL)
 
