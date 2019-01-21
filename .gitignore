@@ -9,3 +9,6 @@ npm-debug.log.*
 thumbs.db
 !.gitkeep
 .idea/
+*.db
+__pycache__/
+*.py[odc]
