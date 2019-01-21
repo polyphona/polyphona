@@ -95,7 +95,8 @@
           password: this.password
         }).then(() => {
           this.$router.push('/')
-        }).catch(() => {
+        }).catch((e) => {
+          console.error(e)
           this.error = 'An error occurred while trying to create your account.'
         })
       }

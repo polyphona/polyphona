@@ -29,7 +29,7 @@ const actions = {
   },
   login (context, {username, password}) {
     return http.post('/tokens/', {username, password}).then((resp) => {
-      const {token, user} = resp.data()
+      const {token, user} = resp.data
       context.commit('setToken', token)
       context.commit('setUser', user)
     })
