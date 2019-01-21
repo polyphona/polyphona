@@ -67,7 +67,7 @@ class GetSongListResource(object):
 class SongResource(object):
     def on_get(self, req, resp, song_id_str):
         song_id = validate_int(song_id_str)
-        token = req.get_param('token')
+        token = req.auth[6:]
 
         # Check validity of request
         if not database.is_token_valid(token):
@@ -84,7 +84,7 @@ class SongResource(object):
 
     def on_put(self, req, resp, song_id_str):
         song_id = validate_int(song_id_str)
-        token = req.get_param('token')
+        token = req.auth[6:]
 
         # Check validity of request
         username = database.is_token_valid(token)
@@ -106,7 +106,7 @@ class SongResource(object):
         resp.status = falcon.HTTP_200
 
     def on_post(self, req, resp):
-        token = req.get_param('token')
+        token = req.auth[6:]
 
         # Check validity of request
         if database.is_token_valid(token) is None:
@@ -124,7 +124,7 @@ class SongResource(object):
 
     def on_delete(self, req, resp, song_id_str):
         song_id = validate_int(song_id_str)
-        token = req.get_param('token')
+        token = req.auth[6:]
 
         # Check validity of request
         username = database.is_token_valid(token)
