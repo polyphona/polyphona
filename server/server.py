@@ -3,11 +3,13 @@
 # api : https://hackmd.io/eNiNVR6eR1mJH2kOebtE5g#
 #
 
-import falcon
 import json
 from uuid import uuid4
-import database
 
+import falcon
+from falcon_cors import CORS
+
+import database
 
 
 def validate_json(req):
@@ -183,7 +185,8 @@ class TokenResource(object):
 
 
 def create_api():
-    app = falcon.API()
+    cors = CORS(allow_origins_list=['*'])
+    app = falcon.API(middleware=[cors.middleware])
 
     database.create_database_table()
 
