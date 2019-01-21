@@ -20,7 +20,7 @@ export class Note {
     var samePitch = Boolean(note.pitch === this.pitch)
     var endNoteCollide = Boolean(note.startTime <= this.startTime && note.startTime + note.duration >= this.startTime + this.duration)
     var startNoteCollide = Boolean(note.startTime >= this.startTime && note.startTime + note.duration <= this.startTime + this.duration)
-    return samePitch && (endNoteCollide || (startNoteCollide))
+    return samePitch && (endNoteCollide || startNoteCollide)
     /*
     True if the note collides with existing note with the same pitch
      */
