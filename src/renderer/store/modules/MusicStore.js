@@ -1,7 +1,9 @@
 import {Track} from '../Music'
+import http from '../../utils/http'
 
 const state = {
-  currentTrack: new Track()
+  currentTrack: new Track(),
+  saved: false
 }
 
 const mutations = {
@@ -18,11 +20,19 @@ const getters = {
 }
 
 const actions = {
-  addNote (context, note) {
-    context.commit('ADD_NOTE', note)
+  addNote ({commit}, note) {
+    commit('ADD_NOTE', note)
   },
-  deleteNote (context, note) {
-    context.commit('DELETE_NOTE', note)
+  deleteNote ({commit}, note) {
+    commit('DELETE_NOTE', note)
+  },
+  async saveTrack ({state}, note) {
+    const data = {
+      'name': 'Test',
+      'tracks': state.currentTrack
+    }
+    await http.post('songs', data)
+    state.currentTrack.saved = true
   }
 }
 

@@ -14,6 +14,7 @@ const mutations = {
   },
   setToken (state, token) {
     localStorage.setItem(TOKEN_STORAGE_ITEM, token)
+    http.defaults.headers.common['Authorization'] = 'Token ' + token
     state.token = token
   },
   discardToken (state) {
