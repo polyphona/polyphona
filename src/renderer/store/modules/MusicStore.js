@@ -1,4 +1,5 @@
 import Tone from 'tone'
+import http from '@/utils/http'
 
 import {Track, SCALE} from '../Music'
 
@@ -25,7 +26,8 @@ const state = {
     percentPerTick: 100 / (4 * division),
     // Percentage of the canvas filled by a note interval, from 0 to 100
     percentPerInterval: 100 / Object.keys(scale).length
-  }
+  },
+  saved: false
 }
 
 function toTransportTime (musicContext, canvasTime) {
@@ -107,6 +109,14 @@ const actions = {
   updateOctave (context, octave) {
     context.commit('SET_OCTAVE', octave)
     context.dispatch('restart')
+  },
+  async saveTrack ({state}, note) {
+    const data = {
+      'name': 'Test',
+      'tracks': state.currentTrack
+    }
+    await http.post('songs', data)
+    state.currentTrack.saved = true
   }
 }
 
