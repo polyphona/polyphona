@@ -26,7 +26,8 @@ const state = {
     percentPerTick: 100 / (4 * division),
     // Percentage of the canvas filled by a note interval, from 0 to 100
     percentPerInterval: 100 / Object.keys(scale).length
-  }
+  },
+  saved: false
 }
 
 function toTransportTime (musicContext, canvasTime) {
