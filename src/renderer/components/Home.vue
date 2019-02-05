@@ -7,6 +7,9 @@
     <p>
       <router-link to="register">Create an account</router-link>
     </p>
+    <p @click="save">
+      Save
+    </p>
     <song-editor></song-editor>
   </div>
 </template>
@@ -16,7 +19,12 @@
 
   export default {
     name: 'Home',
-    components: { SongEditor }
+    components: { SongEditor },
+    methods: {
+      save () {
+        this.$store.dispatch('MusicStore/saveTrack')
+      }
+    }
   }
 </script>
 

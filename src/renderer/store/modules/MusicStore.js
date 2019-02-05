@@ -1,4 +1,5 @@
 import Tone from 'tone'
+import http from '@/utils/http'
 
 import {Track, SCALE} from '../Music'
 
@@ -107,6 +108,14 @@ const actions = {
   updateOctave (context, octave) {
     context.commit('SET_OCTAVE', octave)
     context.dispatch('restart')
+  },
+  async saveTrack ({state}, note) {
+    const data = {
+      'name': 'Test',
+      'tracks': state.currentTrack
+    }
+    await http.post('songs', data)
+    state.currentTrack.saved = true
   }
 }
 
