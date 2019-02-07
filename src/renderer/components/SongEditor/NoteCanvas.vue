@@ -62,12 +62,18 @@
 
   const canvasAdapter = new NoteCanvasAdapter()
 
+  const DRAG_RIGHT = 1
+  const DRAG_NONE = 0
+  const DRAG_LEFT = -1
+
   export default {
     name: 'NoteCanvas',
     components: {NoteBox, CanvasDelimiter},
     data () {
       return {
         newBox: null,
+        // Determines whether we're dragging a new note,
+        // and in which direction.
         dragging: false,
         clicking: false,
         canvasDimensions: null,
@@ -193,18 +199,45 @@
       },
       onMouseDown (event) {
         this.clicking = true
-        this.dragging = true
+        this.dragging = DRAG_NONE
         const height = this.renderContext.percentPerInterval
-        const width = 0
+        const width = this.renderContext.percentPerTick
         const box = {...this.toCanvasPercentPosition(event), width, height}
         this.newBox = canvasAdapter.clip(this.renderContext, box)
       },
       onMouseMove (event) {
         this.clicking = false
-        if (!this.dragging) {
+        if (this.dragging === false) {
           return
         }
-        this.newBox.width = this.toCanvasPercentPosition(event).x - this.newBox.x
+
+        const eventX = this.toCanvasPercentPosition(event).x
+        // Perform a bit of logic to keep track of which way we are
+        // dragging the note.
+        // This is necessary in order to correctly draw the new note,
+        // especially for it to have a correct X coordinate.
+        if (eventX - this.newBox.x > 0) {
+          // Now dragging to the right.
+          if (this.dragging === DRAG_LEFT) {
+            // Fix the X coordinate.
+            this.newBox.x -= this.renderContext.percentPerTick
+          }
+          this.dragging = DRAG_RIGHT
+        } else {
+          // Now dragging to the left.
+          if (this.dragging === DRAG_RIGHT) {
+            // Fix the X coordinate.
+            this.newBox.x += this.renderContext.percentPerTick
+          }
+          this.dragging = DRAG_LEFT
+        }
+
+        this.newBox.width = (
+          eventX -
+          this.newBox.x +
+          (this.dragging > 0 ? 1 : 0) * this.renderContext.percentPerTick
+        )
+
         this.newBox = canvasAdapter.clip(this.renderContext, this.newBox)
       },
       onMouseUp (event) {

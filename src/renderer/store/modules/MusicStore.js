@@ -14,7 +14,7 @@ const state = {
   musicContext: {
     division,
     scale,
-    octave: 4,
+    octave: 2,
     playing: false
   },
   // Mapping of note IDs to transport event IDs.
