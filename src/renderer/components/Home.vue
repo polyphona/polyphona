@@ -1,12 +1,5 @@
 <template>
   <div id="home">
-    <h1>Polyphona</h1>
-    <p>
-      <router-link to="login">Login</router-link>
-    </p>
-    <p>
-      <router-link to="register">Create an account</router-link>
-    </p>
     <song-editor></song-editor>
   </div>
 </template>
