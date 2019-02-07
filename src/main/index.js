@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, BrowserWindow } from 'electron'
+import {app, BrowserWindow, Menu} from 'electron'
 
 /**
  * Set `__static` path to static files in production
@@ -14,6 +14,7 @@ let mainWindow
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
+const isMac = process.platform === 'darwin'
 
 function createWindow () {
   /**
@@ -25,6 +26,73 @@ function createWindow () {
     width: 1000
   })
 
+  const menuTemplate = [
+    // Add app menu on macOS
+    ...(isMac ? [{
+      label: app.getName(),
+      submenu: [
+        {role: 'about'},
+        {type: 'separator'},
+        {role: 'services'},
+        {type: 'separator'},
+        {role: 'hide'},
+        {role: 'hideothers'},
+        {role: 'unhide'},
+        {type: 'separator'},
+        {role: 'quit'}
+      ]
+    }] : []),
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: 'New',
+          accelerator: 'CmdOrCtrl+N',
+          click: () => {
+            new BrowserWindow({
+              height: 563,
+              useContentSize: true,
+              width: 1000
+            }).loadURL(winURL)
+          }
+        },
+        {
+          label: 'Save',
+          accelerator: 'CmdOrCtrl+S'
+        },
+        {
+          label: 'Open',
+          accelerator: 'CmdOrCtrl+O'
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Export to MIDI',
+          accelerator: 'CmdOrCtrl+E'
+        },
+        {
+          type: 'separator'
+        },
+        isMac ? { role: 'close' } : { role: 'quit' }
+      ]
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        {role: 'undo'},
+        {role: 'redo'},
+        {type: 'separator'}]
+    },
+    {
+      label: 'View',
+      submenu: [
+        {role: 'reload'}]
+    }
+  ]
+  const menu = Menu.buildFromTemplate(menuTemplate)
+  Menu.setApplicationMenu(menu)
+
   mainWindow.loadURL(winURL)
 
   mainWindow.on('closed', () => {
@@ -35,7 +103,7 @@ function createWindow () {
 app.on('ready', createWindow)
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+  if (!isMac) {
     app.quit()
   }
 })
