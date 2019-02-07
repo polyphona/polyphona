@@ -1,49 +1,62 @@
 <template>
   <div class="wrapper">
-    <canvas ref="background" class="background"></canvas>
-    <canvas ref="notes" class="layer"></canvas>
-    <canvas-delimiter
-      v-for="delimiter in delimiters"
-      :x="delimiter.x"
-      :y="delimiter.y"
-      :vertical="delimiter.vertical"
-      :width="delimiter.width"
-      :key="'delimiter-' + delimiter.id"
-      layer="background"
-    ></canvas-delimiter>
-    <canvas
-      ref="foreground"
-      class="layer"
-      @click="onClick"
-      @mousedown="onMouseDown"
-      @mouseup="onMouseUp"
-      @mousemove="onMouseMove"
-      @mouseleave="onMouseLeave"
-    ></canvas>
-    <note-box
-      v-if="newBox"
-      :x="newBox.x"
-      :y="newBox.y"
-      :width="newBox.width"
-      :height="newBox.height"
-      :color="'#ffe17f'"
-      layer="foreground"
-    ></note-box>
-    <note-box
-      v-for="box in noteBoxes"
-      :key="'note-' + box.id"
-      :x="box.x"
-      :y="box.y"
-      :width="box.width"
-      :height="box.height"
-      :color="'#f6cd4c'"
-      layer="notes"
-    ></note-box>
+    <!-- Show the names of the notes in a column. -->
+    <ol id="note-pitches">
+      <li v-for="pitch in pitches" :key="'pitch-' + pitch.id">{{ pitch.name }}</li>
+    </ol>
+    <div class="canvas-wrapper">
+      <!-- Canvas layers. -->
+      <canvas ref="background" class="background"></canvas>
+      <canvas ref="notes" class="layer"></canvas>
+      <canvas
+        ref="foreground"
+        class="layer"
+        @click="onClick"
+        @mousedown="onMouseDown"
+        @mouseup="onMouseUp"
+        @mousemove="onMouseMove"
+        @mouseleave="onMouseLeave"
+      ></canvas>
+
+      <!-- Delimiters of notes on the canvas -->
+      <canvas-delimiter
+        v-for="delimiter in delimiters"
+        :x="delimiter.x"
+        :y="delimiter.y"
+        :vertical="delimiter.vertical"
+        :width="delimiter.width"
+        :key="'delimiter-' + delimiter.id"
+        layer="background"
+      ></canvas-delimiter>
+
+      <!-- Note being created (if any) -->
+      <note-box
+        v-if="newBox"
+        :x="newBox.x"
+        :y="newBox.y"
+        :width="newBox.width"
+        :height="newBox.height"
+        :color="'#ffe17f'"
+        layer="foreground"
+      ></note-box>
+
+      <!-- Notes in the song. -->
+      <note-box
+        v-for="box in noteBoxes"
+        :key="'note-' + box.id"
+        :x="box.x"
+        :y="box.y"
+        :width="box.width"
+        :height="box.height"
+        :color="'#f6cd4c'"
+        layer="notes"
+      ></note-box>
+    </div>
   </div>
 </template>
 
 <script>
-  import {NoteCanvasAdapter, NoteTooSmallException} from '@/store/Music'
+  import {NoteCanvasAdapter, SCALE, NoteTooSmallException} from '@/store/Music'
   import NoteBox from './NoteBox'
   import CanvasDelimiter from './CanvasDelimiter.vue'
 
@@ -112,6 +125,12 @@
           this.delimiterId++
         }
         return [...horizontalDelimiters, ...verticalDelimiters]
+      },
+      pitches () {
+        return Object.keys(SCALE).map((index) => ({
+          id: index,
+          name: SCALE[index]
+        }))
       }
     },
     methods: {
@@ -205,7 +224,27 @@
 <style lang="scss" scoped>
   @import "../../styles/_bootstrap_override.scss";
   .wrapper {
+    // position: relative;
+    display: flex;
+  }
+  #note-pitches {
+    display: flex;
+    flex-flow: column;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+    color: map-get($theme-colors, "light");
+    background: map-get($theme-colors, "dark");
+    li {
+      padding: 0 .5em;
+      margin: auto 0;
+    }
+  }
+  .canvas-wrapper {
     position: relative;
+    height: 100%;
+    flex: 1;
 
     .background {
       background: map-get($theme-colors, "light");

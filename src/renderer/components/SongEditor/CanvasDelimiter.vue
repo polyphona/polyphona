@@ -22,24 +22,12 @@
         type: Number,
         default: 1
       },
-      // Color of the box
       color: {
         type: String,
         default: '#ddd'
       },
       layer: {
         type: String
-      }
-    },
-    data () {
-      return {
-        height: 100 // canvas percent
-      }
-    },
-    methods: {
-      clear (ctx) {
-        const {x, top, bottom} = this.line
-        ctx.clearRect(x, top, 1, bottom - top)
       }
     },
     computed: {
@@ -70,16 +58,13 @@
       const {start, end} = this.line
 
       ctx.beginPath()
+      ctx.save()
       ctx.moveTo(start.x, start.y)
       ctx.lineTo(end.x, end.y)
       ctx.strokeStyle = this.color
       ctx.lineWidth = this.width
       ctx.stroke()
-    },
-    destroyed () {
-      // Undraw from canvas
-      const ctx = this.context
-      this.clear(ctx)
+      ctx.restore()
     }
   }
 </script>
