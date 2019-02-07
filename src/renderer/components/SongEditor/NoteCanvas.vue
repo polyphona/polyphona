@@ -130,7 +130,7 @@
         return Object.keys(SCALE).map((index) => ({
           id: index,
           name: SCALE[index]
-        }))
+        })).reverse()
       }
     },
     methods: {
