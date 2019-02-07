@@ -1,0 +1,12 @@
+// See: https://getbootstrap.com/docs/4.2/getting-started/theming/
+@import url('https://fonts.googleapis.com/css?family=Source+Code+Pro');
+
+$theme-colors: (
+    "primary": #34c997,
+    "secondary": #455a64,
+    "warning": #f6cd4c,
+);
+
+$body-bg: white;
+$body-color: #555;
+$font-family-sans-serif: "Source Code Pro", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";

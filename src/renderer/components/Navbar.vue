@@ -1,7 +1,7 @@
 <template>
   <nav>
     <h1 id="brand">
-      <router-link class="btn" to="/">Polyphona</router-link>
+      <router-link to="/">♫ Polyphona</router-link>
     </h1>
     <ul>
       <li>
@@ -27,7 +27,6 @@ nav {
   align-items: center;
   padding: .5em 1em;
   #brand {
-    font-size: 1em;
     margin: 0;
     padding: 0;
   }
