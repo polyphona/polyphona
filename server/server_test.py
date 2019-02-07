@@ -27,8 +27,8 @@ def pytest_namespace():
 
 database_path = 'fake_db.db'
 test_username = 'smith'
-test_first_name = 'smith'
-test_last_name = 'smith'
+test_first_name = 'Smithy'
+test_last_name = 'Smith'
 test_password = '123'
 test_username_wrong = 'smith2'
 test_password_wrong = 'pw'
@@ -240,6 +240,9 @@ def test_create_token(client):
         print("Empty token returned.")
     assert len(json_in['token']) > 0
     pytest.token = json_in['token']
+    assert json_in['user']['username'] == test_username
+    assert json_in['user']['first_name'] == test_first_name
+    assert json_in['user']['last_name'] == test_last_name
     print("Status: {} ({})".format(result.status, result.status_code))
     print("Result:")
     print(result)
