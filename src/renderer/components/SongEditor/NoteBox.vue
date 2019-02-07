@@ -5,9 +5,7 @@
   Instead, it provides a render() function directly which draws the note box to the canvas.
    */
 
-  // Helper functions to convert a percentage of canvas area to pixels.
-  const percentWidthToPix = (percent, ctx) => Math.floor((ctx.canvas.width / 100) * percent)
-  const percentHeightToPix = (percent, ctx) => Math.floor((ctx.canvas.height / 100) * percent)
+  import {percentWidthToPix, percentHeightToPix} from './utils'
 
   export default {
     inject: ['layers'],
@@ -33,7 +31,7 @@
       // Color of the box
       color: {
         type: String,
-        default: '#f00'
+        default: '#f6cd4c'
       },
       layer: {
         type: String,
@@ -42,7 +40,7 @@
     },
     data () {
       return {
-        strokeWidth: 10,
+        strokeWidth: 1,
         oldBox: {
           x: 0,
           y: 0,
@@ -105,6 +103,7 @@
       ctx.clip()
       ctx.fillStyle = this.color
       ctx.lineWidth = this.strokeWidth
+      ctx.strokeStyle = '#999'
       ctx.fill()
       ctx.stroke()
       ctx.restore()

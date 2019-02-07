@@ -1,12 +1,24 @@
 <template>
   <div class="wrapper">
     <canvas ref="background" class="background"></canvas>
-    <canvas ref="foreground" class="foreground"
-            @click="onClick"
-            @mousedown="onMouseDown"
-            @mouseup="onMouseUp"
-            @mousemove="onMouseMove"
-            @mouseleave="onMouseLeave"
+    <canvas ref="notes" class="layer"></canvas>
+    <canvas-delimiter
+      v-for="delimiter in delimiters"
+      :x="delimiter.x"
+      :y="delimiter.y"
+      :vertical="delimiter.vertical"
+      :width="delimiter.width"
+      :key="'delimiter-' + delimiter.id"
+      layer="background"
+    ></canvas-delimiter>
+    <canvas
+      ref="foreground"
+      class="layer"
+      @click="onClick"
+      @mousedown="onMouseDown"
+      @mouseup="onMouseUp"
+      @mousemove="onMouseMove"
+      @mouseleave="onMouseLeave"
     ></canvas>
     <note-box
       v-if="newBox"
@@ -14,17 +26,18 @@
       :y="newBox.y"
       :width="newBox.width"
       :height="newBox.height"
-      :color="'#afa'"
+      :color="'#ffe17f'"
       layer="foreground"
     ></note-box>
     <note-box
       v-for="box in noteBoxes"
-      :key="box.id"
+      :key="'note-' + box.id"
       :x="box.x"
       :y="box.y"
       :width="box.width"
       :height="box.height"
-      :color="'#0f0'"
+      :color="'#f6cd4c'"
+      layer="notes"
     ></note-box>
   </div>
 </template>
@@ -32,12 +45,13 @@
 <script>
   import {NoteCanvasAdapter, NoteTooSmallException} from '@/store/Music'
   import NoteBox from './NoteBox'
+  import CanvasDelimiter from './CanvasDelimiter.vue'
 
   const canvasAdapter = new NoteCanvasAdapter()
 
   export default {
     name: 'NoteCanvas',
-    components: {NoteBox},
+    components: {NoteBox, CanvasDelimiter},
     data () {
       return {
         newBox: null,
@@ -46,8 +60,10 @@
         canvasDimensions: null,
         layers: {
           background: null,
+          notes: null,
           foreground: null
-        }
+        },
+        delimiterId: 0
       }
     },
     mounted () {
@@ -66,8 +82,36 @@
           (note) => canvasAdapter.toBox(this.renderContext, note)
         )
       },
+      musicContext () {
+        return this.$store.getters['MusicStore/getMusicContext']
+      },
       renderContext () {
         return this.$store.getters['MusicStore/getRenderContext']
+      },
+      delimiters () {
+        const division = this.musicContext.division
+        const stepX = this.renderContext.percentPerTick
+        const stepY = this.renderContext.percentPerInterval
+        const verticalDelimiters = []
+        for (let i = 0; i < 100 / stepX; i++) {
+          verticalDelimiters.push({
+            id: this.delimiterId,
+            x: stepX * i,
+            vertical: true,
+            width: i % division === 0 ? 4 : 1
+          })
+          this.delimiterId++
+        }
+        const horizontalDelimiters = []
+        for (let i = 0; i < 100 / stepY; i++) {
+          horizontalDelimiters.push({
+            id: this.delimiterId,
+            y: stepY * i,
+            vertical: false
+          })
+          this.delimiterId++
+        }
+        return [...horizontalDelimiters, ...verticalDelimiters]
       }
     },
     methods: {
@@ -159,14 +203,15 @@
 </script>
 
 <style lang="scss" scoped>
+  @import "../../styles/_bootstrap_override.scss";
   .wrapper {
     position: relative;
 
     .background {
-      background: gold;
+      background: map-get($theme-colors, "light");
     }
 
-    .foreground {
+    .layer {
       position: absolute;
       top: 0;
       left: 0;
