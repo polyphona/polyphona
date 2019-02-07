@@ -241,8 +241,10 @@
         this.newBox = canvasAdapter.clip(this.renderContext, this.newBox)
       },
       onMouseUp (event) {
+        if (this.dragging) {
+          this.addNoteFromBox(this.newBox)
+        }
         this.dragging = false
-        this.addNoteFromBox(this.newBox)
         this.newBox = null
       },
       onMouseLeave (event) {
