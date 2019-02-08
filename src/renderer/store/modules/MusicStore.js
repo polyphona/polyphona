@@ -41,6 +41,7 @@ function toTransportTime (musicContext, canvasTime) {
 const mutations = {
   ADD_NOTE (state, note) {
     state.currentTrack.addNote(note)
+    state.saved = false
   },
   DELETE_NOTE (state, note) {
     state.currentTrack.deleteNote(note)
@@ -48,6 +49,7 @@ const mutations = {
     if (eventId) {
       Tone.Transport.clear(eventId)
     }
+    state.saved = false
   },
   SCHEDULE_NOTES (state) {
     state.currentTrack.notes.forEach((note) => {
@@ -62,6 +64,10 @@ const mutations = {
   },
   SET_OCTAVE (state, octave) {
     state.musicContext.octave = octave
+  },
+  SAVE (state, res) {
+    state.currentTrack.remoteId = res.id
+    state.saved = true
   }
 }
 
@@ -78,12 +84,10 @@ const actions = {
   addNote (context, note) {
     context.commit('ADD_NOTE', note)
     context.dispatch('restart')
-    context.state.saved = false
   },
   deleteNote (context, note) {
     context.commit('DELETE_NOTE', note)
     context.dispatch('restart')
-    context.state.saved = false
   },
   play (context, offset) {
     context.commit('SCHEDULE_NOTES')
@@ -112,14 +116,14 @@ const actions = {
     context.commit('SET_OCTAVE', octave)
     context.dispatch('restart')
   },
-  async saveTrack ({state}, note) {
+  async saveTrack ({state, commit}, note) {
     const data = {
       'name': state.currentTrack.name,
       'tracks': [state.currentTrack]
     }
-    const res = state.currentTrack.remoteId ? await http.put('songs', data) : await http.post('songs', data)
-    state.currentTrack.remoteId = res.id
-    state.saved = true
+    const {data: res} = state.currentTrack.remoteId ? await http.put('songs/' + state.currentTrack.remoteId, data) : await http.post('songs', data)
+    console.log(res)
+    commit('SAVE', res)
   }
 }
 
