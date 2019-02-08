@@ -8,6 +8,7 @@
       <!-- Canvas layers. -->
       <canvas ref="background" class="background"></canvas>
       <canvas ref="notes" class="layer"></canvas>
+      <canvas ref="decorations" class="layer"></canvas>
       <canvas
         ref="foreground"
         class="layer"
@@ -18,8 +19,18 @@
         @mouseleave="onMouseLeave"
       ></canvas>
 
+      <!-- Progress bar -->
+      <canvas-line
+        v-if="playing"
+        :x="progressX"
+        :vertical="true"
+        :width="3"
+        color="red"
+        layer="decorations"
+      ></canvas-line>
+
       <!-- Delimiters of notes on the canvas -->
-      <canvas-delimiter
+      <canvas-line
         v-for="delimiter in delimiters"
         :x="delimiter.x"
         :y="delimiter.y"
@@ -27,7 +38,7 @@
         :width="delimiter.width"
         :key="'delimiter-' + delimiter.id"
         layer="background"
-      ></canvas-delimiter>
+      ></canvas-line>
 
       <!-- Note being created (if any) -->
       <note-box
@@ -56,9 +67,11 @@
 </template>
 
 <script>
+  import Tone from 'tone'
+
   import {NoteCanvasAdapter, SCALE, NoteTooSmallException} from '@/store/Music'
   import NoteBox from './NoteBox'
-  import CanvasDelimiter from './CanvasDelimiter.vue'
+  import CanvasLine from './CanvasLine.vue'
 
   const canvasAdapter = new NoteCanvasAdapter()
 
@@ -68,7 +81,7 @@
 
   export default {
     name: 'NoteCanvas',
-    components: {NoteBox, CanvasDelimiter},
+    components: {NoteBox, CanvasLine},
     data () {
       return {
         newBox: null,
@@ -80,8 +93,12 @@
         layers: {
           background: null,
           notes: null,
+          decorations: null,
           foreground: null
         },
+        progress: Tone.Transport.progress,
+        progressInterval: null,
+        // For `:key` on canvas delimiters
         delimiterId: 0
       }
     },
@@ -95,6 +112,17 @@
         layers: this.layers
       }
     },
+    watch: {
+      playing (value) {
+        if (value) {
+          this.progressInterval = setInterval(() => {
+            this.progress = Tone.Transport.progress
+          }, 16) // 60 FPS
+        } else {
+          clearInterval(this.progressInterval)
+        }
+      }
+    },
     computed: {
       noteBoxes () {
         return this.$store.getters['MusicStore/listNotes'].map(
@@ -106,6 +134,12 @@
       },
       renderContext () {
         return this.$store.getters['MusicStore/getRenderContext']
+      },
+      playing () {
+        return this.$store.getters['MusicStore/getPlaying']
+      },
+      progressX () {
+        return 100 * this.progress
       },
       delimiters () {
         const division = this.musicContext.division

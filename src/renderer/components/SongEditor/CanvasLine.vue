@@ -5,7 +5,6 @@
   export default {
     inject: ['layers'],
     props: {
-      // X coordinate (percentage of canvas dimensions)
       x: {
         type: Number,
         default: 0
@@ -30,21 +29,44 @@
         type: String
       }
     },
+    data () {
+      return {
+        box: null
+      }
+    },
     computed: {
       context () {
         return this.layers[this.layer]
       },
       line () {
-        return {
+        const ctx = this.context
+        const line = {
           start: {
-            x: percentWidthToPix(this.vertical ? this.x : 0, this.context),
-            y: percentHeightToPix(this.vertical ? 0 : this.y, this.context)
+            x: percentWidthToPix(this.vertical ? this.x : 0, ctx),
+            y: percentHeightToPix(this.vertical ? 0 : this.y, ctx)
           },
           end: {
-            x: percentWidthToPix(this.vertical ? this.x : 100, this.context),
-            y: percentHeightToPix(this.vertical ? 100 : this.y, this.context)
+            x: percentWidthToPix(this.vertical ? this.x : 100, ctx),
+            y: percentHeightToPix(this.vertical ? 100 : this.y, ctx)
           }
         }
+        // NOTE: this only works for vertical lines.
+        this.box = {
+          x: line.start.x - this.width,
+          y: line.start.y,
+          width: 2 * this.width,
+          height: line.end.y - line.start.y
+        }
+        return line
+      }
+    },
+    methods: {
+      clear (ctx) {
+        const box = this.box
+        if (!box) {
+          return
+        }
+        ctx.clearRect(box.x, box.y, box.width, box.height)
       }
     },
     render () {
@@ -55,6 +77,7 @@
         return
       }
 
+      this.clear(ctx)
       const {start, end} = this.line
 
       ctx.beginPath()
@@ -65,6 +88,9 @@
       ctx.lineWidth = this.width
       ctx.stroke()
       ctx.restore()
+    },
+    destroyed () {
+      this.clear(this.context)
     }
   }
 </script>
