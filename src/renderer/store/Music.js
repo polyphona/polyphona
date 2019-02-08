@@ -59,9 +59,11 @@ export class NoteCanvasAdapter {
 }
 
 export class Track {
-  constructor () {
+  constructor (remoteId = null, name = 'Test') {
     this.notes = []
     this.lastId = 0
+    this.remoteId = remoteId
+    this.name = name
   }
 
   addNote = (note) => {

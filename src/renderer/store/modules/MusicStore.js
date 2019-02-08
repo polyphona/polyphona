@@ -78,10 +78,12 @@ const actions = {
   addNote (context, note) {
     context.commit('ADD_NOTE', note)
     context.dispatch('restart')
+    context.state.saved = false
   },
   deleteNote (context, note) {
     context.commit('DELETE_NOTE', note)
     context.dispatch('restart')
+    context.state.saved = false
   },
   play (context, offset) {
     context.commit('SCHEDULE_NOTES')
@@ -112,11 +114,12 @@ const actions = {
   },
   async saveTrack ({state}, note) {
     const data = {
-      'name': 'Test',
-      'tracks': state.currentTrack
+      'name': state.currentTrack.name,
+      'tracks': [state.currentTrack]
     }
-    await http.post('songs', data)
-    state.currentTrack.saved = true
+    const res = state.currentTrack.remoteId ? await http.put('songs', data) : await http.post('songs', data)
+    state.currentTrack.remoteId = res.id
+    state.saved = true
   }
 }
 
