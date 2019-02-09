@@ -50,7 +50,7 @@ const mutations = {
   SCHEDULE_NOTES (state) {
     state.currentTrack.notes.forEach((note) => {
       const pitch = state.musicContext.scale[note.pitch] + state.musicContext.octave
-      const trigger = (time) => synthesizer.triggerAttackRelease(pitch, toTransportTime(note.duration), time)
+      const trigger = (time) => synthesizer.triggerAttackRelease(pitch, toTransportTime(state.musicContext, note.duration), time)
       const eventId = Tone.Transport.schedule(trigger, toTransportTime(state.musicContext, note.startTime))
       state.schedule.set(note.id, eventId)
     })
