@@ -141,7 +141,6 @@ def test_create_user_smith(client):
     print(result)
     # Success
     assert result.status_code == 201
-    pass
 
 
 # Let's try creating a new user with the same username
@@ -158,7 +157,6 @@ def test_create_user_smith2(client):
     print(result)
     # Rejected because of same username
     assert result.status_code == 400
-    pass
 
 
 ### ## # TOKENS # ## ###
@@ -169,7 +167,6 @@ def test_create_token_wrong_username(client):
     print("Result:")
     print(result)
     assert result.status_code == 400
-    pass
 
 
 def test_create_token_wrong_password(client):
@@ -179,7 +176,6 @@ def test_create_token_wrong_password(client):
     print("Result:")
     print(result)
     assert result.status_code == 400
-    pass
 
 
 def test_create_token_no_username(client):
@@ -189,7 +185,6 @@ def test_create_token_no_username(client):
     print("Result:")
     print(result)
     assert result.status_code == 400
-    pass
 
 
 def test_create_token_no_password(client):
@@ -199,7 +194,6 @@ def test_create_token_no_password(client):
     print("Result:")
     print(result)
     assert result.status_code == 400
-    pass
 
 
 def test_create_token_corrupt_json(client):
@@ -209,7 +203,6 @@ def test_create_token_corrupt_json(client):
     print("Result:")
     print(result)
     assert result.status_code == 400
-    pass
 
 
 def test_delete_token_wrong_token(client):
@@ -218,7 +211,6 @@ def test_delete_token_wrong_token(client):
     print("Result:")
     print(result)
     assert result.status_code == 404
-    pass
 
 
 def test_create_token(client):
@@ -236,7 +228,6 @@ def test_create_token(client):
     print("Status: {} ({})".format(result.status, result.status_code))
     print("Result:")
     print(result)
-    pass
 
 
 ### ## # LIST SONGS # ## ###
@@ -250,7 +241,6 @@ def test_list_songs_none(client):
     # Success
     assert result.status_code == 200
     assert len(json_in) == 0
-    pass
 
 
 # List songs, but wrong user
@@ -260,7 +250,6 @@ def test_list_songs_wrong_user(client):
     print("Result:")
     print(result)
     assert result.status_code == 404
-    pass
 
 
 ### ## # CREATE SONG # ## ###
@@ -270,7 +259,6 @@ def test_post_song_wrong_token(client):
     result = client.simulate_post("/songs", headers=headers, json=test_song_01)
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 401
-    pass
 
 
 # Create song, but corrupt payload
@@ -280,7 +268,6 @@ def test_post_song_corrupt_json(client):
     result = client.simulate_post("/songs", headers=headers, body=body)
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 400
-    pass
 
 
 # Create song, successful
@@ -289,7 +276,6 @@ def test_post_song_1(client):
     result = client.simulate_post("/songs", headers=headers, json=test_song_01)
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 201
-    pass
 
 
 # Create second song just for the kick of it
@@ -298,7 +284,6 @@ def test_post_song_2(client):
     result = client.simulate_post("/songs", headers=headers, json=test_song_02)
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 201
-    pass
 
 
 ### ## # LIST SONGS AGAIN # ## ###
@@ -330,7 +315,6 @@ def test_retrieve_song_check_create(client):
     del json_dict["updated"]
     del json_dict["id"]
     assert json_dict == test_song_02
-    pass
 
 
 ### ## # Update SONG # ## ###
@@ -342,7 +326,6 @@ def test_put_song_wrong_token(client):
     )
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 401
-    pass
 
 
 # Update song, but invalid song id
@@ -353,7 +336,6 @@ def test_put_song_wrong_id(client):
     )
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 404
-    pass
 
 
 # Update song, but no right to song id
@@ -367,7 +349,6 @@ def test_update_song_corrupt_json(client):
     )
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 400
-    pass
 
 
 # Update song, success
@@ -378,7 +359,6 @@ def test_put_song(client):
     )
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 200
-    pass
 
 
 ### ## # DELETE SONG # ## ###
@@ -390,7 +370,6 @@ def test_delete_song_wrong_token(client):
     )
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 401
-    pass
 
 
 # Delete song, wrong song id
@@ -401,7 +380,6 @@ def test_delete_song_wrong_token(client):
     )
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 404
-    pass
 
 
 # Delete song, success
@@ -412,7 +390,6 @@ def test_delete_song(client):
     )
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 204
-    pass
 
 
 ### ## # RETRIEVE SONG # ## ###
@@ -422,7 +399,6 @@ def test_retrieve_song_wrong_token(client):
     result = client.simulate_get("/songs/{}".format(pytest.song_id1), headers=headers)
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 401
-    pass
 
 
 # Retrieve song, wrong song ID
@@ -433,7 +409,6 @@ def test_retrieve_song_wrong_id(client):
     )
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 404
-    pass
 
 
 # Retrieve song, old song ID
@@ -442,7 +417,6 @@ def test_retrieve_song_old_id(client):
     result = client.simulate_get("/songs/{}".format(pytest.song_id1), headers=headers)
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 404
-    pass
 
 
 # Retrieve song, success
@@ -456,7 +430,6 @@ def test_retrieve_song(client):
     del json_dict["updated"]
     del json_dict["id"]
     assert json_dict == test_song_03
-    pass
 
 
 ### ## # DELETE TOKEN # ## ###
@@ -467,4 +440,3 @@ def test_delete_token(client):
     print("Result:")
     print(result)
     assert result.status_code == 204
-    pass
