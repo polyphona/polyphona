@@ -10,7 +10,6 @@ from falcon import (
     API,
     HTTPError,
     HTTP_201,
-    HTTP_200,
     HTTP_204,
     HTTP_400,
     HTTP_401,
@@ -66,7 +65,6 @@ class GetSongListResource(object):
         # Generate response
         json_resp = database.get_songs_by_user(username)
         resp.body = json.dumps(json_resp)
-        resp.status = HTTP_200
 
 
 class SongResource(object):
@@ -85,7 +83,6 @@ class SongResource(object):
 
         # Generate response
         resp.body = json.dumps(song)
-        resp.status = HTTP_200
 
     def on_put(self, req: Request, resp: Response, song_id_str):
         song_id = validate_int(song_id_str)
@@ -110,7 +107,6 @@ class SongResource(object):
         database.update_song(
             song_id, json_in["name"], json.dumps(json_in["tracks"])
         )
-        resp.status = HTTP_200
 
     def on_post(self, req: Request, resp: Response):
         token = req.auth[6:]
@@ -179,7 +175,6 @@ class TokenResource(object):
             "user": database.get_user_info(json_in["username"]),
         }
         resp.body = json.dumps(json_out, ensure_ascii=False)
-        resp.status = HTTP_200
 
     def on_delete(self, _, resp: Response, token: str):
         if not database.delete_token(token):
