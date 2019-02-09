@@ -1,6 +1,8 @@
 'use strict'
 
-import { app, BrowserWindow } from 'electron'
+import {app, BrowserWindow, Menu} from 'electron'
+
+import store from '../renderer/store'
 
 /**
  * Set `__static` path to static files in production
@@ -14,6 +16,7 @@ let mainWindow
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
+const isMac = process.platform === 'darwin'
 
 function createWindow () {
   /**
@@ -24,6 +27,50 @@ function createWindow () {
     useContentSize: true,
     width: 1000
   })
+
+  const menuTemplate = [
+    // Add app menu on macOS
+    ...(isMac ? [{
+      label: app.getName(),
+      submenu: [
+        {role: 'about'},
+        {type: 'separator'},
+        {role: 'services'},
+        {type: 'separator'},
+        {role: 'hide'},
+        {role: 'hideothers'},
+        {role: 'unhide'},
+        {type: 'separator'},
+        {role: 'quit'}
+      ]
+    }] : []),
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: 'New',
+          accelerator: 'CmdOrCtrl+N',
+          click: () => {
+            new BrowserWindow({
+              height: 563,
+              useContentSize: true,
+              width: 1000
+            }).loadURL(winURL)
+          }
+        },
+        {
+          label: 'Save',
+          accelerator: 'CmdOrCtrl+S',
+          click: () => {
+            store.dispatch('saveTrack')
+          }
+        }
+      ]
+    }
+  ]
+
+  const menu = Menu.buildFromTemplate(menuTemplate)
+  Menu.setApplicationMenu(menu)
 
   mainWindow.loadURL(winURL)
 
