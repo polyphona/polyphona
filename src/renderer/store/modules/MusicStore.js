@@ -17,9 +17,6 @@ const state = {
     octave: 2,
     playing: false
   },
-  // Mapping of note IDs to transport event IDs.
-  // Used to un-schedule an event when a note is deleted.
-  schedule: new Map(),
   renderContext: {
     // Percentage of the canvas filled by one tick, from 0 to 100.
     percentPerTick: 100 / (4 * division),
@@ -42,17 +39,22 @@ const mutations = {
   },
   DELETE_NOTE (state, note) {
     state.currentTrack.deleteNote(note)
-    const eventId = state.schedule.get(note.id)
-    if (eventId) {
-      Tone.Transport.clear(eventId)
-    }
   },
   SCHEDULE_NOTES (state) {
     state.currentTrack.notes.forEach((note) => {
-      const pitch = state.musicContext.scale[note.pitch] + state.musicContext.octave
-      const trigger = (time) => synthesizer.triggerAttackRelease(pitch, toTransportTime(note.duration), time)
-      const eventId = Tone.Transport.schedule(trigger, toTransportTime(state.musicContext, note.startTime))
-      state.schedule.set(note.id, eventId)
+      const pitch = (
+        state.musicContext.scale[note.pitch] + state.musicContext.octave
+      )
+      Tone.Transport.schedule(
+        (time) => {
+          synthesizer.triggerAttackRelease(
+            pitch,
+            toTransportTime(note.duration),
+            time
+          )
+        },
+        toTransportTime(state.musicContext, note.startTime)
+      )
     })
   },
   TOGGLE_PLAY (state) {
@@ -91,6 +93,9 @@ const actions = {
   },
   stop () {
     Tone.Transport.stop()
+    // Cancel all note events so they are not played again
+    // when the transport starts again.
+    Tone.Transport.cancel()
   },
   restart (context) {
     if (context.state.musicContext.playing) {
