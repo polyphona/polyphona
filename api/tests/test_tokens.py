@@ -10,12 +10,12 @@ def payload() -> dict:
 
 def test_create_token_wrong_username(client, payload):
     result = client.simulate_post("/tokens", json=payload)
-    assert result.status_code == 400
+    assert result.status_code == 401
 
 
 def test_create_token_wrong_password(client, payload):
     result = client.simulate_post("/tokens", json=payload)
-    assert result.status_code == 400
+    assert result.status_code == 401
 
 
 @pytest.mark.parametrize("field", ["username", "password"])

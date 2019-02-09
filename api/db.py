@@ -120,7 +120,7 @@ class Database:
                 return list_of_songs
             return []
 
-    def create_song(self, name: str, tracks: dict) -> int:
+    def create_song(self, name: str, tracks: List[dict]) -> int:
         with self:
             now = datetime.datetime.now()
             self.cursor.execute(
@@ -150,7 +150,7 @@ class Database:
                 SET SongName = ?, Updated = ?, TracksJson = ?
                 WHERE SongID = ?
                 """,
-                (name, now, tracks, id),
+                (name, now, json.dumps(tracks), id),
             )
             self.connection.commit()
             return self.get_song_by_id(id)

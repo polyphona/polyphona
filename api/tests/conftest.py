@@ -2,7 +2,7 @@ import pytest
 from falcon.testing import TestClient
 
 from api.db import Database
-from api.server import create_api
+from api.factory import create_api
 
 
 @pytest.fixture
