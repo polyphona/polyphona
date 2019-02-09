@@ -33,7 +33,7 @@ def validate_int(value: str) -> int:
     return rtn
 
 
-class UserResource(object):
+class UserResource:
     def on_post(self, req: Request, resp: Response):
         json_in: dict = req.media
 
@@ -55,7 +55,7 @@ class UserResource(object):
         resp.status = HTTP_201
 
 
-class GetSongListResource(object):
+class GetSongListResource:
     def on_get(self, req: Request, resp: Response, username: str):
         # Check validity of request
         if database.is_user_name_free(username):
@@ -67,7 +67,7 @@ class GetSongListResource(object):
         resp.body = json.dumps(json_resp)
 
 
-class SongResource(object):
+class SongResource:
     def on_get(self, req: Request, resp: ResourceWarning, song_id_str: str):
         song_id = validate_int(song_id_str)
         token = req.auth[6:]
@@ -148,7 +148,7 @@ class SongResource(object):
         resp.status = HTTP_204
 
 
-class TokenResource(object):
+class TokenResource:
     def on_post(self, req: Request, resp: Response):
         json_in = req.media
 
