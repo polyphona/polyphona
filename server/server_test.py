@@ -23,15 +23,16 @@ import server
 
 
 def pytest_namespace():
-    return {'token': ''}
+    return {"token": ""}
 
-database_path = 'fake_db.db'
-test_username = 'smith'
-test_first_name = 'Smithy'
-test_last_name = 'Smith'
-test_password = '123'
-test_username_wrong = 'smith2'
-test_password_wrong = 'pw'
+
+database_path = "fake_db.db"
+test_username = "smith"
+test_first_name = "Smithy"
+test_last_name = "Smith"
+test_password = "123"
+test_username_wrong = "smith2"
+test_password_wrong = "pw"
 test_song_01 = {
     "name": "Song 01",
     "tracks": [
@@ -46,14 +47,14 @@ test_song_01 = {
                     "note": "A2",
                     "velocity": 64,
                     "duration": 16,
-                    "instrumentNumber": 8
+                    "instrumentNumber": 8,
                 }
             ],
             "startTime": 0,
             "duration": 10,
             "instrument": "Cello",
         }
-    ]
+    ],
 }
 test_song_02 = {
     "name": "Song 02",
@@ -69,14 +70,14 @@ test_song_02 = {
                     "note": "A2",
                     "velocity": 64,
                     "duration": 16,
-                    "instrumentNumber": 8
+                    "instrumentNumber": 8,
                 }
             ],
             "startTime": 0,
             "duration": 10,
             "instrument": "Drums",
         }
-    ]
+    ],
 }
 test_song_03 = {
     "name": "Song 03",
@@ -92,26 +93,28 @@ test_song_03 = {
                     "note": "A2",
                     "velocity": 64,
                     "duration": 16,
-                    "instrumentNumber": 8
-                }, {
+                    "instrumentNumber": 8,
+                },
+                {
                     "midi": 10,
                     "time": 10,
                     "note": "A3",
                     "velocity": 64,
                     "duration": 16,
-                    "instrumentNumber": 8
-                }
+                    "instrumentNumber": 8,
+                },
             ],
             "startTime": 0,
             "duration": 10,
             "instrument": "Shotagonu",
         }
-    ]
+    ],
 }
 try:
     os.remove(database_path)
 except:
     pass
+
 
 def setup_module(module):
     create_database_table(database_path)
@@ -130,9 +133,9 @@ def test_create_user_smith(client):
         "username": test_username,
         "first_name": test_first_name,
         "last_name": test_last_name,
-        "password": test_password
+        "password": test_password,
     }
-    result = client.simulate_post('/users', json=payload)
+    result = client.simulate_post("/users", json=payload)
     print("Status: {} ({})".format(result.status, result.status_code))
     print("Result:")
     print(result)
@@ -147,9 +150,9 @@ def test_create_user_smith2(client):
         "username": test_username,
         "first_name": "smith2",
         "last_name": "smith2",
-        "password": test_password_wrong
+        "password": test_password_wrong,
     }
-    result = client.simulate_post('/users', json=payload)
+    result = client.simulate_post("/users", json=payload)
     print("Status: {} ({})".format(result.status, result.status_code))
     print("Result:")
     print(result)
@@ -160,11 +163,8 @@ def test_create_user_smith2(client):
 
 ### ## # TOKENS # ## ###
 def test_create_token_wrong_username(client):
-    payload = {
-        "username": test_username_wrong,
-        "password": test_password
-    }
-    result = client.simulate_post('/tokens', json=payload)
+    payload = {"username": test_username_wrong, "password": test_password}
+    result = client.simulate_post("/tokens", json=payload)
     print("Status: {} ({})".format(result.status, result.status_code))
     print("Result:")
     print(result)
@@ -173,11 +173,8 @@ def test_create_token_wrong_username(client):
 
 
 def test_create_token_wrong_password(client):
-    payload = {
-        "username": test_username,
-        "password": test_password_wrong
-    }
-    result = client.simulate_post('/tokens', json=payload)
+    payload = {"username": test_username, "password": test_password_wrong}
+    result = client.simulate_post("/tokens", json=payload)
     print("Status: {} ({})".format(result.status, result.status_code))
     print("Result:")
     print(result)
@@ -186,10 +183,8 @@ def test_create_token_wrong_password(client):
 
 
 def test_create_token_no_username(client):
-    payload = {
-        "password": test_password
-    }
-    result = client.simulate_post('/tokens', json=payload)
+    payload = {"password": test_password}
+    result = client.simulate_post("/tokens", json=payload)
     print("Status: {} ({})".format(result.status, result.status_code))
     print("Result:")
     print(result)
@@ -198,10 +193,8 @@ def test_create_token_no_username(client):
 
 
 def test_create_token_no_password(client):
-    payload = {
-        "username": test_username,
-    }
-    result = client.simulate_post('/tokens', json=payload)
+    payload = {"username": test_username}
+    result = client.simulate_post("/tokens", json=payload)
     print("Status: {} ({})".format(result.status, result.status_code))
     print("Result:")
     print(result)
@@ -210,8 +203,8 @@ def test_create_token_no_password(client):
 
 
 def test_create_token_corrupt_json(client):
-    payload = "{\"username\": \"smith\"}"
-    result = client.simulate_post('/tokens', body=payload)
+    payload = '{"username": "smith"}'
+    result = client.simulate_post("/tokens", body=payload)
     print("Status: {} ({})".format(result.status, result.status_code))
     print("Result:")
     print(result)
@@ -220,7 +213,7 @@ def test_create_token_corrupt_json(client):
 
 
 def test_delete_token_wrong_token(client):
-    result = client.simulate_delete('/tokens/TOKENNONE')
+    result = client.simulate_delete("/tokens/TOKENNONE")
     print("Status: {} ({})".format(result.status, result.status_code))
     print("Result:")
     print(result)
@@ -229,20 +222,17 @@ def test_delete_token_wrong_token(client):
 
 
 def test_create_token(client):
-    payload = {
-        "username": "smith",
-        "password": "123"
-    }
-    result = client.simulate_post('/tokens', json=payload)
+    payload = {"username": "smith", "password": "123"}
+    result = client.simulate_post("/tokens", json=payload)
     assert result.status_code == 200
     json_in = result.json
-    if len(json_in['token']) == 0:
+    if len(json_in["token"]) == 0:
         print("Empty token returned.")
-    assert len(json_in['token']) > 0
-    pytest.token = json_in['token']
-    assert json_in['user']['username'] == test_username
-    assert json_in['user']['first_name'] == test_first_name
-    assert json_in['user']['last_name'] == test_last_name
+    assert len(json_in["token"]) > 0
+    pytest.token = json_in["token"]
+    assert json_in["user"]["username"] == test_username
+    assert json_in["user"]["first_name"] == test_first_name
+    assert json_in["user"]["last_name"] == test_last_name
     print("Status: {} ({})".format(result.status, result.status_code))
     print("Result:")
     print(result)
@@ -252,7 +242,7 @@ def test_create_token(client):
 ### ## # LIST SONGS # ## ###
 # List songs, but there is none
 def test_list_songs_none(client):
-    result = client.simulate_get('/users/{}/songs'.format(test_username))
+    result = client.simulate_get("/users/{}/songs".format(test_username))
     json_in = result.json
     print("Status: {} ({})".format(result.status, result.status_code))
     print("Result:")
@@ -265,7 +255,7 @@ def test_list_songs_none(client):
 
 # List songs, but wrong user
 def test_list_songs_wrong_user(client):
-    result = client.simulate_get('/users/{}/songs'.format(test_username_wrong))
+    result = client.simulate_get("/users/{}/songs".format(test_username_wrong))
     print("Status: {} ({})".format(result.status, result.status_code))
     print("Result:")
     print(result)
@@ -276,10 +266,8 @@ def test_list_songs_wrong_user(client):
 ### ## # CREATE SONG # ## ###
 # Create song, but invalid token
 def test_post_song_wrong_token(client):
-    headers = {
-        'Authorization' : "Token " + "TOKENNONE"
-    }
-    result = client.simulate_post('/songs', headers=headers, json=test_song_01)
+    headers = {"Authorization": "Token " + "TOKENNONE"}
+    result = client.simulate_post("/songs", headers=headers, json=test_song_01)
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 401
     pass
@@ -287,11 +275,9 @@ def test_post_song_wrong_token(client):
 
 # Create song, but corrupt payload
 def test_post_song_corrupt_json(client):
-    headers = {
-        'Authorization' : "Token " + pytest.token
-    }
+    headers = {"Authorization": "Token " + pytest.token}
     body = "mlkqsd"
-    result = client.simulate_post('/songs', headers=headers, body=body)
+    result = client.simulate_post("/songs", headers=headers, body=body)
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 400
     pass
@@ -299,10 +285,8 @@ def test_post_song_corrupt_json(client):
 
 # Create song, successful
 def test_post_song_1(client):
-    headers = {
-        'Authorization' : "Token " + pytest.token
-    }
-    result = client.simulate_post('/songs', headers=headers, json=test_song_01)
+    headers = {"Authorization": "Token " + pytest.token}
+    result = client.simulate_post("/songs", headers=headers, json=test_song_01)
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 201
     pass
@@ -310,10 +294,8 @@ def test_post_song_1(client):
 
 # Create second song just for the kick of it
 def test_post_song_2(client):
-    headers = {
-        'Authorization' : "Token " + pytest.token
-    }
-    result = client.simulate_post('/songs', headers=headers, json=test_song_02)
+    headers = {"Authorization": "Token " + pytest.token}
+    result = client.simulate_post("/songs", headers=headers, json=test_song_02)
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 201
     pass
@@ -322,7 +304,7 @@ def test_post_song_2(client):
 ### ## # LIST SONGS AGAIN # ## ###
 # List songs, 2 songs expected
 def test_list_songs_success(client):
-    result = client.simulate_get('/users/{}/songs'.format(test_username))
+    result = client.simulate_get("/users/{}/songs".format(test_username))
     json_in = result.json
     print("Status: {} ({})".format(result.status, result.status_code))
     print("Result:")
@@ -339,10 +321,8 @@ def test_list_songs_success(client):
 
 # Retrieve song, check it's been well saved
 def test_retrieve_song_check_create(client):
-    headers = {
-        'Authorization' : "Token " + pytest.token
-    }
-    result = client.simulate_get('/songs/{}'.format(pytest.song_id2), headers=headers)
+    headers = {"Authorization": "Token " + pytest.token}
+    result = client.simulate_get("/songs/{}".format(pytest.song_id2), headers=headers)
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 200
     json_dict = result.json
@@ -356,10 +336,10 @@ def test_retrieve_song_check_create(client):
 ### ## # Update SONG # ## ###
 # Update song, but invalid token
 def test_put_song_wrong_token(client):
-    headers = {
-        'Authorization' : "Token " + "TOKENNONE"
-    }
-    result = client.simulate_put('/songs/{}'.format(pytest.song_id2), headers=headers, json=test_song_01)
+    headers = {"Authorization": "Token " + "TOKENNONE"}
+    result = client.simulate_put(
+        "/songs/{}".format(pytest.song_id2), headers=headers, json=test_song_01
+    )
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 401
     pass
@@ -367,10 +347,10 @@ def test_put_song_wrong_token(client):
 
 # Update song, but invalid song id
 def test_put_song_wrong_id(client):
-    headers = {
-        'Authorization' : "Token " + pytest.token
-    }
-    result = client.simulate_put('/songs/{}'.format(pytest.song_id2 + 10), headers=headers, json=test_song_01)
+    headers = {"Authorization": "Token " + pytest.token}
+    result = client.simulate_put(
+        "/songs/{}".format(pytest.song_id2 + 10), headers=headers, json=test_song_01
+    )
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 404
     pass
@@ -379,11 +359,12 @@ def test_put_song_wrong_id(client):
 # Update song, but no right to song id
 # TODO: need an additionnal user ....
 
+
 def test_update_song_corrupt_json(client):
-    headers = {
-        'Authorization' : "Token " + pytest.token
-    }
-    result = client.simulate_put('/songs/{}'.format(pytest.song_id2), headers=headers, body="qsdmnve")
+    headers = {"Authorization": "Token " + pytest.token}
+    result = client.simulate_put(
+        "/songs/{}".format(pytest.song_id2), headers=headers, body="qsdmnve"
+    )
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 400
     pass
@@ -391,10 +372,10 @@ def test_update_song_corrupt_json(client):
 
 # Update song, success
 def test_put_song(client):
-    headers = {
-        'Authorization' : "Token " + pytest.token
-    }
-    result = client.simulate_put('/songs/{}'.format(pytest.song_id2), headers=headers, json=test_song_03)
+    headers = {"Authorization": "Token " + pytest.token}
+    result = client.simulate_put(
+        "/songs/{}".format(pytest.song_id2), headers=headers, json=test_song_03
+    )
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 200
     pass
@@ -403,10 +384,10 @@ def test_put_song(client):
 ### ## # DELETE SONG # ## ###
 # Delete song, wrong token
 def test_delete_song_wrong_token(client):
-    headers = {
-        'Authorization' : "Token " + "TOKENNONE"
-    }
-    result = client.simulate_delete('/songs/{}'.format(pytest.song_id1), headers=headers)
+    headers = {"Authorization": "Token " + "TOKENNONE"}
+    result = client.simulate_delete(
+        "/songs/{}".format(pytest.song_id1), headers=headers
+    )
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 401
     pass
@@ -414,10 +395,10 @@ def test_delete_song_wrong_token(client):
 
 # Delete song, wrong song id
 def test_delete_song_wrong_token(client):
-    headers = {
-        'Authorization' : "Token " + pytest.token
-    }
-    result = client.simulate_delete('/songs/{}'.format(pytest.song_id1 + 100), headers=headers)
+    headers = {"Authorization": "Token " + pytest.token}
+    result = client.simulate_delete(
+        "/songs/{}".format(pytest.song_id1 + 100), headers=headers
+    )
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 404
     pass
@@ -425,10 +406,10 @@ def test_delete_song_wrong_token(client):
 
 # Delete song, success
 def test_delete_song(client):
-    headers = {
-        'Authorization' : "Token " + pytest.token
-    }
-    result = client.simulate_delete('/songs/{}'.format(pytest.song_id1), headers=headers)
+    headers = {"Authorization": "Token " + pytest.token}
+    result = client.simulate_delete(
+        "/songs/{}".format(pytest.song_id1), headers=headers
+    )
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 204
     pass
@@ -437,10 +418,8 @@ def test_delete_song(client):
 ### ## # RETRIEVE SONG # ## ###
 # Retrieve song, wrong token
 def test_retrieve_song_wrong_token(client):
-    headers = {
-        'Authorization' : "Token " + "TOKENNONE"
-    }
-    result = client.simulate_get('/songs/{}'.format(pytest.song_id1), headers=headers)
+    headers = {"Authorization": "Token " + "TOKENNONE"}
+    result = client.simulate_get("/songs/{}".format(pytest.song_id1), headers=headers)
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 401
     pass
@@ -448,10 +427,10 @@ def test_retrieve_song_wrong_token(client):
 
 # Retrieve song, wrong song ID
 def test_retrieve_song_wrong_id(client):
-    headers = {
-        'Authorization' : "Token " + pytest.token
-    }
-    result = client.simulate_get('/songs/{}'.format(pytest.song_id1 + 100), headers=headers)
+    headers = {"Authorization": "Token " + pytest.token}
+    result = client.simulate_get(
+        "/songs/{}".format(pytest.song_id1 + 100), headers=headers
+    )
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 404
     pass
@@ -459,10 +438,8 @@ def test_retrieve_song_wrong_id(client):
 
 # Retrieve song, old song ID
 def test_retrieve_song_old_id(client):
-    headers = {
-        'Authorization' : "Token " + pytest.token
-    }
-    result = client.simulate_get('/songs/{}'.format(pytest.song_id1), headers=headers)
+    headers = {"Authorization": "Token " + pytest.token}
+    result = client.simulate_get("/songs/{}".format(pytest.song_id1), headers=headers)
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 404
     pass
@@ -470,10 +447,8 @@ def test_retrieve_song_old_id(client):
 
 # Retrieve song, success
 def test_retrieve_song(client):
-    headers = {
-        'Authorization' : "Token " + pytest.token
-    }
-    result = client.simulate_get('/songs/{}'.format(pytest.song_id2), headers=headers)
+    headers = {"Authorization": "Token " + pytest.token}
+    result = client.simulate_get("/songs/{}".format(pytest.song_id2), headers=headers)
     print("Status: {} ({})".format(result.status, result.status_code))
     assert result.status_code == 200
     json_dict = result.json
@@ -487,7 +462,7 @@ def test_retrieve_song(client):
 ### ## # DELETE TOKEN # ## ###
 def test_delete_token(client):
     print("Token = {}".format(pytest.token))
-    result = client.simulate_delete('/tokens/{}'.format(pytest.token))
+    result = client.simulate_delete("/tokens/{}".format(pytest.token))
     print("Status: {} ({})".format(result.status, result.status_code))
     print("Result:")
     print(result)

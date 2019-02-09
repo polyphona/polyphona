@@ -14,7 +14,7 @@ import database
 
 def validate_json(req):
     try:
-        json_in = json.loads(req.stream.read().decode('utf-8'))
+        json_in = json.loads(req.stream.read().decode("utf-8"))
     except json.JSONDecodeError:
         raise falcon.HTTPError(falcon.HTTP_400, "unreadable json.")
     else:
@@ -30,29 +30,31 @@ def validate_int(value):
     return rtn
 
 
-
 class UserResource(object):
-
     def on_post(self, req, resp):
         json_in = validate_json(req)
 
         # Check validity of request
-        for field in 'username', 'first_name', 'last_name', 'password':
+        for field in "username", "first_name", "last_name", "password":
             if field not in json_in:
-                raise falcon.HTTPError(falcon.HTTP_400, 'Missing {} field.'.format(field))
+                raise falcon.HTTPError(
+                    falcon.HTTP_400, "Missing {} field.".format(field)
+                )
 
-        if not database.is_user_name_free(json_in['username']):
+        if not database.is_user_name_free(json_in["username"]):
             raise falcon.HTTPError(falcon.HTTP_400, "Username already taken.")
-        if not database.create_user(json_in['username'], json_in['first_name'], json_in['last_name'],
-                                    json_in['password']):
+        if not database.create_user(
+            json_in["username"],
+            json_in["first_name"],
+            json_in["last_name"],
+            json_in["password"],
+        ):
             raise falcon.HTTPError(falcon.HTTP_500, "Unexpected server error.")
 
         resp.status = falcon.HTTP_201
 
 
-
 class GetSongListResource(object):
-
     def on_get(self, req, resp, username):
         # Check validity of request
         if database.is_user_name_free(username):
@@ -63,7 +65,6 @@ class GetSongListResource(object):
         json_resp = database.get_songs_by_user(username)
         resp.body = json.dumps(json_resp)
         resp.status = falcon.HTTP_200
-
 
 
 class SongResource(object):
@@ -99,9 +100,11 @@ class SongResource(object):
             raise falcon.HTTPError(falcon.HTTP_404, "Song ID unknown.")
 
         json_in = validate_json(req)
-        for field in 'name', 'tracks':
+        for field in "name", "tracks":
             if field not in json_in.keys():
-                raise falcon.HTTPError(falcon.HTTP_400, "Missing {} field.".format(field))
+                raise falcon.HTTPError(
+                    falcon.HTTP_400, "Missing {} field.".format(field)
+                )
 
         # Process request
         database.update_song(song_id, json_in["name"], json.dumps(json_in["tracks"]))
@@ -114,9 +117,9 @@ class SongResource(object):
         if database.is_token_valid(token) is None:
             raise falcon.HTTPError(falcon.HTTP_401, "Invalid token.")
         json_in = validate_json(req)
-        if 'name' not in json_in.keys():
+        if "name" not in json_in.keys():
             raise falcon.HTTPError(falcon.HTTP_400, "Missing name field.")
-        if 'tracks' not in json_in.keys():
+        if "tracks" not in json_in.keys():
             raise falcon.HTTPError(falcon.HTTP_400, "Missing tracks field.")
 
         # Process request
@@ -145,16 +148,14 @@ class SongResource(object):
         resp.status = falcon.HTTP_204
 
 
-
 class TokenResource(object):
-
     def on_post(self, req, resp):
         json_in = validate_json(req)
 
         # Check validity of request
-        if 'username' not in json_in.keys():
+        if "username" not in json_in.keys():
             raise falcon.HTTPError(falcon.HTTP_400, "Missing username field.")
-        if 'password' not in json_in.keys():
+        if "password" not in json_in.keys():
             raise falcon.HTTPError(falcon.HTTP_400, "Missing password field.")
         if not database.check_user(json_in["username"], json_in["password"]):
             raise falcon.HTTPError(falcon.HTTP_400, "Invalid login information.")
@@ -166,22 +167,22 @@ class TokenResource(object):
         if database.is_token_valid(new_token) is not None:
             raise falcon.HTTPError(falcon.HTTP_508, "Cannot generate token.")
         if not database.create_token(json_in["username"], new_token):
-            raise falcon.HTTPError(falcon.HTTP_500, "Failed to validate token (unexcepted).")
+            raise falcon.HTTPError(
+                falcon.HTTP_500, "Failed to validate token (unexcepted)."
+            )
 
         # Generate response
         json_out = {
             "token": new_token,
-            "user": database.get_user_info(json_in["username"])
+            "user": database.get_user_info(json_in["username"]),
         }
         resp.body = json.dumps(json_out, ensure_ascii=False)
         resp.status = falcon.HTTP_200
-
 
     def on_delete(self, req, resp, token):
         if not database.delete_token(token):
             raise falcon.HTTPError(falcon.HTTP_404, "Invalid token.")
         resp.status = falcon.HTTP_204
-
 
 
 def create_api(database_path):
@@ -191,20 +192,20 @@ def create_api(database_path):
     database.create_database_table(database_path)
 
     user_resource = UserResource()
-    app.add_route('/users/', user_resource)
+    app.add_route("/users/", user_resource)
 
     get_song_list = GetSongListResource()
-    app.add_route('/users/{username}/songs', get_song_list)
+    app.add_route("/users/{username}/songs", get_song_list)
 
     update_delete_song = SongResource()
-    app.add_route('/songs/{song_id_str}', update_delete_song)
-    app.add_route('/songs/', update_delete_song)
+    app.add_route("/songs/{song_id_str}", update_delete_song)
+    app.add_route("/songs/", update_delete_song)
 
     token_resource = TokenResource()
-    app.add_route('/tokens/{token}', token_resource)
-    app.add_route('/tokens/', token_resource)
+    app.add_route("/tokens/{token}", token_resource)
+    app.add_route("/tokens/", token_resource)
 
     return app
 
 
-app = create_api('polyphona_db.db')
+app = create_api("polyphona_db.db")
