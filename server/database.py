@@ -82,6 +82,15 @@ def create_user(user_name, first_name, last_name, password):
 
 
 def get_user_info(user_name):
+    vars['cursor'].execute("SELECT UserName, FirstName, LastName FROM users WHERE UserName=?", [user_name])
+    result = vars['cursor'].fetchone()
+    if result is not None:
+        output = {
+            "username" : result[0],
+            "first_name" : result[1],
+            "last_name" : result[2],
+           }
+        return output
     return ""
 
 
