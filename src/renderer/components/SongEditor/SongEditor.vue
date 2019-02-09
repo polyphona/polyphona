@@ -3,6 +3,7 @@
     <form id="song-tools">
       <span class="form-field">
         <button class="btn btn-light" @click="togglePlay" type="button">{{ playing ? '❙❙' : '►️'}}️</button>
+        <button class="btn btn-light" @click="exportMidi" type="button">Export Midi</button>
       </span>
       <span class="form-group">
         <label for="octave">Octave:</label>
@@ -29,6 +30,9 @@
     methods: {
       togglePlay () {
         this.$store.dispatch('MusicStore/togglePlay')
+      },
+      exportMidi () {
+        this.$store.dispatch('MusicStore/exportMidi')
       }
     },
     computed: {

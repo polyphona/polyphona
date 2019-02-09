@@ -62,6 +62,24 @@ const mutations = {
   },
   SET_OCTAVE (state, octave) {
     state.musicContext.octave = octave
+  },
+  EXPORT_MIDI (state, octave) {
+    var fs = require('fs')
+    var Midi = require('jsmidgen')
+    var file = new Midi.File()
+    var track = new Midi.Track()
+    // var myTrack = this.$store.getters['MusicStore/getTrack']
+    file.addTrack(track)
+    // const notes = this.$store.getters['MusicStore/listNotes']
+    const notes = state.currentTrack.notes
+    for (var i = 0; i < notes.length; i++) {
+      const note = notes[i]
+      const notePitch = scale[note.pitch].toLowerCase() + state.musicContext.octave.toString()
+      // jsmeden function addNote(channel, pitch, dur, time, velocity)
+      track.addNote(note.channel, notePitch, note.duration, note.startTime)
+    }
+    console.log('writing file')
+    fs.writeFileSync('test_k.mid', file.toBytes(), 'binary')
   }
 }
 
@@ -115,6 +133,9 @@ const actions = {
   updateOctave (context, octave) {
     context.commit('SET_OCTAVE', octave)
     context.dispatch('restart')
+  },
+  exportMidi (context) {
+    context.commit('EXPORT_MIDI')
   }
 }
 
