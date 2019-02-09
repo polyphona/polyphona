@@ -69,7 +69,7 @@ class GetSongListResource(object):
 class SongResource(object):
     def on_get(self, req, resp, song_id_str):
         song_id = validate_int(song_id_str)
-        token = req.get_param('token')
+        token = req.auth[6:]
 
         # Check validity of request
         if not database.is_token_valid(token):
@@ -86,7 +86,7 @@ class SongResource(object):
 
     def on_put(self, req, resp, song_id_str):
         song_id = validate_int(song_id_str)
-        token = req.get_param('token')
+        token = req.auth[6:]
 
         # Check validity of request
         username = database.is_token_valid(token)
@@ -108,7 +108,7 @@ class SongResource(object):
         resp.status = falcon.HTTP_200
 
     def on_post(self, req, resp):
-        token = req.get_param('token')
+        token = req.auth[6:]
 
         # Check validity of request
         if database.is_token_valid(token) is None:
@@ -126,7 +126,7 @@ class SongResource(object):
 
     def on_delete(self, req, resp, song_id_str):
         song_id = validate_int(song_id_str)
-        token = req.get_param('token')
+        token = req.auth[6:]
 
         # Check validity of request
         username = database.is_token_valid(token)
@@ -184,11 +184,11 @@ class TokenResource(object):
 
 
 
-def create_api():
+def create_api(database_path):
     cors = CORS(allow_all_origins=True, allow_all_methods=True, allow_all_headers=True)
     app = falcon.API(middleware=[cors.middleware])
 
-    database.create_database_table()
+    database.create_database_table(database_path)
 
     user_resource = UserResource()
     app.add_route('/users/', user_resource)
@@ -207,4 +207,4 @@ def create_api():
     return app
 
 
-app = create_api()
+app = create_api('polyphona_db.db')
