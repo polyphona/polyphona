@@ -79,7 +79,7 @@ const mutations = {
       track.addNote(note.channel, notePitch, note.duration, note.startTime)
     }
     console.log('writing file')
-    fs.writeFileSync('test_k.mid', file.toBytes(), 'binary')
+    fs.writeFileSync('test_export.mid', file.toBytes(), 'binary')
   }
 }
 
