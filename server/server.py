@@ -12,15 +12,6 @@ from falcon_cors import CORS
 import database
 
 
-def validate_json(req):
-    try:
-        json_in = json.loads(req.stream.read().decode("utf-8"))
-    except json.JSONDecodeError:
-        raise falcon.HTTPError(falcon.HTTP_400, "unreadable json.")
-    else:
-        return json_in
-
-
 def validate_int(value):
     rtn = 0
     try:
@@ -32,7 +23,7 @@ def validate_int(value):
 
 class UserResource(object):
     def on_post(self, req, resp):
-        json_in = validate_json(req)
+        json_in: dict = req.media
 
         # Check validity of request
         for field in "username", "first_name", "last_name", "password":
@@ -99,7 +90,7 @@ class SongResource(object):
         if song_id not in song_id_list:
             raise falcon.HTTPError(falcon.HTTP_404, "Song ID unknown.")
 
-        json_in = validate_json(req)
+        json_in = req.media
         for field in "name", "tracks":
             if field not in json_in.keys():
                 raise falcon.HTTPError(
@@ -107,7 +98,9 @@ class SongResource(object):
                 )
 
         # Process request
-        database.update_song(song_id, json_in["name"], json.dumps(json_in["tracks"]))
+        database.update_song(
+            song_id, json_in["name"], json.dumps(json_in["tracks"])
+        )
         resp.status = falcon.HTTP_200
 
     def on_post(self, req, resp):
@@ -116,14 +109,16 @@ class SongResource(object):
         # Check validity of request
         if database.is_token_valid(token) is None:
             raise falcon.HTTPError(falcon.HTTP_401, "Invalid token.")
-        json_in = validate_json(req)
+        json_in = req.media
         if "name" not in json_in.keys():
             raise falcon.HTTPError(falcon.HTTP_400, "Missing name field.")
         if "tracks" not in json_in.keys():
             raise falcon.HTTPError(falcon.HTTP_400, "Missing tracks field.")
 
         # Process request
-        song_id = database.create_song(json_in["name"], json.dumps(json_in["tracks"]))
+        song_id = database.create_song(
+            json_in["name"], json.dumps(json_in["tracks"])
+        )
         database.create_song_user_link(song_id, database.is_token_valid(token))
         resp.status = falcon.HTTP_201
 
@@ -150,7 +145,7 @@ class SongResource(object):
 
 class TokenResource(object):
     def on_post(self, req, resp):
-        json_in = validate_json(req)
+        json_in = req.media
 
         # Check validity of request
         if "username" not in json_in.keys():
@@ -158,7 +153,9 @@ class TokenResource(object):
         if "password" not in json_in.keys():
             raise falcon.HTTPError(falcon.HTTP_400, "Missing password field.")
         if not database.check_user(json_in["username"], json_in["password"]):
-            raise falcon.HTTPError(falcon.HTTP_400, "Invalid login information.")
+            raise falcon.HTTPError(
+                falcon.HTTP_400, "Invalid login information."
+            )
 
         # Try and generate a new token
         new_token = str(uuid4())
@@ -186,7 +183,9 @@ class TokenResource(object):
 
 
 def create_api(database_path):
-    cors = CORS(allow_all_origins=True, allow_all_methods=True, allow_all_headers=True)
+    cors = CORS(
+        allow_all_origins=True, allow_all_methods=True, allow_all_headers=True
+    )
     app = falcon.API(middleware=[cors.middleware])
 
     database.create_database_table(database_path)
