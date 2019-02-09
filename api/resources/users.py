@@ -12,16 +12,16 @@ class UserResource:
 
     @require_fields("username", "first_name", "last_name", "password")
     def on_post(self, req: Request, resp: Response):
-        json_in: dict = req.media
+        data: dict = req.media
 
-        if not self.db.is_user_name_free(json_in["username"]):
+        if not self.db.is_user_name_free(data["username"]):
             raise falcon.HTTPBadRequest("Username already taken.")
 
         if not self.db.create_user(
-            json_in["username"],
-            json_in["first_name"],
-            json_in["last_name"],
-            json_in["password"],
+            data["username"],
+            data["first_name"],
+            data["last_name"],
+            data["password"],
         ):
             raise falcon.HTTPError(falcon.HTTP_500, "Unexpected server error.")
 
