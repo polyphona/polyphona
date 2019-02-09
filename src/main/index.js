@@ -1,8 +1,4 @@
-'use strict'
-
 import {app, BrowserWindow, Menu} from 'electron'
-
-import store from '../renderer/store'
 
 /**
  * Set `__static` path to static files in production
@@ -27,6 +23,8 @@ function createWindow () {
     useContentSize: true,
     width: 1000
   })
+
+  mainWindow.loadURL(winURL)
 
   const menuTemplate = [
     // Add app menu on macOS
@@ -62,17 +60,42 @@ function createWindow () {
           label: 'Save',
           accelerator: 'CmdOrCtrl+S',
           click: () => {
-            store.dispatch('saveTrack')
+            console.log('saving')
+            mainWindow.webContents.send('saving')
           }
-        }
+        },
+        {
+          label: 'Open',
+          accelerator: 'CmdOrCtrl+O'
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Export to MIDI',
+          accelerator: 'CmdOrCtrl+E'
+        },
+        {
+          type: 'separator'
+        },
+        isMac ? { role: 'close' } : { role: 'quit' }
       ]
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        {role: 'undo'},
+        {role: 'redo'},
+        {type: 'separator'}]
+    },
+    {
+      label: 'View',
+      submenu: [
+        {role: 'reload'}]
     }
   ]
-
   const menu = Menu.buildFromTemplate(menuTemplate)
   Menu.setApplicationMenu(menu)
-
-  mainWindow.loadURL(winURL)
 
   mainWindow.on('closed', () => {
     mainWindow = null
@@ -82,7 +105,7 @@ function createWindow () {
 app.on('ready', createWindow)
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+  if (!isMac) {
     app.quit()
   }
 })
@@ -99,16 +122,4 @@ app.on('activate', () => {
  * Uncomment the following code below and install `electron-updater` to
  * support auto updating. Code Signing with a valid certificate is required.
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-electron-builder.html#auto-updating
- */
-
-/*
-import { autoUpdater } from 'electron-updater'
-
-autoUpdater.on('update-downloaded', () => {
-  autoUpdater.quitAndInstall()
-})
-
-app.on('ready', () => {
-  if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
-})
  */

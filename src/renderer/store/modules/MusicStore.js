@@ -1,6 +1,5 @@
 import Tone from 'tone'
-import http from '@/utils/http'
-
+import http from '../../utils/http'
 import {Track, SCALE} from '../Music'
 
 const division = 4

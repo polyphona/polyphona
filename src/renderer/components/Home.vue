@@ -16,7 +16,7 @@
 
 <script>
   import SongEditor from './SongEditor/SongEditor.vue'
-
+  import store from '../store'
   export default {
     name: 'Home',
     components: { SongEditor },
@@ -26,6 +26,7 @@
       }
     }
   }
+  require('electron').ipcRenderer.on('saving', () => { store.dispatch('MusicStore/saveTrack') })
 </script>
 
 <style lang="scss" scoped>
