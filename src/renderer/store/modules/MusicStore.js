@@ -14,7 +14,7 @@ const state = {
   musicContext: {
     division,
     scale,
-    octave: 4,
+    octave: 2,
     playing: false
   },
   // Mapping of note IDs to transport event IDs.
@@ -81,24 +81,27 @@ const actions = {
     context.commit('DELETE_NOTE', note)
     context.dispatch('restart')
   },
-  play (context, offset) {
-    context.commit('SCHEDULE_NOTES')
+  play ({commit}, offset) {
+    commit('SCHEDULE_NOTES')
     // Loop one measure ad eternam
     Tone.Transport.loopEnd = '1m'
     Tone.Transport.loop = true
     // Start the song now, but offset by `offset`.
     Tone.Transport.start(Tone.Transport.now(), offset)
   },
+  stop () {
+    Tone.Transport.stop()
+  },
   restart (context) {
     if (context.state.musicContext.playing) {
       const offset = Tone.Transport.getSecondsAtTime()
-      Tone.Transport.stop()
+      context.dispatch('stop')
       context.dispatch('play', offset)
     }
   },
   togglePlay (context) {
     if (context.state.musicContext.playing) {
-      Tone.Transport.stop()
+      context.dispatch('stop')
     } else {
       context.dispatch('play')
     }

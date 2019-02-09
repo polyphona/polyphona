@@ -27,12 +27,13 @@ export class Note {
 
 export class NoteCanvasAdapter {
   toBox (renderContext, note) {
+    const height = renderContext.percentPerInterval
     return {
       id: note.id,
       x: renderContext.percentPerTick * note.startTime,
-      y: renderContext.percentPerInterval * note.pitch,
+      y: 100 - (height + renderContext.percentPerInterval * note.pitch),
       width: renderContext.percentPerTick * note.duration,
-      height: renderContext.percentPerInterval
+      height
     }
   }
 
@@ -44,7 +45,7 @@ export class NoteCanvasAdapter {
     return new Note(
       Math.floor(box.x / renderContext.percentPerTick),
       duration,
-      Math.floor(box.y / renderContext.percentPerInterval)
+      Math.floor((100 - (box.y + box.height)) / renderContext.percentPerInterval)
     )
   }
 
