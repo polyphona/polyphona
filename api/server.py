@@ -5,6 +5,7 @@
 
 import json
 from uuid import uuid4
+from functools import wraps
 
 from falcon import (
     API,
@@ -21,7 +22,7 @@ from falcon import (
 )
 from falcon_cors import CORS
 
-import database
+from .db import Database
 
 
 def validate_int(value: str) -> int:
@@ -33,7 +34,32 @@ def validate_int(value: str) -> int:
     return rtn
 
 
+def authenticated(responder):
+    """Require the client to provide a valid token to access the endpoint."""
+
+    @wraps(responder)
+    def with_auth(self, req, resp, *args, **kwargs):
+        _, _, token = (req.auth or "").partition("Token ")
+
+        if not token:
+            raise HTTPError(
+                HTTP_401, "Authentication credentials were not provided."
+            )
+
+        username = self.db.is_token_valid(token)
+        if username is None:
+            raise HTTPError(HTTP_401, "Invalid token.")
+
+        req.username = username
+        return responder(self, req, resp, *args, **kwargs)
+
+    return with_auth
+
+
 class UserResource:
+    def __init__(self, db: Database):
+        self.db = db
+
     def on_post(self, req: Request, resp: Response):
         json_in: dict = req.media
 
@@ -42,9 +68,9 @@ class UserResource:
             if field not in json_in:
                 raise HTTPError(HTTP_400, "Missing {} field.".format(field))
 
-        if not database.is_user_name_free(json_in["username"]):
+        if not self.db.is_user_name_free(json_in["username"]):
             raise HTTPError(HTTP_400, "Username already taken.")
-        if not database.create_user(
+        if not self.db.create_user(
             json_in["username"],
             json_in["first_name"],
             json_in["last_name"],
@@ -56,44 +82,37 @@ class UserResource:
 
 
 class GetSongListResource:
+    def __init__(self, db: Database):
+        self.db = db
+
     def on_get(self, req: Request, resp: Response, username: str):
-        # Check validity of request
-        if database.is_user_name_free(username):
-            # Username nor recognized
+        if self.db.is_user_name_free(username):
             raise HTTPError(HTTP_404, "Username unknown.")
 
         # Generate response
-        json_resp = database.get_songs_by_user(username)
+        json_resp = self.db.get_songs_by_user(username)
         resp.body = json.dumps(json_resp)
 
 
 class SongResource:
+    def __init__(self, db: Database):
+        self.db = db
+
+    @authenticated
     def on_get(self, req: Request, resp: ResourceWarning, song_id_str: str):
         song_id = validate_int(song_id_str)
-        token = req.auth[6:]
 
-        # Check validity of request
-        if not database.is_token_valid(token):
-            raise HTTPError(HTTP_401, "Invalid token.")
-        song = database.get_song_by_id(song_id)
+        song = self.db.get_song_by_id(song_id)
         if song is None:
-            # Unknown song_id
-            resp.status = HTTP_404
             raise HTTPError(HTTP_404, "song_id unknown.")
 
-        # Generate response
-        resp.body = json.dumps(song)
+        resp.media = song
 
+    @authenticated
     def on_put(self, req: Request, resp: Response, song_id_str):
         song_id = validate_int(song_id_str)
-        token = req.auth[6:]
-
-        # Check validity of request
-        username = database.is_token_valid(token)
-        if username is None:
-            raise HTTPError(HTTP_401, "Invalid token.")
-
-        songs = database.get_songs_by_user(username)
+        username = req.username
+        songs = self.db.get_songs_by_user(username)
         song_id_list = [song["id"] for song in songs]
         if song_id not in song_id_list:
             raise HTTPError(HTTP_404, "Song ID unknown.")
@@ -104,16 +123,12 @@ class SongResource:
                 raise HTTPError(HTTP_400, "Missing {} field.".format(field))
 
         # Process request
-        database.update_song(
+        self.db.update_song(
             song_id, json_in["name"], json.dumps(json_in["tracks"])
         )
 
+    @authenticated
     def on_post(self, req: Request, resp: Response):
-        token = req.auth[6:]
-
-        # Check validity of request
-        if database.is_token_valid(token) is None:
-            raise HTTPError(HTTP_401, "Invalid token.")
         json_in = req.media
         if "name" not in json_in.keys():
             raise HTTPError(HTTP_400, "Missing name field.")
@@ -121,21 +136,17 @@ class SongResource:
             raise HTTPError(HTTP_400, "Missing tracks field.")
 
         # Process request
-        song_id = database.create_song(
+        song_id = self.db.create_song(
             json_in["name"], json.dumps(json_in["tracks"])
         )
-        database.create_song_user_link(song_id, database.is_token_valid(token))
+        self.db.create_song_user_link(song_id, req.username)
         resp.status = HTTP_201
 
+    @authenticated
     def on_delete(self, req: Request, resp: Response, song_id_str):
         song_id = validate_int(song_id_str)
-        token = req.auth[6:]
 
-        # Check validity of request
-        username = database.is_token_valid(token)
-        if username is None:
-            raise HTTPError(HTTP_401, "Invalid token.")
-        songs = database.get_songs_by_user(username)
+        songs = self.db.get_songs_by_user(req.username)
         song_id_list = []
         for song in songs:
             song_id_list.append(song["id"])
@@ -144,11 +155,14 @@ class SongResource:
             raise HTTPError(HTTP_404, "Song ID unknown.")
 
         # Process request
-        database.delete_song(song_id)
+        self.db.delete_song(song_id)
         resp.status = HTTP_204
 
 
 class TokenResource:
+    def __init__(self, db: Database):
+        self.db = db
+
     def on_post(self, req: Request, resp: Response):
         json_in = req.media
 
@@ -157,50 +171,48 @@ class TokenResource:
             raise HTTPError(HTTP_400, "Missing username field.")
         if "password" not in json_in.keys():
             raise HTTPError(HTTP_400, "Missing password field.")
-        if not database.check_user(json_in["username"], json_in["password"]):
+        if not self.db.check_user(json_in["username"], json_in["password"]):
             raise HTTPError(HTTP_400, "Invalid login information.")
 
         # Try and generate a new token
         new_token = str(uuid4())
-        if database.is_token_valid(new_token) is not None:
+        if self.db.is_token_valid(new_token) is not None:
             new_token = str(uuid4())
-        if database.is_token_valid(new_token) is not None:
+        if self.db.is_token_valid(new_token) is not None:
             raise HTTPError(HTTP_508, "Cannot generate token.")
-        if not database.create_token(json_in["username"], new_token):
+        if not self.db.create_token(json_in["username"], new_token):
             raise HTTPError(HTTP_500, "Failed to validate token (unexcepted).")
 
         # Generate response
         json_out = {
             "token": new_token,
-            "user": database.get_user_info(json_in["username"]),
+            "user": self.db.get_user_info(json_in["username"]),
         }
         resp.body = json.dumps(json_out, ensure_ascii=False)
 
     def on_delete(self, _, resp: Response, token: str):
-        if not database.delete_token(token):
+        if not self.db.delete_token(token):
             raise HTTPError(HTTP_404, "Invalid token.")
         resp.status = HTTP_204
 
 
-def create_api(database_path: str) -> API:
+def create_api(db: Database) -> API:
     cors = CORS(
         allow_all_origins=True, allow_all_methods=True, allow_all_headers=True
     )
     api = API(middleware=[cors.middleware])
 
-    database.create_database_table(database_path)
-
-    user_resource = UserResource()
+    user_resource = UserResource(db)
     api.add_route("/users/", user_resource)
 
-    get_song_list = GetSongListResource()
+    get_song_list = GetSongListResource(db)
     api.add_route("/users/{username}/songs", get_song_list)
 
-    update_delete_song = SongResource()
+    update_delete_song = SongResource(db)
     api.add_route("/songs/{song_id_str}", update_delete_song)
     api.add_route("/songs/", update_delete_song)
 
-    token_resource = TokenResource()
+    token_resource = TokenResource(db)
     api.add_route("/tokens/{token}", token_resource)
     api.add_route("/tokens/", token_resource)
 
