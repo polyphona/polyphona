@@ -217,6 +217,3 @@ def create_api(db: Database) -> API:
     api.add_route("/tokens/", token_resource)
 
     return api
-
-
-app = create_api("polyphona_db.db")
