@@ -40,30 +40,3 @@ def auth_headers(db: Database, example_user: dict, token: str) -> dict:
     )
     db.create_token(username="admin", token=token)
     return {"Authorization": f"Token {token}"}
-
-
-@pytest.fixture
-def song2_payload(db: Database) -> dict:
-    return {
-        "name": "Song 02",
-        "data": [
-            {
-                "id": 1,
-                "name": "Drums",
-                "isMuted": False,
-                "notes": [
-                    {
-                        "midi": 10,
-                        "time": 10,
-                        "note": "A2",
-                        "velocity": 64,
-                        "duration": 16,
-                        "instrumentNumber": 8,
-                    }
-                ],
-                "startTime": 0,
-                "duration": 10,
-                "instrument": "Drums",
-            }
-        ],
-    }
