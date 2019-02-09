@@ -11,7 +11,7 @@ class GetSongListResource:
         self.db = db
 
     def on_get(self, req: Request, resp: Response, username: str):
-        if self.db.is_user_name_free(username):
+        if self.db.user_exists(username):
             raise falcon.HTTPNotFound(title=f"No user named {username}.")
         resp.media = self.db.get_songs_by_user(username)
 

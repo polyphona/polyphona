@@ -99,7 +99,7 @@ class Database:
             list of dictionaries
         """
         with self:
-            if not self.is_user_name_free(username):
+            if not self.user_exists(username):
                 self.cursor.execute(
                     """
                     SELECT *
@@ -172,28 +172,22 @@ class Database:
 
     def create_user(
         self, username: str, first_name: str, last_name: str, password: str
-    ) -> bool:
+    ):
         with self:
-            if self.is_user_name_free(username):
-                self.cursor.execute(
-                    """INSERT INTO users (UserName, FirstName, LastName, Password)
-                                VALUES (?,?,?,?)""",
-                    (username, first_name, last_name, password),
-                )
-                self.connection.commit()
-                return True
-            return False
+            self.cursor.execute(
+                """INSERT INTO users (UserName, FirstName, LastName, Password)
+                            VALUES (?,?,?,?)""",
+                (username, first_name, last_name, password),
+            )
+            self.connection.commit()
 
-    def is_user_name_free(self, username) -> bool:
+    def user_exists(self, username) -> bool:
         with self:
             self.cursor.execute(
                 "SELECT count(UserName) FROM users WHERE UserName=?",
                 (username,),
             )
-            if self.cursor.fetchone()[0] == 0:
-                return True
-            else:
-                return False
+            return self.cursor.fetchone()[0] == 0
 
     def get_user_info(self, username: str) -> dict:
         with self:
@@ -224,7 +218,7 @@ class Database:
     def create_song_user_link(self, song_id: int, username: str) -> bool:
         with self:
             if self.song_id_exists(song_id) and not (
-                self.is_user_name_free(username)
+                self.user_exists(username)
             ):
                 self.cursor.execute(
                     """
@@ -240,7 +234,7 @@ class Database:
     # TODO: rename to `save_token()`
     def create_token(self, username: str, token: str) -> bool:
         with self:
-            if not self.is_user_name_free(username) and not self.is_token_valid(
+            if not self.user_exists(username) and not self.is_token_valid(
                 token
             ):
                 refresh = datetime.datetime.now() + datetime.timedelta(
@@ -282,7 +276,7 @@ class Database:
 
     def check_user(self, username: str, password: str):
         with self:
-            if self.is_user_name_free(username):
+            if self.user_exists(username):
                 return False
             self.cursor.execute(
                 "SELECT Password FROM users WHERE UserName=?", (username,)
