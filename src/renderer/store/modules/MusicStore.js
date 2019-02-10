@@ -72,7 +72,8 @@ const mutations = {
   SAVED_TRACKS (state, savedTracks) {
     state.savedTracks = savedTracks
   },
-  LOAD_TRACK (state, track, id) {
+  LOAD_TRACK (state, {track, id}) {
+    console.log(id)
     state.currentTrack = track
     state.currentTrack.remoteId = id
   }
@@ -139,7 +140,7 @@ const actions = {
   },
   loadSavedTrack ({state, commit}, id) {
     const track = state.savedTracks.find(track => track.id === id)
-    commit('LOAD_TRACK', track.tracks[0], id) // Not good but necessary, will change when we upgrade the local song model
+    commit('LOAD_TRACK', {track: track.tracks[0], id}) // Not good but necessary, will change when we upgrade the local song model
   }
 }
 

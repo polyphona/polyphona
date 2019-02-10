@@ -12,7 +12,8 @@
         <div class="modal-body">
           <slot name="body">
             <div class="list-group">
-              <div class="list-group-item list-group-item-action" v-for="track in savedTracks" @click="loadTrack(track.id); $emit('close');" :key="track.remoteId">
+              <div class="list-group-item list-group-item-action" v-for="track in savedTracks"
+                   @click="loadTrack(track.id); $emit('close');" :key="track.remoteId">
                 {{ track.id }} - {{ track.name }}
               </div>
             </div>
@@ -35,9 +36,9 @@
 <script>
   export default {
     name: 'LoadDialog',
-    data () {
-      return {
-        savedTracks: this.$store.state.MusicStore.savedTracks
+    computed: {
+      savedTracks () {
+        return this.$store.state.MusicStore.savedTracks
       }
     },
     methods: {
