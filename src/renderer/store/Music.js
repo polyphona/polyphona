@@ -9,11 +9,12 @@ clip(15.01, 2.5) => 15.0
 const clip = (value, increment) => Math.floor(value / increment) * increment
 
 export class Note {
-  constructor (startTime, duration, pitch) {
+  constructor (startTime, duration, pitch, velocity = 0.8) {
     this.startTime = startTime
     this.duration = duration
     this.pitch = pitch
     this.id = undefined
+    this.velocity = velocity
   }
 
   /* True if the note collides with existing note with the same pitch */

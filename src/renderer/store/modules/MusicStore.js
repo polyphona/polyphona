@@ -6,7 +6,7 @@ const division = 4
 const scale = SCALE
 // NOTE: synthesizer cannot be in the store because Tone modifies this value
 // (and does so outside of a mutation, which Vuex does not like).
-const synthesizer = new Tone.PluckSynth().toMaster()
+const synthesizer = new Tone.Synth().toMaster()
 Tone.Transport.bpm.value = 120
 
 const state = {
@@ -49,8 +49,9 @@ const mutations = {
         (time) => {
           synthesizer.triggerAttackRelease(
             pitch,
-            toTransportTime(note.duration),
-            time
+            toTransportTime(state.musicContext, note.duration),
+            time,
+            note.velocity
           )
         },
         toTransportTime(state.musicContext, note.startTime)
@@ -62,24 +63,6 @@ const mutations = {
   },
   SET_OCTAVE (state, octave) {
     state.musicContext.octave = octave
-  },
-  EXPORT_MIDI (state, octave) {
-    var fs = require('fs')
-    var Midi = require('jsmidgen')
-    var file = new Midi.File()
-    var track = new Midi.Track()
-    // var myTrack = this.$store.getters['MusicStore/getTrack']
-    file.addTrack(track)
-    // const notes = this.$store.getters['MusicStore/listNotes']
-    const notes = state.currentTrack.notes
-    for (var i = 0; i < notes.length; i++) {
-      const note = notes[i]
-      const notePitch = scale[note.pitch].toLowerCase() + state.musicContext.octave.toString()
-      // jsmeden function addNote(channel, pitch, dur, time, velocity)
-      track.addNote(note.channel, notePitch, note.duration, note.startTime)
-    }
-    console.log('writing file')
-    fs.writeFileSync('test_export.mid', file.toBytes(), 'binary')
   }
 }
 
@@ -135,7 +118,22 @@ const actions = {
     context.dispatch('restart')
   },
   exportMidi (context) {
-    context.commit('EXPORT_MIDI')
+    var fs = require('fs')
+    var MidiConvert = require('simonadcock-midiconvert')
+    var midi = MidiConvert.create()
+    // add a track
+    var track = midi.track()
+    // select an instrument by its MIDI patch number
+      .patch(32)
+    const notes = context.state.currentTrack.notes
+    for (var i = 0; i < notes.length; i++) {
+      const note = notes[i]
+      const notePitch = scale[note.pitch].toLowerCase() + context.state.musicContext.octave.toString()
+      // note events: note, time, duration
+      track.note(notePitch, note.startTime, note.duration)
+    }
+    // write the output
+    fs.writeFileSync('output.mid', midi.encode(), 'binary')
   }
 }
 
