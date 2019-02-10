@@ -15,3 +15,4 @@ __pycache__/
 *.mid
 env/
 venv/
+*.mid

@@ -56,6 +56,8 @@
     "axios": "^0.18.0",
     "bootstrap": "^4.1.3",
     "bootstrap-vue": "^2.0.0-rc.11",
+    "jsmidgen": "^0.1.5",
+    "simonadcock-midiconvert": "0.0.2",
     "tone": "^0.12.80",
     "vue": "^2.5.16",
     "vue-electron": "^1.0.6",
