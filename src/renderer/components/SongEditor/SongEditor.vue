@@ -3,7 +3,7 @@
     <form id="song-tools">
       <span class="form-field">
         <button class="btn btn-light" @click="togglePlay" type="button">{{ playing ? '❙❙' : '►️'}}️</button>
-        <button class="btn btn-light" @click="exportMidi" type="button">Export Midi</button>
+        <button class="btn btn-light" @click="exportMidi" type="button">📂 Export</button>
       </span>
       <span class="form-group">
         <label for="octave">Octave:</label>
