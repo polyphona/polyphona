@@ -22,7 +22,7 @@
     components: { SongEditor },
     methods: {
       save () {
-        this.$store.dispatch('MusicStore/saveTrack')
+        this.$store.dispatch('MusicStore/getSavedTracks')
       }
     }
   }

@@ -26,6 +26,7 @@ const state = {
     // Percentage of the canvas filled by a note interval, from 0 to 100
     percentPerInterval: 100 / Object.keys(scale).length
   },
+  savedTracks: [],
   saved: false
 }
 
@@ -67,6 +68,13 @@ const mutations = {
   SAVE (state, res) {
     state.currentTrack.remoteId = res.id
     state.saved = true
+  },
+  SAVED_TRACKS (state, savedTracks) {
+    state.savedTracks = savedTracks
+  },
+  LOAD_TRACK (state, track, id) {
+    state.currentTrack = track
+    state.currentTrack.remoteId = id
   }
 }
 
@@ -123,8 +131,16 @@ const actions = {
       'tracks': [state.currentTrack]
     }
     const {data: res} = state.currentTrack.remoteId ? await http.put('songs/' + state.currentTrack.remoteId, data) : await http.post('songs', data)
-    console.log(res)
     commit('SAVE', res)
+  },
+  async getSavedTracks ({state, commit, rootState}) {
+    const {data: res} = await http.get('users/' + rootState.auth.user.username + '/songs')
+    console.log(res)
+    commit('SAVED_TRACKS', res)
+  },
+  loadSavedTrack ({state, commit}, id) {
+    const track = state.savedTracks.find(track => track.id === id)
+    commit('LOAD_TRACK', track, id)
   }
 }
 
