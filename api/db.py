@@ -1,9 +1,22 @@
-import os
 import datetime
 import json
+import os
 import sqlite3
 from contextlib import suppress
 from typing import List, Optional
+
+import falcon
+
+
+class DoesNotExist(falcon.HTTPNotFound):
+    def __init__(self, obj_type: str, **kwargs: str):
+        if kwargs:
+            attrs = " with " + ", ".join(
+                [f"{key}={value}" for key, value in kwargs.items()]
+            )
+        else:
+            attrs = ""
+        super().__init__(title=f"{obj_type}{attrs} does not exist.")
 
 
 class Database:
@@ -81,14 +94,26 @@ class Database:
 
     def get_song_by_id(self, id: int) -> dict:
         with self:
-            if not self.song_id_exists(id):
-                return None
-
-            self.cursor.execute("SELECT * FROM songs WHERE SongID = ? ", (id,))
-            result = self.cursor.fetchone()
-            return strings2dict(
-                result[0], result[1], result[2], result[3], result[4]
+            self.cursor.execute(
+                """
+                SELECT SongID, SongName, Created, Updated, TracksJson
+                FROM songs
+                WHERE SongID = ?
+                """,
+                (id,),
             )
+            try:
+                id, name, created, updated, tracks = self.cursor.fetchone()
+            except TypeError:
+                raise DoesNotExist("Song", id=id)
+            else:
+                return {
+                    "id": id,
+                    "name": name,
+                    "created": str(created),
+                    "updated": str(updated),
+                    "tracks": json.loads(tracks),
+                }
 
     def get_songs_by_user(self, username: str) -> List[dict]:
         """Return list of songs where the user is contributing
@@ -155,20 +180,26 @@ class Database:
             self.connection.commit()
             return self.get_song_by_id(id)
 
-    def delete_song(self, id: int) -> bool:
+    def delete_song(self, id: int, username: str) -> bool:
         with self:
             self.cursor.execute(
-                "SELECT SongID FROM songs WHERE SongID = ?", (id,)
+                """
+                SELECT songs.SongID
+                FROM songs, song_user_links
+                ON songs.SongID = song_user_links.SongID
+                WHERE songs.SongID = ?
+                AND song_user_links.UserName = ? 
+                """,
+                (id, username),
             )
-            result = self.cursor.fetchall()
-            if len(result) == 1:
-                self.cursor.execute("DELETE FROM songs WHERE SongID = ?", (id,))
-                self.cursor.execute(
-                    "DELETE FROM song_user_links WHERE SongID = ?", (id,)
-                )
-                self.connection.commit()
-                return True
-            return False
+            if self.cursor.fetchone() is None:
+                raise DoesNotExist("Song", id=id, username=username)
+
+            self.cursor.execute("DELETE FROM songs WHERE SongID = ?", (id,))
+            self.cursor.execute(
+                "DELETE FROM song_user_links WHERE SongID = ?", (id,)
+            )
+            self.connection.commit()
 
     def create_user(
         self, username: str, first_name: str, last_name: str, password: str
@@ -195,15 +226,12 @@ class Database:
                 "SELECT UserName, FirstName, LastName FROM users WHERE UserName=?",
                 (username,),
             )
-            result = self.cursor.fetchone()
-            if result is not None:
-                output = {
-                    "username": result[0],
-                    "first_name": result[1],
-                    "last_name": result[2],
-                }
-                return output
-            return {}
+            username, first_name, last_name = self.cursor.fetchone()
+            return {
+                "username": username,
+                "first_name": first_name,
+                "last_name": last_name,
+            }
 
     def is_token_valid(self, token: str) -> Optional[str]:
         with self:

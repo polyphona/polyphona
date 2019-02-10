@@ -23,12 +23,7 @@ class SongResource:
     @authenticated
     def on_get(self, _, resp: ResourceWarning, song_id_str: str):
         song_id = parse_int(song_id_str)
-
-        song = self.db.get_song_by_id(song_id)
-        if song is None:
-            raise falcon.HTTPNotFound(title=f"Song {song_id} does not exist.")
-
-        resp.media = song
+        resp.media = self.db.get_song_by_id(song_id)
 
     @authenticated
     @require_fields("name", "tracks")
@@ -53,10 +48,5 @@ class SongResource:
     @authenticated
     def on_delete(self, req: Request, resp: Response, song_id_str):
         song_id = parse_int(song_id_str)
-
-        songs = self.db.get_songs_by_user(req.username)
-        if song_id not in map(lambda song: song["id"], songs):
-            raise falcon.HTTPNotFound(title="Song ID unknown.")
-
-        self.db.delete_song(song_id)
+        self.db.delete_song(song_id, username=req.username)
         resp.status = falcon.HTTP_204
