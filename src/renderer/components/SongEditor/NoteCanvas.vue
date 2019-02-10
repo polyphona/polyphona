@@ -126,9 +126,9 @@
         }
         box = canvasAdapter.clip(this.renderContext, box)
         const note = canvasAdapter.toNote(this.renderContext, box)
-        const wrappingNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.EqualOrcontainedInNote(value))
-        if (wrappingNotes.length > 0) { // There is an existing note same as or wrapping the new one : we delete note
-          this.$store.dispatch('MusicStore/deleteNote', wrappingNotes[0])
+        const exitingNote = this.$store.getters['MusicStore/listNotes'].filter((value) => note.disturbs(value))
+        if (exitingNote.length > 0) { // There is an existing note same as or wrapping the new one : we delete note
+          this.$store.dispatch('MusicStore/deleteNote', exitingNote[0])
         } else { // there are no problematic notes : we add a new note
           this.addNoteFromBox(box)
         }
@@ -151,15 +151,19 @@
         this.newBox = canvasAdapter.clip(this.renderContext, this.newBox)
       },
       onMouseUp (event) {
-        this.dragging = false
-        let box = this.newBox
-        // TODO ajouter bloc try pour toosmallexception
-        const note = canvasAdapter.toNote(this.renderContext, box)
-        const problematicNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.disturbs(value))
-        if (problematicNotes.length === 0) { // there are no problematic notes : we add a new note
-          this.addNoteFromBox(box)
+        try {
+          this.dragging = false
+          let box = this.newBox
+          const note = canvasAdapter.toNote(this.renderContext, box)
+          const problematicNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.disturbs(value))
+          if (problematicNotes.length === 0) { // there are no problematic notes : we add a new note
+            this.addNoteFromBox(box)
+          }
+          this.newBox = null
+        } catch (e) {
+          if (e instanceof NoteTooSmallException) {
+          }
         }
-        this.newBox = null
       },
       onMouseLeave (event) {
         this.dragging = false
