@@ -1,21 +1,23 @@
 <template>
   <div id="song-editor">
-    <p style="display: flex;">
+    <form id="song-tools">
       <span class="form-field">
-        <button @click="togglePlay">{{ playing ? '❙❙' : '►️'}}️</button>
+        <button class="btn btn-light" @click="togglePlay" type="button">{{ playing ? '❙❙' : '►️'}}️</button>
+        <button class="btn btn-light" @click="exportMidi" type="button">📂 Export</button>
       </span>
-      <span class="form-field">
+      <span class="form-group">
         <label for="octave">Octave:</label>
-        <select id="octave" v-model="octave">
-          <option :value="1">1</option>
-          <option :value="2">2</option>
-          <option :value="3">3</option>
-          <option :value="4">4</option>
-          <option :value="5">5</option>
-          <option :value="6">6</option>
-        </select>
+        <input
+          id="octave"
+          class="form-control"
+          type="number"
+          min="1"
+          max="6"
+          required
+          v-model="octave"
+        >
       </span>
-    </p>
+    </form>
     <note-canvas id="note-canvas"></note-canvas>
   </div>
 </template>
@@ -28,6 +30,9 @@
     methods: {
       togglePlay () {
         this.$store.dispatch('MusicStore/togglePlay')
+      },
+      exportMidi () {
+        this.$store.dispatch('MusicStore/exportMidi')
       }
     },
     computed: {
@@ -42,6 +47,10 @@
       playing () {
         return this.$store.getters['MusicStore/getPlaying']
       }
+    },
+    destroyed () {
+      // Prevent music from keeping playing when navigating to another page.
+      this.$store.dispatch('MusicStore/stop')
     }
   }
 </script>
@@ -50,12 +59,15 @@
     height: 70%;
   }
 
+  #song-tools {
+    padding: 1em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
   #note-canvas {
     width: 100%;
     height: 100%;
-  }
-
-  .form-field {
-    margin: 1em;
   }
 </style>

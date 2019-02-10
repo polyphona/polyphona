@@ -24,8 +24,6 @@ function createWindow () {
     width: 1000
   })
 
-  mainWindow.loadURL(winURL)
-
   const menuTemplate = [
     // Add app menu on macOS
     ...(isMac ? [{

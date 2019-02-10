@@ -1,14 +1,9 @@
 <template>
   <div class="container" id="container">
-    <p class="text-muted">
-      <router-link to="home">Home</router-link>
-    </p>
     <h1>Sign in</h1>
     <p class="text-muted">Enter your Polyphona account details to sign in.</p>
 
-    <div class="alert alert-danger" v-if="error" role="alert">
-      {{ error }}
-    </div>
+    <div class="alert alert-danger" v-if="error" role="alert">{{ error }}</div>
 
     <form @submit.prevent="onSubmit">
       <div class="form-group">
@@ -17,7 +12,14 @@
           <div class="input-group-prepend">
             <span class="input-group-text">👤</span>
           </div>
-          <input v-model="username" id="username" type="text" class="form-control" placeholder="Username" required/>
+          <input
+            v-model="username"
+            id="username"
+            type="text"
+            class="form-control"
+            placeholder="Username"
+            required
+          >
         </div>
       </div>
 
@@ -27,7 +29,14 @@
           <div class="input-group-prepend">
             <span class="input-group-text">🔒</span>
           </div>
-          <input v-model="password" id="password" type="password" class="form-control" placeholder="Password" required/>
+          <input
+            v-model="password"
+            id="password"
+            type="password"
+            class="form-control"
+            placeholder="Password"
+            required
+          >
         </div>
       </div>
 
@@ -64,9 +73,7 @@
 </script>
 
 <style scoped>
-  #container {
-    width: 30em;
-    margin-top: 3em;
-  }
-
+#container {
+  width: 30em;
+}
 </style>

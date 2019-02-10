@@ -6,7 +6,7 @@ const division = 4
 const scale = SCALE
 // NOTE: synthesizer cannot be in the store because Tone modifies this value
 // (and does so outside of a mutation, which Vuex does not like).
-const synthesizer = new Tone.PluckSynth().toMaster()
+const synthesizer = new Tone.Synth().toMaster()
 Tone.Transport.bpm.value = 120
 
 const state = {
@@ -14,12 +14,9 @@ const state = {
   musicContext: {
     division,
     scale,
-    octave: 4,
+    octave: 2,
     playing: false
   },
-  // Mapping of note IDs to transport event IDs.
-  // Used to un-schedule an event when a note is deleted.
-  schedule: new Map(),
   renderContext: {
     // Percentage of the canvas filled by one tick, from 0 to 100.
     percentPerTick: 100 / (4 * division),
@@ -45,22 +42,31 @@ const mutations = {
   },
   DELETE_NOTE (state, note) {
     state.currentTrack.deleteNote(note)
-    const eventId = state.schedule.get(note.id)
-    if (eventId) {
-      Tone.Transport.clear(eventId)
-    }
     state.saved = false
   },
   SCHEDULE_NOTES (state) {
     state.currentTrack.notes.forEach((note) => {
-      const pitch = state.musicContext.scale[note.pitch] + state.musicContext.octave
-      const trigger = (time) => synthesizer.triggerAttackRelease(pitch, toTransportTime(note.duration), time)
-      const eventId = Tone.Transport.schedule(trigger, toTransportTime(state.musicContext, note.startTime))
-      state.schedule.set(note.id, eventId)
+      const pitch = (
+        state.musicContext.scale[note.pitch] + state.musicContext.octave
+      )
+      Tone.Transport.schedule(
+        (time) => {
+          synthesizer.triggerAttackRelease(
+            pitch,
+            toTransportTime(state.musicContext, note.duration),
+            time,
+            note.velocity
+          )
+        },
+        toTransportTime(state.musicContext, note.startTime)
+      )
     })
   },
-  TOGGLE_PLAY (state) {
-    state.musicContext.playing = !state.musicContext.playing
+  START (state) {
+    state.musicContext.playing = true
+  },
+  STOP (state) {
+    state.musicContext.playing = false
   },
   SET_OCTAVE (state, octave) {
     state.musicContext.octave = octave
@@ -98,28 +104,35 @@ const actions = {
     context.dispatch('restart')
     context.state.saved = false
   },
-  play (context, offset) {
-    context.commit('SCHEDULE_NOTES')
+  play ({commit}, offset) {
+    commit('START')
+    commit('SCHEDULE_NOTES')
     // Loop one measure ad eternam
     Tone.Transport.loopEnd = '1m'
     Tone.Transport.loop = true
     // Start the song now, but offset by `offset`.
     Tone.Transport.start(Tone.Transport.now(), offset)
   },
+  stop ({commit}) {
+    commit('STOP')
+    Tone.Transport.stop()
+    // Cancel all note events so they are not played again
+    // when the transport starts again.
+    Tone.Transport.cancel()
+  },
   restart (context) {
     if (context.state.musicContext.playing) {
       const offset = Tone.Transport.getSecondsAtTime()
-      Tone.Transport.stop()
+      context.dispatch('stop')
       context.dispatch('play', offset)
     }
   },
   togglePlay (context) {
     if (context.state.musicContext.playing) {
-      Tone.Transport.stop()
+      context.dispatch('stop')
     } else {
       context.dispatch('play')
     }
-    context.commit('TOGGLE_PLAY')
   },
   updateOctave (context, octave) {
     context.commit('SET_OCTAVE', octave)
@@ -140,6 +153,36 @@ const actions = {
   loadSavedTrack ({state, commit}, id) {
     const track = state.savedTracks.find(track => track.id === id)
     commit('LOAD_TRACK', {track: track.tracks[0], id}) // Not good but necessary, will change when we upgrade the local song model
+  },
+  exportMidi (context) {
+    var fs = require('fs')
+    var MidiConvert = require('simonadcock-midiconvert')
+    var midi = MidiConvert.create()
+    // add a track
+    var track = midi.track()
+    // select an instrument by its MIDI patch number
+      .patch(32)
+    const notes = context.state.currentTrack.notes
+    for (var i = 0; i < notes.length; i++) {
+      const note = notes[i]
+      const notePitch = scale[note.pitch].toLowerCase() + context.state.musicContext.octave.toString()
+      // note events: note, time, duration
+      track.note(notePitch, note.startTime, note.duration / 8, note.velocity)
+    }
+    const {dialog} = require('electron').remote
+    const path = dialog.showSaveDialog({
+      'filters': [
+        {
+          'name': 'MIDI',
+          'extensions': ['midi']
+        }
+      ]
+    })
+    if (!path) {
+      return
+    }
+    // write the output in the path chosen by the user
+    fs.writeFileSync(path, midi.encode(), 'binary')
   }
 }
 
