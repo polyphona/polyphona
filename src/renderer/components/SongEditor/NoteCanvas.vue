@@ -127,7 +127,7 @@
         box = canvasAdapter.clip(this.renderContext, box)
         const note = canvasAdapter.toNote(this.renderContext, box)
         const existingNote = this.$store.getters['MusicStore/listNotes'].filter((value) => note.disturbs(value))
-        if (existingNote.length > 0) { // There is an existing note same as or wrapping the new one : we delete note
+        if (existingNote.length > 0) { // There is an existing note : we delete note
           this.$store.dispatch('MusicStore/deleteNote', existingNote[0])
         } else { // there are no problematic notes : we add a new note
           this.addNoteFromBox(box)
