@@ -57,8 +57,11 @@ const mutations = {
       )
     })
   },
-  TOGGLE_PLAY (state) {
-    state.musicContext.playing = !state.musicContext.playing
+  START (state) {
+    state.musicContext.playing = true
+  },
+  STOP (state) {
+    state.musicContext.playing = false
   },
   SET_OCTAVE (state, octave) {
     state.musicContext.octave = octave
@@ -84,6 +87,7 @@ const actions = {
     context.dispatch('restart')
   },
   play ({commit}, offset) {
+    commit('START')
     commit('SCHEDULE_NOTES')
     // Loop one measure ad eternam
     Tone.Transport.loopEnd = '1m'
@@ -91,7 +95,8 @@ const actions = {
     // Start the song now, but offset by `offset`.
     Tone.Transport.start(Tone.Transport.now(), offset)
   },
-  stop () {
+  stop ({commit}) {
+    commit('STOP')
     Tone.Transport.stop()
     // Cancel all note events so they are not played again
     // when the transport starts again.
@@ -110,7 +115,6 @@ const actions = {
     } else {
       context.dispatch('play')
     }
-    context.commit('TOGGLE_PLAY')
   },
   updateOctave (context, octave) {
     context.commit('SET_OCTAVE', octave)
