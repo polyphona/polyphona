@@ -6,7 +6,7 @@ const division = 4
 const scale = SCALE
 // NOTE: synthesizer cannot be in the store because Tone modifies this value
 // (and does so outside of a mutation, which Vuex does not like).
-const synthesizer = new Tone.PluckSynth().toMaster()
+const synthesizer = new Tone.Synth().toMaster()
 Tone.Transport.bpm.value = 120
 
 const state = {
@@ -49,8 +49,9 @@ const mutations = {
         (time) => {
           synthesizer.triggerAttackRelease(
             pitch,
-            toTransportTime(note.duration),
-            time
+            toTransportTime(state.musicContext, note.duration),
+            time,
+            note.velocity
           )
         },
         toTransportTime(state.musicContext, note.startTime)
