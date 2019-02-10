@@ -137,9 +137,19 @@ const actions = {
       track.note(notePitch, note.startTime, note.duration / 8, note.velocity)
     }
     const {dialog} = require('electron').remote
-    var path = dialog.showSaveDialog()
+    const path = dialog.showSaveDialog({
+      'filters': [
+        {
+          'name': 'MIDI',
+          'extensions': ['midi']
+        }
+      ]
+    })
+    if (!path) {
+      return
+    }
     // write the output in the path chosen by the user
-    fs.writeFileSync(path + '.mid', midi.encode(), 'binary')
+    fs.writeFileSync(path, midi.encode(), 'binary')
   }
 }
 
