@@ -1,5 +1,6 @@
 <template>
   <div id="home">
+    <load-dialog v-if="showLoadDialog" v-on:close="showLoadDialog = false"></load-dialog>
     <song-editor></song-editor>
   </div>
 </template>
