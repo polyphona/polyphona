@@ -43,6 +43,10 @@
       playing () {
         return this.$store.getters['MusicStore/getPlaying']
       }
+    },
+    destroyed () {
+      // Prevent music from keeping playing when navigating to another page.
+      this.$store.dispatch('MusicStore/stop')
     }
   }
 </script>

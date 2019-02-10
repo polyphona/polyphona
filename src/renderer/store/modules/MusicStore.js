@@ -6,7 +6,7 @@ const division = 4
 const scale = SCALE
 // NOTE: synthesizer cannot be in the store because Tone modifies this value
 // (and does so outside of a mutation, which Vuex does not like).
-const synthesizer = new Tone.PluckSynth().toMaster()
+const synthesizer = new Tone.Synth().toMaster()
 Tone.Transport.bpm.value = 120
 
 const state = {
@@ -17,9 +17,6 @@ const state = {
     octave: 2,
     playing: false
   },
-  // Mapping of note IDs to transport event IDs.
-  // Used to un-schedule an event when a note is deleted.
-  schedule: new Map(),
   renderContext: {
     // Percentage of the canvas filled by one tick, from 0 to 100.
     percentPerTick: 100 / (4 * division),
@@ -42,21 +39,30 @@ const mutations = {
   },
   DELETE_NOTE (state, note) {
     state.currentTrack.deleteNote(note)
-    const eventId = state.schedule.get(note.id)
-    if (eventId) {
-      Tone.Transport.clear(eventId)
-    }
   },
   SCHEDULE_NOTES (state) {
     state.currentTrack.notes.forEach((note) => {
-      const pitch = state.musicContext.scale[note.pitch] + state.musicContext.octave
-      const trigger = (time) => synthesizer.triggerAttackRelease(pitch, toTransportTime(state.musicContext, note.duration), time)
-      const eventId = Tone.Transport.schedule(trigger, toTransportTime(state.musicContext, note.startTime))
-      state.schedule.set(note.id, eventId)
+      const pitch = (
+        state.musicContext.scale[note.pitch] + state.musicContext.octave
+      )
+      Tone.Transport.schedule(
+        (time) => {
+          synthesizer.triggerAttackRelease(
+            pitch,
+            toTransportTime(state.musicContext, note.duration),
+            time,
+            note.velocity
+          )
+        },
+        toTransportTime(state.musicContext, note.startTime)
+      )
     })
   },
-  TOGGLE_PLAY (state) {
-    state.musicContext.playing = !state.musicContext.playing
+  START (state) {
+    state.musicContext.playing = true
+  },
+  STOP (state) {
+    state.musicContext.playing = false
   },
   SET_OCTAVE (state, octave) {
     state.musicContext.octave = octave
@@ -82,6 +88,7 @@ const actions = {
     context.dispatch('restart')
   },
   play ({commit}, offset) {
+    commit('START')
     commit('SCHEDULE_NOTES')
     // Loop one measure ad eternam
     Tone.Transport.loopEnd = '1m'
@@ -89,8 +96,12 @@ const actions = {
     // Start the song now, but offset by `offset`.
     Tone.Transport.start(Tone.Transport.now(), offset)
   },
-  stop () {
+  stop ({commit}) {
+    commit('STOP')
     Tone.Transport.stop()
+    // Cancel all note events so they are not played again
+    // when the transport starts again.
+    Tone.Transport.cancel()
   },
   restart (context) {
     if (context.state.musicContext.playing) {
@@ -105,7 +116,6 @@ const actions = {
     } else {
       context.dispatch('play')
     }
-    context.commit('TOGGLE_PLAY')
   },
   updateOctave (context, octave) {
     context.commit('SET_OCTAVE', octave)
