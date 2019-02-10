@@ -13,3 +13,5 @@ thumbs.db
 __pycache__/
 *.py[odc]
 *.mid
+env/
+venv/

@@ -1,12 +1,5 @@
 <template>
-  <div>
-    <h1>Polyphona</h1>
-    <p>
-      <router-link to="login">Login</router-link>
-    </p>
-    <p>
-      <router-link to="register">Create an account</router-link>
-    </p>
+  <div id="home">
     <song-editor></song-editor>
   </div>
 </template>
@@ -21,4 +14,7 @@
 </script>
 
 <style lang="scss" scoped>
+  #home {
+    height: 100%;
+  }
 </style>

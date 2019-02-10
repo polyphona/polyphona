@@ -9,10 +9,11 @@ clip(15.01, 2.5) => 15.0
 const clip = (value, increment) => Math.floor(value / increment) * increment
 
 export class Note {
-  constructor (startTime, duration, pitch) {
+  constructor (startTime, duration, pitch, velocity = 0.8) {
     this.startTime = startTime
     this.duration = duration
     this.pitch = pitch
+    this.velocity = velocity
     this.id = undefined
   }
 
@@ -28,32 +29,33 @@ export class Note {
 
 export class NoteCanvasAdapter {
   toBox (renderContext, note) {
+    const height = renderContext.percentPerInterval
     return {
       id: note.id,
-      x: renderContext.percentPerQuarter * note.startTime,
-      y: renderContext.percentPerInterval * note.pitch,
-      width: renderContext.percentPerQuarter * note.duration,
-      height: renderContext.percentPerInterval
+      x: renderContext.percentPerTick * note.startTime,
+      y: 100 - (height + renderContext.percentPerInterval * note.pitch),
+      width: renderContext.percentPerTick * note.duration,
+      height
     }
   }
 
   toNote (renderContext, box) {
-    const width = Math.floor(box.width / renderContext.percentPerQuarter)
-    if (!width) {
+    const duration = Math.floor(box.width / renderContext.percentPerTick)
+    if (!duration) {
       throw new NoteTooSmallException()
     }
     return new Note(
-      Math.floor(box.x / renderContext.percentPerQuarter),
-      width,
-      Math.floor(box.y / renderContext.percentPerInterval)
+      Math.floor(box.x / renderContext.percentPerTick),
+      duration,
+      Math.floor((100 - (box.y + box.height)) / renderContext.percentPerInterval)
     )
   }
 
   clip (renderContext, box) {
     return {
-      x: clip(box.x, renderContext.percentPerQuarter),
+      x: clip(box.x, renderContext.percentPerTick),
       y: clip(box.y, renderContext.percentPerInterval),
-      width: clip(box.width, renderContext.percentPerQuarter),
+      width: clip(box.width, renderContext.percentPerTick),
       height: clip(box.height, renderContext.percentPerInterval)
     }
   }
@@ -75,4 +77,20 @@ export class Track {
     const index = this.notes.indexOf(note)
     this.notes.splice(index, 1)
   }
+}
+
+export const SCALE = {
+  0: 'C',
+  1: 'C#',
+  2: 'D',
+  3: 'D#',
+  4: 'E',
+  5: 'F',
+  6: 'F#',
+  7: 'G',
+  8: 'G#',
+  9: 'A',
+  10: 'A#',
+  11: 'B',
+  12: 'C'
 }

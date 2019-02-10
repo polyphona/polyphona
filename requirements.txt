@@ -1,4 +1,4 @@
 falcon
+falcon-cors
 gunicorn
-sqlite3
 pytest
