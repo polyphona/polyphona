@@ -1,69 +1,69 @@
 <template>
-  <div class="wrapper">
-    <!-- Show the names of the notes in a column. -->
-    <ol id="note-pitches">
-      <li v-for="pitch in pitches" :key="'pitch-' + pitch.id">{{ pitch.name }}</li>
-    </ol>
-    <div class="canvas-wrapper">
-      <!-- Canvas layers. -->
-      <canvas ref="background" class="background"></canvas>
-      <canvas ref="notes" class="layer"></canvas>
-      <canvas ref="decorations" class="layer"></canvas>
-      <canvas
-        ref="foreground"
-        class="layer"
-        @click="onClick"
-        @mousedown="onMouseDown"
-        @mouseup="onMouseUp"
-        @mousemove="onMouseMove"
-        @mouseleave="onMouseLeave"
-      ></canvas>
+    <div class="wrapper">
+        <!-- Show the names of the notes in a column. -->
+        <ol id="note-pitches">
+            <li v-for="pitch in pitches" :key="'pitch-' + pitch.id">{{ pitch.name }}</li>
+        </ol>
+        <div class="canvas-wrapper">
+            <!-- Canvas layers. -->
+            <canvas ref="background" class="background"></canvas>
+            <canvas ref="notes" class="layer"></canvas>
+            <canvas ref="decorations" class="layer"></canvas>
+            <canvas
+                    ref="foreground"
+                    class="layer"
+                    @click="onClick"
+                    @mousedown="onMouseDown"
+                    @mouseup="onMouseUp"
+                    @mousemove="onMouseMove"
+                    @mouseleave="onMouseLeave"
+            ></canvas>
 
-      <!-- Progress bar -->
-      <canvas-line
-        v-if="playing"
-        :x="progressX"
-        :vertical="true"
-        :width="3"
-        color="red"
-        layer="decorations"
-      ></canvas-line>
+            <!-- Progress bar -->
+            <canvas-line
+                    v-if="playing"
+                    :x="progressX"
+                    :vertical="true"
+                    :width="3"
+                    color="red"
+                    layer="decorations"
+            ></canvas-line>
 
-      <!-- Delimiters of notes on the canvas -->
-      <canvas-line
-        v-for="delimiter in delimiters"
-        :x="delimiter.x"
-        :y="delimiter.y"
-        :vertical="delimiter.vertical"
-        :width="delimiter.width"
-        :key="'delimiter-' + delimiter.id"
-        layer="background"
-      ></canvas-line>
+            <!-- Delimiters of notes on the canvas -->
+            <canvas-line
+                    v-for="delimiter in delimiters"
+                    :x="delimiter.x"
+                    :y="delimiter.y"
+                    :vertical="delimiter.vertical"
+                    :width="delimiter.width"
+                    :key="'delimiter-' + delimiter.id"
+                    layer="background"
+            ></canvas-line>
 
-      <!-- Note being created (if any) -->
-      <note-box
-        v-if="newBox"
-        :x="newBox.x"
-        :y="newBox.y"
-        :width="newBox.width"
-        :height="newBox.height"
-        :color="'#ffe17f'"
-        layer="foreground"
-      ></note-box>
+            <!-- Note being created (if any) -->
+            <note-box
+                    v-if="newBox"
+                    :x="newBox.x"
+                    :y="newBox.y"
+                    :width="newBox.width"
+                    :height="newBox.height"
+                    :color="'#ffe17f'"
+                    layer="foreground"
+            ></note-box>
 
-      <!-- Notes in the song. -->
-      <note-box
-        v-for="box in noteBoxes"
-        :key="'note-' + box.id"
-        :x="box.x"
-        :y="box.y"
-        :width="box.width"
-        :height="box.height"
-        :color="'#f6cd4c'"
-        layer="notes"
-      ></note-box>
+            <!-- Notes in the song. -->
+            <note-box
+                    v-for="box in noteBoxes"
+                    :key="'note-' + box.id"
+                    :x="box.x"
+                    :y="box.y"
+                    :width="box.width"
+                    :height="box.height"
+                    :color="'#f6cd4c'"
+                    layer="notes"
+            ></note-box>
+        </div>
     </div>
-  </div>
 </template>
 
 <script>
@@ -275,19 +275,22 @@
         this.newBox = canvasAdapter.clip(this.renderContext, this.newBox)
       },
       onMouseUp (event) {
-        try {
-          this.dragging = false
-          let box = this.newBox
-          const note = canvasAdapter.toNote(this.renderContext, box)
-          const problematicNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.disturbs(value))
-          if (problematicNotes.length === 0) { // there are no problematic notes : we add a new note
-            this.addNoteFromBox(box)
-          }
-          this.newBox = null
-        } catch (e) {
-          if (e instanceof NoteTooSmallException) {
+        if (this.dragging) {
+          try {
+            let box = this.newBox
+            const note = canvasAdapter.toNote(this.renderContext, box)
+            const problematicNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.disturbs(value))
+            if (problematicNotes.length === 0) { // there are no problematic notes : we add a new note
+              this.addNoteFromBox(box)
+            }
+            this.newBox = null
+          } catch (e) {
+            if (e instanceof NoteTooSmallException) {
+            }
           }
         }
+        this.dragging = false
+        this.newBox = null
       },
       onMouseLeave (event) {
         this.dragging = false
@@ -299,39 +302,43 @@
 </script>
 
 <style lang="scss" scoped>
-  @import "../../styles/_bootstrap_override.scss";
-  .wrapper {
-    // position: relative;
-    display: flex;
-  }
-  #note-pitches {
-    display: flex;
-    flex-flow: column;
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    text-align: center;
-    color: map-get($theme-colors, "light");
-    background: map-get($theme-colors, "dark");
-    li {
-      padding: 0 .5em;
-      margin: auto 0;
-    }
-  }
-  .canvas-wrapper {
-    position: relative;
-    height: 100%;
-    flex: 1;
+    @import "../../styles/_bootstrap_override.scss";
 
-    .background {
-      background: map-get($theme-colors, "light");
+    .wrapper {
+        // position: relative;
+        display: flex;
     }
 
-    .layer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      background: transparent;
+    #note-pitches {
+        display: flex;
+        flex-flow: column;
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        text-align: center;
+        color: map-get($theme-colors, "light");
+        background: map-get($theme-colors, "dark");
+
+        li {
+            padding: 0 .5em;
+            margin: auto 0;
+        }
     }
-  }
+
+    .canvas-wrapper {
+        position: relative;
+        height: 100%;
+        flex: 1;
+
+        .background {
+            background: map-get($theme-colors, "light");
+        }
+
+        .layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: transparent;
+        }
+    }
 </style>
