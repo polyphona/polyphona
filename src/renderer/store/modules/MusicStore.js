@@ -1,6 +1,7 @@
 import Tone from 'tone'
 
 import {Track, SCALE} from '../Music'
+import {remote} from 'electron'
 
 const division = 4
 const scale = SCALE
@@ -134,10 +135,12 @@ const actions = {
       const note = notes[i]
       const notePitch = scale[note.pitch].toLowerCase() + context.state.musicContext.octave.toString()
       // note events: note, time, duration
-      track.note(notePitch, note.startTime, note.duration)
+      track.note(notePitch, note.startTime, note.duration / 5, note.velocity + 0.2)
     }
-    // write the output
-    fs.writeFileSync('output.mid', midi.encode(), 'binary')
+    const {dialog} = require('electron').remote
+    var path = dialog.showSaveDialog()
+    // write the output in the path chosen by the user
+    fs.writeFileSync(path + '.mid', midi.encode(), 'binary')
   }
 }
 
