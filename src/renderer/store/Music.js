@@ -17,12 +17,14 @@ export class Note {
     this.velocity = velocity
   }
 
-  /* True if the note collides with existing note with the same pitch */
-  collides (note) {
-    const samePitch = note.pitch === this.pitch
-    const endNoteCollide = note.startTime <= this.startTime && note.startTime + note.duration >= this.startTime + this.duration
-    const startNoteCollide = note.startTime >= this.startTime && note.startTime + note.duration <= this.startTime + this.duration
-    return samePitch && (endNoteCollide || startNoteCollide)
+  /*
+  Returns true if this note collides in any manner with the argument note
+   */
+  disturbs (note) {
+    var samePitch = Boolean(note.pitch === this.pitch)
+    var disturbs = Boolean(!(this.startTime + this.duration < note.startTime || this.startTime > note.startTime + note.duration))
+    var juxtaposed = Boolean(this.startTime === note.startTime + note.duration || this.startTime + this.duration === note.startTime)
+    return (samePitch && disturbs) && !juxtaposed
   }
 }
 

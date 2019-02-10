@@ -223,10 +223,10 @@
         }
         box = canvasAdapter.clip(this.renderContext, box)
         const note = canvasAdapter.toNote(this.renderContext, box)
-        const collidingNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.collides(value))
-        if (collidingNotes.length > 0) {
-          collidingNotes.forEach((note) => this.$store.dispatch('MusicStore/deleteNote', note))
-        } else {
+        const existingNote = this.$store.getters['MusicStore/listNotes'].filter((value) => note.disturbs(value))
+        if (existingNote.length > 0) { // There is an existing note : we delete note
+          this.$store.dispatch('MusicStore/deleteNote', existingNote[0])
+        } else { // there are no problematic notes : we add a new note
           this.addNoteFromBox(box)
         }
         this.clicking = false
@@ -276,7 +276,24 @@
       },
       onMouseUp (event) {
         if (this.dragging) {
-          this.addNoteFromBox(this.newBox)
+          try {
+            let box = this.newBox
+            if (box.width < 0) {
+              // This is the case if we dragged the note to the left.
+              box.width *= -1
+              box.x -= box.width
+            }
+            const note = canvasAdapter.toNote(this.renderContext, box)
+            const problematicNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.disturbs(value))
+            if (problematicNotes.length === 0) {
+              // there are no problematic notes => we can add a new note
+              this.addNoteFromBox(box)
+            }
+            this.newBox = null
+          } catch (e) {
+            if (e instanceof NoteTooSmallException) {
+            }
+          }
         }
         this.dragging = false
         this.newBox = null
@@ -291,39 +308,43 @@
 </script>
 
 <style lang="scss" scoped>
-  @import "../../styles/_bootstrap_override.scss";
-  .wrapper {
-    // position: relative;
-    display: flex;
-  }
-  #note-pitches {
-    display: flex;
-    flex-flow: column;
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    text-align: center;
-    color: map-get($theme-colors, "light");
-    background: map-get($theme-colors, "dark");
-    li {
-      padding: 0 .5em;
-      margin: auto 0;
-    }
-  }
-  .canvas-wrapper {
-    position: relative;
-    height: 100%;
-    flex: 1;
+    @import "../../styles/_bootstrap_override.scss";
 
-    .background {
-      background: map-get($theme-colors, "light");
+    .wrapper {
+        // position: relative;
+        display: flex;
     }
 
-    .layer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      background: transparent;
+    #note-pitches {
+        display: flex;
+        flex-flow: column;
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        text-align: center;
+        color: map-get($theme-colors, "light");
+        background: map-get($theme-colors, "dark");
+
+        li {
+            padding: 0 .5em;
+            margin: auto 0;
+        }
     }
-  }
+
+    .canvas-wrapper {
+        position: relative;
+        height: 100%;
+        flex: 1;
+
+        .background {
+            background: map-get($theme-colors, "light");
+        }
+
+        .layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: transparent;
+        }
+    }
 </style>
