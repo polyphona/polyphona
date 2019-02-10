@@ -23,7 +23,8 @@ export class Note {
   disturbs (note) {
     var samePitch = Boolean(note.pitch === this.pitch)
     var disturbs = Boolean(!(this.startTime + this.duration < note.startTime || this.startTime > note.startTime + note.duration))
-    return samePitch && disturbs
+    var juxtaposed = Boolean(this.startTime === note.startTime + note.duration || this.startTime + this.duration === note.startTime)
+    return (samePitch && disturbs) && !juxtaposed
   }
 }
 
