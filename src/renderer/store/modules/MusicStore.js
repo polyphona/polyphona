@@ -1,6 +1,8 @@
 import Tone from 'tone'
-
+import {remote} from 'electron'
 import {Track, SCALE} from '../Music'
+import fs from 'fs'
+import * as MidiConvert from 'simonadcock-midiconvert'
 
 const division = 4
 const scale = SCALE
@@ -121,23 +123,32 @@ const actions = {
     context.commit('SET_OCTAVE', octave)
     context.dispatch('restart')
   },
-  exportMidi (context) {
-    var fs = require('fs')
-    var MidiConvert = require('simonadcock-midiconvert')
-    var midi = MidiConvert.create()
-    // add a track
-    var track = midi.track()
-    // select an instrument by its MIDI patch number
-      .patch(32)
-    const notes = context.state.currentTrack.notes
-    for (var i = 0; i < notes.length; i++) {
-      const note = notes[i]
-      const notePitch = scale[note.pitch].toLowerCase() + context.state.musicContext.octave.toString()
-      // note events: note, time, duration
-      track.note(notePitch, note.startTime, note.duration / 8, note.velocity)
-    }
-    const {dialog} = require('electron').remote
-    const path = dialog.showSaveDialog({
+  exportMidi ({state}) {
+    const midi = MidiConvert.create()
+
+    // TODO: make channel/instrument customizable
+    const channel = 32
+    const track = midi.track().patch(channel)
+
+    const toMidiTime = (canvasTime) => (
+      canvasTime /
+      state.musicContext.division /
+      (Tone.Transport.bpm.value / 60)
+    )
+
+    state.currentTrack.notes.forEach((note) => {
+      const pitch = (
+        scale[note.pitch].toLowerCase() + state.musicContext.octave.toString()
+      )
+      track.note(
+        pitch,
+        toMidiTime(note.startTime),
+        toMidiTime(note.duration),
+        note.velocity
+      )
+    })
+
+    const path = remote.dialog.showSaveDialog({
       'filters': [
         {
           'name': 'MIDI',
