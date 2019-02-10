@@ -1,6 +1,6 @@
 import Tone from 'tone'
 import http from '../../utils/http'
-import {Track, SCALE} from '../Music'
+import {Track, SCALE, TrackLoader} from '../Music'
 
 const division = 4
 const scale = SCALE
@@ -73,8 +73,7 @@ const mutations = {
     state.savedTracks = savedTracks
   },
   LOAD_TRACK (state, {track, id}) {
-    console.log(id)
-    state.currentTrack = track
+    state.currentTrack = TrackLoader.toTrack(track)
     state.currentTrack.remoteId = id
   }
 }

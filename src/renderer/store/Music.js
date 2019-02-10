@@ -78,6 +78,16 @@ export class Track {
   }
 }
 
+export class TrackLoader {
+  static toTrack (data) {
+    let track = new Track(data.id, data.name)
+    for (const note of data.notes) {
+      track.addNote(new Note(note.startTime, note.duration, note.pitch))
+    }
+    return track
+  }
+}
+
 export const SCALE = {
   0: 'C',
   1: 'C#',
