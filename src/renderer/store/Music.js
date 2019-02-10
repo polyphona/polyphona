@@ -13,6 +13,7 @@ export class Note {
     this.startTime = startTime
     this.duration = duration
     this.pitch = pitch
+    this.velocity = velocity
     this.id = undefined
     this.velocity = velocity
   }
