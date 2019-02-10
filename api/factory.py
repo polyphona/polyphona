@@ -1,9 +1,6 @@
 """API factory."""
 
-# server.py
-# use : gunicorn server:app
-# api : https://hackmd.io/eNiNVR6eR1mJH2kOebtE5g#
-#
+# API specification: https://hackmd.io/eNiNVR6eR1mJH2kOebtE5g#
 
 from falcon import API
 from falcon_cors import CORS
