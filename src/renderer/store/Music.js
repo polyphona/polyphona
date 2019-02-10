@@ -13,8 +13,8 @@ export class Note {
     this.startTime = startTime
     this.duration = duration
     this.pitch = pitch
-    this.velocity = velocity
     this.id = undefined
+    this.velocity = velocity
   }
 
   /* True if the note collides with existing note with the same pitch */
