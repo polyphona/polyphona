@@ -74,7 +74,7 @@ function createWindow () {
         {
           type: 'separator'
         },
-        isMac ? { role: 'close' } : { role: 'quit' }
+        isMac ? {role: 'close'} : {role: 'quit'}
       ]
     },
     {

@@ -19,8 +19,8 @@ export class Note {
     }
 
     this.pitch = pitch
-    this.velocity = velocity
     this.id = undefined
+    this.velocity = velocity
   }
 
   /*

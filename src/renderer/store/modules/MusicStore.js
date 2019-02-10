@@ -120,6 +120,26 @@ const actions = {
   updateOctave (context, octave) {
     context.commit('SET_OCTAVE', octave)
     context.dispatch('restart')
+  },
+  exportMidi (context) {
+    var fs = require('fs')
+    var MidiConvert = require('simonadcock-midiconvert')
+    var midi = MidiConvert.create()
+    // add a track
+    var track = midi.track()
+    // select an instrument by its MIDI patch number
+      .patch(32)
+    const notes = context.state.currentTrack.notes
+    for (var i = 0; i < notes.length; i++) {
+      const note = notes[i]
+      const notePitch = scale[note.pitch].toLowerCase() + context.state.musicContext.octave.toString()
+      // note events: note, time, duration
+      track.note(notePitch, note.startTime, note.duration / 8, note.velocity)
+    }
+    const {dialog} = require('electron').remote
+    var path = dialog.showSaveDialog()
+    // write the output in the path chosen by the user
+    fs.writeFileSync(path + '.mid', midi.encode(), 'binary')
   }
 }
 
