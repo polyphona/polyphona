@@ -12,3 +12,4 @@ thumbs.db
 *.db
 __pycache__/
 *.py[odc]
+*.mid
