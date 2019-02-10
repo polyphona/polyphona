@@ -17,45 +17,9 @@ export class Note {
   }
 
   /*
-    Handles case where an existing note has a colliding part with the new note
-     */
-  collides (note) {
-    var samePitch = Boolean(note.pitch === this.pitch)
-    var endSuperpose = Boolean(note.startTime < this.startTime && this.startTime < note.startTime + note.duration)
-    var startSuperpose = Boolean(this.startTime < note.startTime && note.startTime < this.startTime + this.duration)
-    // var endNoteCollide = Boolean(note.startTime < this.startTime && note.startTime + note.duration < this.startTime + this.duration)
-    // var startNoteCollide = Boolean(note.startTime > this.startTime && note.startTime + note.duration > this.startTime + this.duration)
-    // return samePitch && (endNoteCollide || startNoteCollide) && superpose
-    console.log('collides booleans : ', samePitch, endSuperpose, startSuperpose, 'result : ', samePitch && (endSuperpose || startSuperpose))
-    return samePitch && (endSuperpose || startSuperpose)
-  }
-
-  /*
-  Handles case when the new note is contained or equal to an existing note
+  Returns true if this note collides in any manner with the argument note
    */
-  EqualOrcontainedInNote (note) {
-    var samePitch = Boolean(note.pitch === this.pitch)
-    var startSameOrGreater = Boolean(note.startTime <= this.startTime)
-    var endSameOrLess = Boolean(note.startTime + note.duration >= this.startTime + this.duration)
-    var durationSameOrLess = Boolean(note.duration >= this.duration)
-    return samePitch && startSameOrGreater && endSameOrLess && durationSameOrLess
-  }
-
-  /*
-  Handles case when the new note overrides an existing note
-   */
-  containsNote (note) {
-    var samePitch = Boolean(note.pitch === this.pitch)
-    var durationGreater = Boolean(note.duration < this.duration)
-    var startSameOrLess = Boolean(this.startTime + this.duration > note.startTime >= this.startTime)
-    var endSameOrGreater = Boolean(note.startTime + note.duration <= this.startTime + this.duration)
-    return samePitch && durationGreater && startSameOrLess && endSameOrGreater
-  }
-
-  /*
-  Handles all 3 cases above
-   */
-  distrubs (note) {
+  disturbs (note) {
     var samePitch = Boolean(note.pitch === this.pitch)
     var disturbs = Boolean(!(this.startTime + this.duration < note.startTime || this.startTime > note.startTime + note.duration))
     return samePitch && disturbs

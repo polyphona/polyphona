@@ -155,40 +155,11 @@
         let box = this.newBox
         // TODO ajouter bloc try pour toosmallexception
         const note = canvasAdapter.toNote(this.renderContext, box)
-        const problematicNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.distrubs(value))
-        /*
-        const collidingNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.collides(value))
-        const wrappingNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.EqualOrcontainedInNote(value))
-        const wrappedNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.containsNote(value))
-        console.log('collide', collidingNotes, 'wrapping', wrappingNotes, 'wrapped', wrappedNotes)
-        if (collidingNotes[0] || wrappingNotes.length > 0 || wrappedNotes.length > 0) { // If there are existing notes colliding
-          if (wrappingNotes.length > 0) { // There is an existing note wrapping the new one : we don't add the new note
-            this.$store.dispatch('MusicStore/deleteNote', note)
-          }
-          if (collidingNotes[0]) { // There are notes colliding at the end or start of the new note : We add the new note & delete old one
-            console.log('sorry, there exists colliding notes')
-            console.log('colliding notes : ', collidingNotes)
-            for (var j = 0; j < wrappedNotes.length; j++) {
-              this.$store.dispatch('MusicStore/deleteNote', collidingNotes[j])
-            }
-            this.$store.dispatch('MusicStore/addNote', note)
-          }
-          if (wrappedNotes.length > 0) { // There exists wrapped notes : We delete old notes
-            for (var i = 0; i < wrappedNotes.length; i++) {
-              // console.log('wrapped note deleted')
-              this.$store.dispatch('MusicStore/deleteNote', wrappedNotes[i])
-            }
-          } */
+        const problematicNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.disturbs(value))
         if (problematicNotes.length === 0) { // there are no problematic notes : we add a new note
           this.addNoteFromBox(box)
         }
         this.newBox = null
-        /*
-        onMouseUp :
-        this.dragging = false
-        this.addNoteFromBox(this.newBox)
-        this.newBox = null
-         */
       },
       onMouseLeave (event) {
         this.dragging = false
