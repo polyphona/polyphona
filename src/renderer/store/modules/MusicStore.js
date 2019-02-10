@@ -135,12 +135,11 @@ const actions = {
   },
   async getSavedTracks ({state, commit, rootState}) {
     const {data: res} = await http.get('users/' + rootState.auth.user.username + '/songs')
-    console.log(res)
     commit('SAVED_TRACKS', res)
   },
   loadSavedTrack ({state, commit}, id) {
     const track = state.savedTracks.find(track => track.id === id)
-    commit('LOAD_TRACK', track, id)
+    commit('LOAD_TRACK', track.tracks[0], id) // Not good but necessary, will change when we upgrade the local song model
   }
 }
 
