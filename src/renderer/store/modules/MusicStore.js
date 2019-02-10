@@ -1,7 +1,6 @@
 import Tone from 'tone'
 
 import {Track, SCALE} from '../Music'
-import {remote} from 'electron'
 
 const division = 4
 const scale = SCALE
@@ -135,7 +134,7 @@ const actions = {
       const note = notes[i]
       const notePitch = scale[note.pitch].toLowerCase() + context.state.musicContext.octave.toString()
       // note events: note, time, duration
-      track.note(notePitch, note.startTime, note.duration / 5, note.velocity + 0.2)
+      track.note(notePitch, note.startTime, note.duration / 8, note.velocity)
     }
     const {dialog} = require('electron').remote
     var path = dialog.showSaveDialog()
