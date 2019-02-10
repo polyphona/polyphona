@@ -7,12 +7,6 @@
     <p>
       <router-link to="register">Create an account</router-link>
     </p>
-    <p @click="save">
-      Save
-    </p>
-    <p @click="open">
-      Open
-    </p>
     <load-dialog v-if="showLoadDialog" v-on:close="showLoadDialog = false"></load-dialog>
     <song-editor></song-editor>
   </div>
@@ -30,7 +24,7 @@
       save () {
         this.$store.dispatch('MusicStore/getSavedTracks')
       },
-      open () {
+      load () {
         this.$store.dispatch('MusicStore/getSavedTracks')
         this.showLoadDialog = true
       }
@@ -39,11 +33,16 @@
       return {
         showLoadDialog: false
       }
+    },
+    mounted () {
+      this.$electron.ipcRenderer.on('saving', () => {
+        store.dispatch('MusicStore/saveTrack')
+      })
+      this.$electron.ipcRenderer.on('load', () => {
+        this.load()
+      })
     }
   }
-  require('electron').ipcRenderer.on('saving', () => {
-    store.dispatch('MusicStore/saveTrack')
-  })
 </script>
 
 <style lang="scss" scoped>
