@@ -51,6 +51,15 @@ export class Note {
     var endSameOrGreater = Boolean(note.startTime + note.duration <= this.startTime + this.duration)
     return samePitch && durationGreater && startSameOrLess && endSameOrGreater
   }
+
+  /*
+  Handles all 3 cases above
+   */
+  distrubs (note) {
+    var samePitch = Boolean(note.pitch === this.pitch)
+    var disturbs = Boolean(!(this.startTime + this.duration < note.startTime || this.startTime > note.startTime + note.duration))
+    return samePitch && disturbs
+  }
 }
 
 export class NoteCanvasAdapter {

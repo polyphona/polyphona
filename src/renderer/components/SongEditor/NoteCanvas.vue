@@ -151,11 +151,12 @@
         this.newBox = canvasAdapter.clip(this.renderContext, this.newBox)
       },
       onMouseUp (event) {
-        console.log('onMouseUp event')
         this.dragging = false
         let box = this.newBox
         // TODO ajouter bloc try pour toosmallexception
         const note = canvasAdapter.toNote(this.renderContext, box)
+        const problematicNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.distrubs(value))
+        /*
         const collidingNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.collides(value))
         const wrappingNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.EqualOrcontainedInNote(value))
         const wrappedNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.containsNote(value))
@@ -177,8 +178,8 @@
               // console.log('wrapped note deleted')
               this.$store.dispatch('MusicStore/deleteNote', wrappedNotes[i])
             }
-          }
-        } else { // there are no problematic notes : we add a new note
+          } */
+        if (problematicNotes.length === 0) { // there are no problematic notes : we add a new note
           this.addNoteFromBox(box)
         }
         this.newBox = null
