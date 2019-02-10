@@ -10,14 +10,8 @@ const clip = (value, increment) => Math.floor(value / increment) * increment
 
 export class Note {
   constructor (startTime, duration, pitch, velocity = 0.8) {
-    if (duration > 0) {
-      this.startTime = startTime
-      this.duration = duration
-    } else {
-      this.startTime = startTime + duration
-      this.duration = -duration
-    }
-
+    this.startTime = startTime
+    this.duration = duration
     this.pitch = pitch
     this.id = undefined
     this.velocity = velocity

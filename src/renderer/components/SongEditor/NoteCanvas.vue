@@ -1,69 +1,69 @@
 <template>
-    <div class="wrapper">
-        <!-- Show the names of the notes in a column. -->
-        <ol id="note-pitches">
-            <li v-for="pitch in pitches" :key="'pitch-' + pitch.id">{{ pitch.name }}</li>
-        </ol>
-        <div class="canvas-wrapper">
-            <!-- Canvas layers. -->
-            <canvas ref="background" class="background"></canvas>
-            <canvas ref="notes" class="layer"></canvas>
-            <canvas ref="decorations" class="layer"></canvas>
-            <canvas
-                    ref="foreground"
-                    class="layer"
-                    @click="onClick"
-                    @mousedown="onMouseDown"
-                    @mouseup="onMouseUp"
-                    @mousemove="onMouseMove"
-                    @mouseleave="onMouseLeave"
-            ></canvas>
+  <div class="wrapper">
+    <!-- Show the names of the notes in a column. -->
+    <ol id="note-pitches">
+      <li v-for="pitch in pitches" :key="'pitch-' + pitch.id">{{ pitch.name }}</li>
+    </ol>
+    <div class="canvas-wrapper">
+      <!-- Canvas layers. -->
+      <canvas ref="background" class="background"></canvas>
+      <canvas ref="notes" class="layer"></canvas>
+      <canvas ref="decorations" class="layer"></canvas>
+      <canvas
+        ref="foreground"
+        class="layer"
+        @click="onClick"
+        @mousedown="onMouseDown"
+        @mouseup="onMouseUp"
+        @mousemove="onMouseMove"
+        @mouseleave="onMouseLeave"
+      ></canvas>
 
-            <!-- Progress bar -->
-            <canvas-line
-                    v-if="playing"
-                    :x="progressX"
-                    :vertical="true"
-                    :width="3"
-                    color="red"
-                    layer="decorations"
-            ></canvas-line>
+      <!-- Progress bar -->
+      <canvas-line
+        v-if="playing"
+        :x="progressX"
+        :vertical="true"
+        :width="3"
+        color="red"
+        layer="decorations"
+      ></canvas-line>
 
-            <!-- Delimiters of notes on the canvas -->
-            <canvas-line
-                    v-for="delimiter in delimiters"
-                    :x="delimiter.x"
-                    :y="delimiter.y"
-                    :vertical="delimiter.vertical"
-                    :width="delimiter.width"
-                    :key="'delimiter-' + delimiter.id"
-                    layer="background"
-            ></canvas-line>
+      <!-- Delimiters of notes on the canvas -->
+      <canvas-line
+        v-for="delimiter in delimiters"
+        :x="delimiter.x"
+        :y="delimiter.y"
+        :vertical="delimiter.vertical"
+        :width="delimiter.width"
+        :key="'delimiter-' + delimiter.id"
+        layer="background"
+      ></canvas-line>
 
-            <!-- Note being created (if any) -->
-            <note-box
-                    v-if="newBox"
-                    :x="newBox.x"
-                    :y="newBox.y"
-                    :width="newBox.width"
-                    :height="newBox.height"
-                    :color="'#ffe17f'"
-                    layer="foreground"
-            ></note-box>
+      <!-- Note being created (if any) -->
+      <note-box
+        v-if="newBox"
+        :x="newBox.x"
+        :y="newBox.y"
+        :width="newBox.width"
+        :height="newBox.height"
+        :color="'#ffe17f'"
+        layer="foreground"
+      ></note-box>
 
-            <!-- Notes in the song. -->
-            <note-box
-                    v-for="box in noteBoxes"
-                    :key="'note-' + box.id"
-                    :x="box.x"
-                    :y="box.y"
-                    :width="box.width"
-                    :height="box.height"
-                    :color="'#f6cd4c'"
-                    layer="notes"
-            ></note-box>
-        </div>
+      <!-- Notes in the song. -->
+      <note-box
+        v-for="box in noteBoxes"
+        :key="'note-' + box.id"
+        :x="box.x"
+        :y="box.y"
+        :width="box.width"
+        :height="box.height"
+        :color="'#f6cd4c'"
+        layer="notes"
+      ></note-box>
     </div>
+  </div>
 </template>
 
 <script>
@@ -278,9 +278,15 @@
         if (this.dragging) {
           try {
             let box = this.newBox
+            if (box.width < 0) {
+              // This is the case if we dragged the note to the left.
+              box.width *= -1
+              box.x -= box.width
+            }
             const note = canvasAdapter.toNote(this.renderContext, box)
             const problematicNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.disturbs(value))
-            if (problematicNotes.length === 0) { // there are no problematic notes : we add a new note
+            if (problematicNotes.length === 0) {
+              // there are no problematic notes => we can add a new note
               this.addNoteFromBox(box)
             }
             this.newBox = null
