@@ -69,10 +69,7 @@ function createWindow () {
         },
         {
           label: 'Export to MIDI',
-          accelerator: 'CmdOrCtrl+E',
-          click: () => {
-            // TODO export midi file : Je ne sais pas comment accéder aux notes depuis ici
-          }
+          accelerator: 'CmdOrCtrl+E'
         },
         {
           type: 'separator'
