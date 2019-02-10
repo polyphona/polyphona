@@ -6,11 +6,11 @@ from .parsers import parse_int
 from .decorators import authenticated, require_fields
 
 
-class GetSongListResource:
+class UserSongsResource:
     def __init__(self, db: Database):
         self.db = db
 
-    def on_get(self, req: Request, resp: Response, username: str):
+    def on_get(self, _, resp: Response, username: str):
         if self.db.user_exists(username):
             raise falcon.HTTPNotFound(title=f"No user named {username}.")
         resp.media = self.db.get_songs_by_user(username)
@@ -21,32 +21,29 @@ class SongResource:
         self.db: Database = db
 
     @authenticated
-    def on_get(self, _, resp: ResourceWarning, song_id_str: str):
-        song_id = parse_int(song_id_str)
-        resp.media = self.db.get_song_by_id(song_id)
+    def on_get(self, _, resp: Response, pk: str):
+        resp.media = self.db.get_song_by_id(id=parse_int(pk))
 
     @authenticated
     @require_fields("name", "tracks")
-    def on_put(self, req: Request, resp: Response, song_id_str):
-        song_id = parse_int(song_id_str)
-        songs = self.db.get_songs_by_user(req.username)
-        song_id_list = [song["id"] for song in songs]
-        if song_id not in song_id_list:
-            raise falcon.HTTPNotFound(title=f"Song {song_id} does not exist.")
-
-        data = req.media
-        self.db.update_song(song_id, data["name"], data["tracks"])
+    def on_put(self, req: Request, _, pk: str):
+        self.db.update_song(
+            id=parse_int(pk),
+            name=req.media["name"],
+            tracks=req.media["tracks"],
+            username=req.username,
+        )
 
     @authenticated
     @require_fields("name", "tracks")
     def on_post(self, req: Request, resp: Response):
-        data = req.media
-        song_id = self.db.create_song(data["name"], data["tracks"])
+        song_id = self.db.create_song(
+            name=req.media["name"], tracks=req.media["tracks"]
+        )
         self.db.create_song_user_link(song_id, req.username)
         resp.status = falcon.HTTP_201
 
     @authenticated
-    def on_delete(self, req: Request, resp: Response, song_id_str):
-        song_id = parse_int(song_id_str)
-        self.db.delete_song(song_id, username=req.username)
+    def on_delete(self, req: Request, resp: Response, pk: str):
+        self.db.delete_song(id=parse_int(pk), username=req.username)
         resp.status = falcon.HTTP_204

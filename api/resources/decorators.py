@@ -15,7 +15,7 @@ def authenticated(responder):
                 "Authentication credentials were not provided."
             )
 
-        username = self.db.is_token_valid(token)
+        username = self.db.reverse_token(token)
         if username is None:
             raise falcon.HTTPUnauthorized("Invalid token.")
 

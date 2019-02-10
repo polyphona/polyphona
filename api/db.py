@@ -85,13 +85,6 @@ class Database:
     def remove(self):
         os.remove(self.path)
 
-    def song_id_exists(self, id: int) -> bool:
-        with self:
-            self.cursor.execute(
-                "SELECT count(SongID) FROM songs WHERE SongID = ?", (id,)
-            )
-            return self.cursor.fetchone()[0] == 1
-
     def get_song_by_id(self, id: int) -> dict:
         with self:
             self.cursor.execute(
@@ -116,34 +109,18 @@ class Database:
                 }
 
     def get_songs_by_user(self, username: str) -> List[dict]:
-        """Return list of songs where the user is contributing
-        user_name : string
-            Name of user
-        Returns
-        -------------
-            list of dictionaries
-        """
         with self:
-            if not self.user_exists(username):
-                self.cursor.execute(
-                    """
-                    SELECT *
-                    FROM songs, song_user_links
-                    ON songs.SongID = song_user_links.SongID
-                    WHERE UserName = ?
-                    """,
-                    (username,),
-                )
-                result = self.cursor.fetchall()
-                list_of_songs = []
-                for song in result:
-                    list_of_songs.append(
-                        strings2dict(
-                            song[0], song[1], song[2], song[3], song[4]
-                        )
-                    )
-                return list_of_songs
-            return []
+            self.cursor.execute(
+                """
+                SELECT songs.SongID, SongName, Created, Updated, TracksJson
+                FROM songs, song_user_links
+                ON songs.SongID = song_user_links.SongID
+                WHERE UserName = ?
+                """,
+                (username,),
+            )
+            result = self.cursor.fetchall()
+            return [strings2dict(*song) for song in result]
 
     def create_song(self, name: str, tracks: List[dict]) -> int:
         with self:
@@ -160,13 +137,25 @@ class Database:
                 "SELECT SongID FROM songs WHERE Created = ? AND SongName = ?",
                 (now, name),
             )
-            row_id = self.cursor.fetchall()[0][0]
+            row_id: int = self.cursor.fetchall()[0][0]
             return row_id
 
-    def update_song(self, id: int, name: str, tracks: List[dict]) -> dict:
+    def update_song(
+        self, id: int, name: str, tracks: List[dict], username: str
+    ) -> dict:
         with self:
-            if not self.song_id_exists(id):
-                return None
+            self.cursor.execute(
+                """
+                SELECT songs.SongID
+                FROM songs, song_user_links
+                ON songs.SongID = song_user_links.SongID
+                WHERE songs.SongID = ?
+                AND song_user_links.UserName = ? 
+                """,
+                (id, username),
+            )
+            if self.cursor.fetchone() is None:
+                raise DoesNotExist("Song", id=id, username=username)
 
             now = datetime.datetime.now()
             self.cursor.execute(
@@ -201,6 +190,15 @@ class Database:
             )
             self.connection.commit()
 
+    def user_exists(self, username) -> bool:
+        with self:
+            self.cursor.execute(
+                "SELECT count(UserName) FROM users WHERE UserName=?",
+                (username,),
+            )
+            count, = self.cursor.fetchone()
+            return count == 0
+
     def create_user(
         self, username: str, first_name: str, last_name: str, password: str
     ):
@@ -212,18 +210,14 @@ class Database:
             )
             self.connection.commit()
 
-    def user_exists(self, username) -> bool:
+    def get_user(self, username: str) -> dict:
         with self:
             self.cursor.execute(
-                "SELECT count(UserName) FROM users WHERE UserName=?",
-                (username,),
-            )
-            return self.cursor.fetchone()[0] == 0
-
-    def get_user_info(self, username: str) -> dict:
-        with self:
-            self.cursor.execute(
-                "SELECT UserName, FirstName, LastName FROM users WHERE UserName=?",
+                """
+                SELECT UserName, FirstName, LastName
+                FROM users
+                WHERE UserName=?
+                """,
                 (username,),
             )
             username, first_name, last_name = self.cursor.fetchone()
@@ -233,102 +227,59 @@ class Database:
                 "last_name": last_name,
             }
 
-    def is_token_valid(self, token: str) -> Optional[str]:
+    def create_song_user_link(self, song_id: int, username: str):
+        with self:
+            self.cursor.execute(
+                """
+                INSERT INTO song_user_links (SongID, UserName)
+                VALUES (?,?)
+                """,
+                (song_id, username),
+            )
+            self.connection.commit()
+
+    def save_token(self, username: str, token: str):
+        with self:
+            refresh = datetime.datetime.now() + datetime.timedelta(minutes=15)
+            self.cursor.execute(
+                """
+                INSERT INTO tokens (Token, UserName, RefreshDate)
+                VALUES (?,?,?)
+                """,
+                (token, username, refresh),
+            )
+            self.connection.commit()
+
+    def reverse_token(self, token: str) -> Optional[str]:
         with self:
             self.cursor.execute(
                 "SELECT UserName FROM tokens WHERE Token=?", (token,)
             )
             result = self.cursor.fetchall()
-            if len(result) == 1:
-                return result[0][0]
-            return None
+            try:
+                username = result[0][0]
+                return username
+            except IndexError:
+                return None
 
-    def create_song_user_link(self, song_id: int, username: str) -> bool:
+    def delete_token(self, token: str):
         with self:
-            if self.song_id_exists(song_id) and not (
-                self.user_exists(username)
-            ):
-                self.cursor.execute(
-                    """
-                    INSERT INTO song_user_links (SongID, UserName)
-                    VALUES (?,?)
-                    """,
-                    (song_id, username),
-                )
-                self.connection.commit()
-                return True
-            return False
-
-    # TODO: rename to `save_token()`
-    def create_token(self, username: str, token: str) -> bool:
-        with self:
-            if not self.user_exists(username) and not self.is_token_valid(
-                token
-            ):
-                refresh = datetime.datetime.now() + datetime.timedelta(
-                    minutes=15
-                )
-                self.cursor.execute(
-                    """
-                    INSERT INTO tokens (Token, UserName, RefreshDate)
-                    VALUES (?,?,?)
-                    """,
-                    (token, username, refresh),
-                )
-                self.connection.commit()
-                return True
-            return False
-
-    def delete_token(self, token: str) -> bool:
-        with self:
-            self.cursor.execute(
-                "SELECT Token FROM tokens WHERE Token = ?", (token,)
-            )
-            result = self.cursor.fetchall()
-            if len(result) == 1:
-                self.cursor.execute(
-                    """DELETE FROM tokens WHERE Token = ?""", (token,)
-                )
-                self.connection.commit()
-                return True
-            return False
-
-    def delete_obsolete_tokens(self) -> bool:
-        with self:
-            self.cursor.execute(
-                "DELETE FROM tokens WHERE RefreshDate <= ?",
-                datetime.datetime.now(),
-            )
+            count = self.cursor.execute(
+                """DELETE FROM tokens WHERE Token = ?""", (token,)
+            ).rowcount
+            if count == 0:
+                raise DoesNotExist("Token", token=token)
             self.connection.commit()
-            return True
 
-    def check_user(self, username: str, password: str):
+    def check_user(self, username: str, password: str) -> bool:
+        if self.user_exists(username):
+            return False
+
         with self:
-            if self.user_exists(username):
-                return False
             self.cursor.execute(
                 "SELECT Password FROM users WHERE UserName=?", (username,)
             )
-            if self.cursor.fetchone()[0] == password:
-                return True
-            return False
-
-    def check_user_token(self, username: str) -> Optional[str]:
-        with self:
-            self.cursor.execute(
-                "SELECT Token, RefreshDate FROM tokens WHERE UserName=?",
-                (username,),
-            )
-            result = self.cursor.fetchall()
-            if len(result) > 0:
-                count = 0
-                for token_date in result:
-                    if token_date[1] < datetime.datetime.now():
-                        count += 1
-                        sole_valid_token = token_date[0]
-                if count == 1:
-                    return sole_valid_token
-            return None
+            return self.cursor.fetchone()[0] == password
 
 
 def strings2dict(song_id, song_name, created, updated, tracks):

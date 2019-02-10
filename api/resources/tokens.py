@@ -13,28 +13,17 @@ class TokenResource:
 
     @require_fields("username", "password")
     def on_post(self, req: Request, resp: Response):
-        data = req.media
+        username = req.media["username"]
+        password = req.media["password"]
 
-        if not self.db.check_user(data["username"], data["password"]):
+        if not self.db.check_user(username, password):
             raise falcon.HTTPUnauthorized("Invalid credentials.")
 
-        # Try and generate a new token
-        new_token = str(uuid4())
-        if self.db.is_token_valid(new_token) is not None:
-            new_token = str(uuid4())
-        if self.db.is_token_valid(new_token) is not None:
-            raise falcon.HTTPLoopDetected("Cannot generate token.")
-        if not self.db.create_token(data["username"], new_token):
-            raise falcon.HTTPError(
-                falcon.HTTP_500, "Failed to validate token (unexcepted)."
-            )
+        token = str(uuid4())
+        self.db.save_token(username, token)
 
-        resp.media = {
-            "token": new_token,
-            "user": self.db.get_user_info(data["username"]),
-        }
+        resp.media = {"token": token, "user": self.db.get_user(username)}
 
     def on_delete(self, _, resp: Response, token: str):
-        if not self.db.delete_token(token):
-            raise falcon.HTTPNotFound(title="Token does not exist.")
+        self.db.delete_token(token)
         resp.status = falcon.HTTP_204

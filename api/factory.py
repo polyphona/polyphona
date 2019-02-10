@@ -9,7 +9,7 @@ from falcon import API
 from falcon_cors import CORS
 
 from .db import Database
-from .resources.songs import GetSongListResource, SongResource
+from .resources.songs import UserSongsResource, SongResource
 from .resources.tokens import TokenResource
 from .resources.users import UserResource
 
@@ -22,10 +22,10 @@ def create_api(db: Database) -> API:
 
     api.add_route("/users/", UserResource(db))
 
-    api.add_route("/users/{username}/songs", GetSongListResource(db))
+    api.add_route("/users/{username}/songs", UserSongsResource(db))
 
     song_resource = SongResource(db)
-    api.add_route("/songs/{song_id_str}", song_resource)
+    api.add_route("/songs/{pk}", song_resource)
     api.add_route("/songs/", song_resource)
 
     token_resource = TokenResource(db)

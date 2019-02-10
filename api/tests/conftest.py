@@ -38,5 +38,5 @@ def auth_headers(db: Database, example_user: dict, token: str) -> dict:
         last_name="admin",
         password="admin",
     )
-    db.create_token(username="admin", token=token)
+    db.save_token(username="admin", token=token)
     return {"Authorization": f"Token {token}"}
