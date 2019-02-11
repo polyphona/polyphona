@@ -75,7 +75,10 @@ function createWindow () {
         },
         {
           label: 'Export to MIDI',
-          accelerator: 'CmdOrCtrl+E'
+          accelerator: 'CmdOrCtrl+E',
+          click: () => {
+            mainWindow.webContents.send('exportMidi')
+          }
         },
         {
           type: 'separator'
