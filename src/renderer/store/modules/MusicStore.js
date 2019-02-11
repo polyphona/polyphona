@@ -5,37 +5,61 @@ import Tone from 'tone'
 import {Track, SCALE, TrackLoader} from '../Music'
 import http from '../../utils/http'
 
-const division = 4
-const scale = SCALE
 // NOTE: synthesizer cannot be in the store because Tone modifies this value
 // (and does so outside of a mutation, which Vuex does not like).
 const synthesizer = new Tone.Synth().toMaster()
 Tone.Transport.bpm.value = 120
 
-const state = {
-  currentTrack: new Track(),
-  musicContext: {
-    division,
-    scale,
-    octave: 2,
-    playing: false
-  },
-  renderContext: {
-    // Percentage of the canvas filled by one tick, from 0 to 100.
-    percentPerTick: 100 / (4 * division),
-    // Percentage of the canvas filled by a note interval, from 0 to 100
-    percentPerInterval: 100 / Object.keys(scale).length
-  },
-  savedTracks: [],
-  saved: false
+class RenderContext {
+  constructor (musicContext) {
+    this.musicContext = musicContext
+  }
+
+  get percentPerTick () {
+    return 100 / (4 * this.musicContext.division)
+  }
+
+  get percentPerInterval () {
+    return 100 / Object.keys(this.musicContext.scale).length
+  }
 }
 
-function toTransportTime (musicContext, canvasTime) {
-  // Notation: "bar:quarter:sixteenth"
-  // See: https://github.com/Tonejs/Tone.js/wiki/Time#transport-time
-  const quarter = Math.floor(canvasTime / musicContext.division)
-  const sixteenth = 4 / musicContext.division * (canvasTime % musicContext.division)
-  return `0:${quarter}:${sixteenth}`
+class MusicContext {
+  constructor () {
+    this.division = 4
+    this.scale = SCALE
+    this.octave = 2
+    this.playing = false
+  }
+
+  toTransportTime (canvasTime) {
+    // Notation: "bar:quarter:sixteenth"
+    // See: https://github.com/Tonejs/Tone.js/wiki/Time#transport-time
+    const quarter = Math.floor(canvasTime / this.division)
+    const sixteenth = 4 / this.division * (canvasTime % this.division)
+    return `0:${quarter}:${sixteenth}`
+  }
+}
+
+class State {
+  constructor () {
+    this.currentTrack = new Track()
+    this.musicContext = new MusicContext()
+    this.renderContext = new RenderContext(this.musicContext)
+    this.savedTracks = []
+    this.saved = false
+  }
+}
+
+const state = new State()
+
+const getters = {
+  listNotes: (state) => state.currentTrack.notes,
+  getTrack: (state) => state.currentTrack,
+  getRenderContext: (state) => state.renderContext,
+  getMusicContext: (state) => state.musicContext,
+  getOctave: (state) => state.musicContext.octave,
+  getPlaying: (state) => state.musicContext.playing
 }
 
 const mutations = {
@@ -56,12 +80,12 @@ const mutations = {
         (time) => {
           synthesizer.triggerAttackRelease(
             pitch,
-            toTransportTime(state.musicContext, note.duration),
+            state.musicContext.toTransportTime(note.duration),
             time,
             note.velocity
           )
         },
-        toTransportTime(state.musicContext, note.startTime)
+        state.musicContext.toTransportTime(note.startTime)
       )
     })
   },
@@ -85,15 +109,6 @@ const mutations = {
     state.currentTrack = TrackLoader.toTrack(track)
     state.currentTrack.remoteId = id
   }
-}
-
-const getters = {
-  listNotes: (state) => state.currentTrack.notes,
-  getTrack: (state) => state.currentTrack,
-  getRenderContext: (state) => state.renderContext,
-  getMusicContext: (state) => state.musicContext,
-  getOctave: (state) => state.musicContext.octave,
-  getPlaying: (state) => state.musicContext.playing
 }
 
 const actions = {
@@ -173,7 +188,7 @@ const actions = {
 
     state.currentTrack.notes.forEach((note) => {
       const pitch = (
-        scale[note.pitch].toLowerCase() + state.musicContext.octave.toString()
+        state.musicContext.scale[note.pitch].toLowerCase() + state.musicContext.octave.toString()
       )
       track.note(
         pitch,

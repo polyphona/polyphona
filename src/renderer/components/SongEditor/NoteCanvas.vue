@@ -4,7 +4,7 @@
     <ol id="note-pitches">
       <li v-for="pitch in pitches" :key="'pitch-' + pitch.id">{{ pitch.name }}</li>
     </ol>
-    <div class="canvas-wrapper">
+    <div ref="canvas-container" class="canvas-wrapper">
       <!-- Canvas layers. -->
       <canvas ref="background" class="background"></canvas>
       <canvas ref="notes" class="layer"></canvas>
@@ -36,7 +36,7 @@
         :y="delimiter.y"
         :vertical="delimiter.vertical"
         :width="delimiter.width"
-        :key="'delimiter-' + delimiter.id"
+        :key="canvasId + '-delimiter-' + delimiter.id"
         layer="background"
       ></canvas-line>
 
@@ -54,7 +54,7 @@
       <!-- Notes in the song. -->
       <note-box
         v-for="box in noteBoxes"
-        :key="'note-' + box.id"
+        :key="canvasId + '-note-' + box.id"
         :x="box.x"
         :y="box.y"
         :width="box.width"
@@ -99,12 +99,17 @@
         progress: Tone.Transport.progress,
         progressInterval: null,
         // For `:key` on canvas delimiters
-        delimiterId: 0
+        delimiterId: 0,
+        // Gets incremented when the canvas needs to be re-rendered.
+        // This is why we use it in the canvas components' `:key`.
+        canvasId: 0
       }
     },
     mounted () {
       // Canvas are only accessible once the component is mounted in the DOM
       Object.keys(this.layers).forEach((layer) => this.setUpCanvas(layer))
+      // Listen to window resize events to resize the canvases accordingly.
+      window.addEventListener('resize', this.onWindowResize)
     },
     provide () {
       // Allow child components to access the layers via `inject: ['layers']`.
@@ -302,7 +307,21 @@
         this.dragging = false
         this.clicking = false
         this.newBox = null
+      },
+      onWindowResize () {
+        const container = this.$refs['canvas-container']
+        // Update each layer's width and height to match that of the container.
+        Object.values(this.layers).forEach((ctx) => {
+          ctx.canvas.width = container.clientWidth
+          ctx.canvas.height = container.clientHeight
+        })
+        // Increment the canvas ID so that components that use it in
+        // their `:key` get re-rendered by Vue.
+        this.canvasId++
       }
+    },
+    destroyed () {
+      window.removeEventListener('resize', this.onWindowResize)
     }
   }
 </script>
@@ -334,7 +353,7 @@
     .canvas-wrapper {
         position: relative;
         height: 100%;
-        flex: 1;
+        width: 100%;
 
         .background {
             background: map-get($theme-colors, "light");
