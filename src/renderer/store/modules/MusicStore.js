@@ -1,11 +1,12 @@
 import Tone from 'tone'
 import {remote} from 'electron'
-import {Track, SCALE} from '../Music'
+import {Track, SCALE, INVERSESCALE, Note} from '../Music'
 import fs from 'fs'
 import * as MidiConvert from 'simonadcock-midiconvert'
 
 const division = 4
 const scale = SCALE
+const inverseScale = INVERSESCALE
 // NOTE: synthesizer cannot be in the store because Tone modifies this value
 // (and does so outside of a mutation, which Vuex does not like).
 const synthesizer = new Tone.Synth().toMaster()
@@ -161,6 +162,32 @@ const actions = {
     }
     // write the output in the path chosen by the user
     fs.writeFileSync(path, midi.encode(), 'binary')
+  },
+  importMidi (context) {
+    const toCanvasTime = (midiTime) => (
+      midiTime *
+      context.state.musicContext.division *
+      (Tone.Transport.bpm.value / 60)
+    )
+    const toCanvasPitch = (n) => {
+      var matches = /([a-g])(#+|b+)?([0-9]+)$/i.exec(n)
+      var note = matches[1].toUpperCase() + (matches[2] || '')
+      var octave = parseInt(matches[3], 10)
+      return [note, octave]
+    }
+    fs.readFile('test.midi', 'binary', function (err, midiBlob) {
+      if (!err) {
+        var midi = MidiConvert.parse(midiBlob)
+        var midiNotes = midi.tracks[0].notes
+        for (var i = 0; i < midiNotes.length; i++) {
+          var midiNote = midiNotes[i]
+          var name = midiNote.name
+          context.commit('ADD_NOTE', new Note(toCanvasTime(midiNote.time), toCanvasTime(midiNote.duration), inverseScale[toCanvasPitch(name)[0]], midiNote.velocity))
+        }
+
+        console.log(midi)
+      }
+    })
   }
 }
 

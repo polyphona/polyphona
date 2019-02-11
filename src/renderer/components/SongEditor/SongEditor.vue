@@ -1,25 +1,26 @@
 <template>
-  <div id="song-editor">
-    <form id="song-tools">
+    <div id="song-editor">
+        <form id="song-tools">
       <span class="form-field">
         <button class="btn btn-light" @click="togglePlay" type="button">{{ playing ? '❙❙' : '►️'}}️</button>
         <button class="btn btn-light" @click="exportMidi" type="button">📂 Export</button>
+          <button class="btn btn-light" @click="importMidi" type="button">📂 Import</button>
       </span>
-      <span class="form-group">
+            <span class="form-group">
         <label for="octave">Octave:</label>
         <input
-          id="octave"
-          class="form-control"
-          type="number"
-          min="1"
-          max="6"
-          required
-          v-model="octave"
+                id="octave"
+                class="form-control"
+                type="number"
+                min="1"
+                max="6"
+                required
+                v-model="octave"
         >
       </span>
-    </form>
-    <note-canvas id="note-canvas"></note-canvas>
-  </div>
+        </form>
+        <note-canvas id="note-canvas"></note-canvas>
+    </div>
 </template>
 <script>
   import NoteCanvas from './NoteCanvas.vue'
@@ -33,6 +34,9 @@
       },
       exportMidi () {
         this.$store.dispatch('MusicStore/exportMidi')
+      },
+      importMidi () {
+        this.$store.dispatch('MusicStore/importMidi')
       }
     },
     computed: {
@@ -55,19 +59,19 @@
   }
 </script>
 <style lang="scss" scoped>
-  #song-editor {
-    height: 70%;
-  }
+    #song-editor {
+        height: 70%;
+    }
 
-  #song-tools {
-    padding: 1em;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
+    #song-tools {
+        padding: 1em;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
 
-  #note-canvas {
-    width: 100%;
-    height: 100%;
-  }
+    #note-canvas {
+        width: 100%;
+        height: 100%;
+    }
 </style>
