@@ -30,7 +30,6 @@
     },
     data () {
       return {
-        isSaved: this.$store.state.MusicStore.saved,
         hasError: false,
         showLoadDialog: false
       }
