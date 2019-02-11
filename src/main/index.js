@@ -65,7 +65,10 @@ function createWindow () {
         },
         {
           label: 'Open',
-          accelerator: 'CmdOrCtrl+O'
+          accelerator: 'CmdOrCtrl+O',
+          click: () => {
+            mainWindow.webContents.send('load')
+          }
         },
         {
           type: 'separator'

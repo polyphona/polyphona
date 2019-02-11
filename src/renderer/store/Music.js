@@ -9,30 +9,34 @@ clip(15.01, 2.5) => 15.0
 const clip = (value, increment) => Math.floor(value / increment) * increment
 
 export class Note {
-  constructor (startTime, duration, pitch) {
+  constructor (startTime, duration, pitch, velocity = 0.8) {
     this.startTime = startTime
     this.duration = duration
     this.pitch = pitch
     this.id = undefined
+    this.velocity = velocity
   }
 
-  /* True if the note collides with existing note with the same pitch */
-  collides (note) {
-    const samePitch = note.pitch === this.pitch
-    const endNoteCollide = note.startTime <= this.startTime && note.startTime + note.duration >= this.startTime + this.duration
-    const startNoteCollide = note.startTime >= this.startTime && note.startTime + note.duration <= this.startTime + this.duration
-    return samePitch && (endNoteCollide || startNoteCollide)
+  /*
+  Returns true if this note collides in any manner with the argument note
+   */
+  disturbs (note) {
+    var samePitch = Boolean(note.pitch === this.pitch)
+    var disturbs = Boolean(!(this.startTime + this.duration < note.startTime || this.startTime > note.startTime + note.duration))
+    var juxtaposed = Boolean(this.startTime === note.startTime + note.duration || this.startTime + this.duration === note.startTime)
+    return (samePitch && disturbs) && !juxtaposed
   }
 }
 
 export class NoteCanvasAdapter {
   toBox (renderContext, note) {
+    const height = renderContext.percentPerInterval
     return {
       id: note.id,
       x: renderContext.percentPerTick * note.startTime,
-      y: renderContext.percentPerInterval * note.pitch,
+      y: 100 - (height + renderContext.percentPerInterval * note.pitch),
       width: renderContext.percentPerTick * note.duration,
-      height: renderContext.percentPerInterval
+      height
     }
   }
 
@@ -44,7 +48,7 @@ export class NoteCanvasAdapter {
     return new Note(
       Math.floor(box.x / renderContext.percentPerTick),
       duration,
-      Math.floor(box.y / renderContext.percentPerInterval)
+      Math.floor((100 - (box.y + box.height)) / renderContext.percentPerInterval)
     )
   }
 
@@ -75,6 +79,16 @@ export class Track {
   deleteNote = (note) => {
     const index = this.notes.indexOf(note)
     this.notes.splice(index, 1)
+  }
+}
+
+export class TrackLoader {
+  static toTrack (data) {
+    let track = new Track(data.id, data.name)
+    for (const note of data.notes) {
+      track.addNote(new Note(note.startTime, note.duration, note.pitch))
+    }
+    return track
   }
 }
 
