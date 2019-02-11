@@ -175,7 +175,15 @@ const actions = {
       var octave = parseInt(matches[3], 10)
       return [note, octave]
     }
-    fs.readFile('test.midi', 'binary', function (err, midiBlob) {
+    const path = remote.dialog.showOpenDialog({
+      'filters': [
+        {
+          'name': 'MIDI',
+          'extensions': ['midi']
+        }
+      ]
+    })
+    fs.readFile(path.toString(), 'binary', function (err, midiBlob) {
       if (!err) {
         var midi = MidiConvert.parse(midiBlob)
         var midiNotes = midi.tracks[0].notes
@@ -184,8 +192,6 @@ const actions = {
           var name = midiNote.name
           context.commit('ADD_NOTE', new Note(toCanvasTime(midiNote.time), toCanvasTime(midiNote.duration), inverseScale[toCanvasPitch(name)[0]], midiNote.velocity))
         }
-
-        console.log(midi)
       }
     })
   }
