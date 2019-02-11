@@ -15,17 +15,10 @@
     name: 'Home',
     components: {SongEditor, LoadDialog, AlertsList},
     mounted () {
-      this.$electron.ipcRenderer.on('saving', () => {
-        this.save()
-      })
-      this.$electron.ipcRenderer.on('load', () => {
-        this.load()
-      })
       // FIX: Electron may send the event multiple times, causing
       // the file selection window to show up multiple times.
-      // So use `.once()` instead of `.on()` and rebind a once listener
-      // in `.exportMidi()`.
-      // See: (A)
+      this.$electron.ipcRenderer.once('saving', this.save)
+      this.$electron.ipcRenderer.once('load', this.load)
       this.$electron.ipcRenderer.once('exportMidi', this.exportMidi)
       this.$electron.ipcRenderer.once('importMidi', this.importMidi)
     },
@@ -36,12 +29,18 @@
       }
     },
     methods: {
-      async save () {
-        await this.$store.dispatch('MusicStore/saveTrack')
-          .then(() => this.$store.dispatch('alerts/add', {
-            kind: 'success',
-            message: 'Le morceau est bien sauvé !'
-          }))
+      save () {
+        this.$store.dispatch('MusicStore/saveTrack')
+          .then(() => {
+            this.$store.dispatch('alerts/add', {
+              kind: 'success',
+              message: 'Le morceau est bien sauvé !'
+            })
+            setTimeout(
+              () => this.$electron.ipcRenderer.once('saving', this.save),
+              100
+            )
+          })
           .catch(() => {
             this.$store.dispatch('alerts/add', {
               kind: 'danger',
@@ -52,6 +51,10 @@
       load () {
         this.$store.dispatch('MusicStore/getSavedTracks')
         this.showLoadDialog = true
+        setTimeout(
+          () => this.$electron.ipcRenderer.once('load', this.load),
+          100
+        )
       },
       exportMidi () {
         // (A)
