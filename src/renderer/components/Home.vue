@@ -15,12 +15,10 @@
     name: 'Home',
     components: {SongEditor, LoadDialog, AlertsList},
     mounted () {
-      // FIX: Electron may send the event multiple times, causing
-      // the file selection window to show up multiple times.
-      this.$electron.ipcRenderer.once('saving', this.save)
-      this.$electron.ipcRenderer.once('load', this.load)
-      this.$electron.ipcRenderer.once('exportMidi', this.exportMidi)
-      this.$electron.ipcRenderer.once('importMidi', this.importMidi)
+      this.$electron.ipcRenderer.on('saving', this.save)
+      this.$electron.ipcRenderer.on('load', this.load)
+      this.$electron.ipcRenderer.on('exportMidi', this.exportMidi)
+      this.$electron.ipcRenderer.on('importMidi', this.importMidi)
     },
     data () {
       return {
@@ -36,10 +34,6 @@
               kind: 'success',
               message: 'Le morceau est bien sauvé !'
             })
-            setTimeout(
-              () => this.$electron.ipcRenderer.once('saving', this.save),
-              100
-            )
           })
           .catch(() => {
             this.$store.dispatch('alerts/add', {
@@ -51,31 +45,19 @@
       load () {
         this.$store.dispatch('MusicStore/getSavedTracks')
         this.showLoadDialog = true
-        setTimeout(
-          () => this.$electron.ipcRenderer.once('load', this.load),
-          100
-        )
       },
       exportMidi () {
-        // (A)
         this.$store.dispatch('MusicStore/exportMidi')
-        // Wait a bit so that the extra Electron events that will be sent
-        // in a few ms are not caught.
-        setTimeout(
-          () => this.$electron.ipcRenderer.once('exportMidi', this.exportMidi),
-          100
-        )
       },
       importMidi () {
-        // (A)
         this.$store.dispatch('MusicStore/importMidi')
-        // Wait a bit so that the extra Electron events that will be sent
-        // in a few ms are not caught.
-        setTimeout(
-          () => this.$electron.ipcRenderer.once('importMidi', this.importMidi),
-          100
-        )
       }
+    },
+    destroyed () {
+      this.$electron.ipcRenderer.removeAllListeners('saving')
+      this.$electron.ipcRenderer.removeAllListeners('load')
+      this.$electron.ipcRenderer.removeAllListeners('importMidi')
+      this.$electron.ipcRenderer.removeAllListeners('exportMidi')
     }
   }
 </script>
