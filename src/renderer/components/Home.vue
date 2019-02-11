@@ -1,5 +1,28 @@
 <template>
   <div id="home">
+    <div class="alert alert-primary alert-dismissable fade show" role="alert" v-if="isSaved">
+      Le morceau est bien sauvé !
+      <button
+        type="button"
+        class="close"
+        @click="hideSuccessAlert"
+        aria-label="Close"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="alert alert-danger alert-dismissable fade show" role="alert" v-if="hasError">
+      Le morceau n'a pas pu être
+      sauvé !
+      <button
+        type="button"
+        class="close"
+        @click="hideErrorAlert"
+        aria-label="Close"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
     <load-dialog v-if="showLoadDialog" v-on:close="showLoadDialog = false"></load-dialog>
     <song-editor></song-editor>
   </div>
@@ -12,14 +35,9 @@
   export default {
     name: 'Home',
     components: {SongEditor, LoadDialog},
-    data () {
-      return {
-        showLoadDialog: false
-      }
-    },
     mounted () {
       this.$electron.ipcRenderer.on('saving', () => {
-        this.$store.dispatch('MusicStore/saveTrack')
+        this.save()
       })
       this.$electron.ipcRenderer.on('load', () => {
         this.load()
@@ -31,13 +49,29 @@
       // See: (A)
       this.$electron.ipcRenderer.once('exportMidi', this.exportMidi)
     },
+    data () {
+      return {
+        isSaved: this.$store.state.MusicStore.saved,
+        hasError: false,
+        showLoadDialog: false
+      }
+    },
     methods: {
-      save () {
-        this.$store.dispatch('MusicStore/getSavedTracks')
+      async save () {
+        await this.$store.dispatch('MusicStore/saveTrack').catch(() => {
+          this.hasError = true
+        })
+        this.isSaved = this.$store.state.MusicStore.saved
       },
       load () {
         this.$store.dispatch('MusicStore/getSavedTracks')
         this.showLoadDialog = true
+      },
+      hideSuccessAlert () {
+        this.isSaved = false
+      },
+      hideErrorAlert () {
+        this.hasError = false
       },
       exportMidi () {
         // (A)

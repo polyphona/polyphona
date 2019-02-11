@@ -146,6 +146,7 @@ const actions = {
       'name': state.currentTrack.name,
       'tracks': [state.currentTrack]
     }
+
     const {data: res} = state.currentTrack.remoteId ? await http.put('songs/' + state.currentTrack.remoteId, data) : await http.post('songs', data)
     commit('SAVE', res)
   },
