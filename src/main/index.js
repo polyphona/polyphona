@@ -81,6 +81,13 @@ function createWindow () {
           }
         },
         {
+          label: 'Import MIDI',
+          accelerator: 'CmdOrCtrl+I',
+          click: () => {
+            mainWindow.webContents.send('importMidi')
+          }
+        },
+        {
           type: 'separator'
         },
         isMac ? { role: 'close' } : { role: 'quit' }

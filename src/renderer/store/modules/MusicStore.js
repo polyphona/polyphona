@@ -252,6 +252,10 @@ const actions = {
         }
       }
     })
+    context.dispatch('alerts/add', {
+      kind: 'success',
+      message: `Le morceau a été importé.`
+    }, {root: true})
   }
 }
 

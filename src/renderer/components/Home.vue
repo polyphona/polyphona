@@ -27,6 +27,7 @@
       // in `.exportMidi()`.
       // See: (A)
       this.$electron.ipcRenderer.once('exportMidi', this.exportMidi)
+      this.$electron.ipcRenderer.once('importMidi', this.importMidi)
     },
     data () {
       return {
@@ -59,6 +60,16 @@
         // in a few ms are not caught.
         setTimeout(
           () => this.$electron.ipcRenderer.once('exportMidi', this.exportMidi),
+          100
+        )
+      },
+      importMidi () {
+        // (A)
+        this.$store.dispatch('MusicStore/importMidi')
+        // Wait a bit so that the extra Electron events that will be sent
+        // in a few ms are not caught.
+        setTimeout(
+          () => this.$electron.ipcRenderer.once('importMidi', this.importMidi),
           100
         )
       }
