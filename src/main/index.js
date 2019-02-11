@@ -60,7 +60,6 @@ function createWindow () {
           label: 'Save',
           accelerator: 'CmdOrCtrl+S',
           click: () => {
-            console.log('saving')
             mainWindow.webContents.send('saving')
           }
         },
