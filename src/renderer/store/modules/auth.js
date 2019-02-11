@@ -37,6 +37,7 @@ const actions = {
   },
   logout (context) {
     context.commit('discardToken')
+    context.commit('setUser', null)
   }
 }
 
