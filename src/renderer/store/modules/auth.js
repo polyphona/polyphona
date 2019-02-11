@@ -43,9 +43,13 @@ const actions = {
 
 // Initial state
 const rawUser = localStorage.getItem(USER_STORAGE_ITEM)
+const token = localStorage.getItem(TOKEN_STORAGE_ITEM)
+if (token) {
+  http.defaults.headers.common['Authorization'] = 'Token ' + token
+}
 const state = {
   user: rawUser ? JSON.parse(rawUser) : null,
-  token: localStorage.getItem(TOKEN_STORAGE_ITEM)
+  token
 }
 
 export default {namespaced: true, getters, actions, mutations, state}
