@@ -4,8 +4,7 @@
       <router-link to="/">♫ Polyphona</router-link>
     </h1>
     <ul>
-      <li v-if="user" id="display-username">
-        <small>Signed in as</small>
+      <li v-if="user" id="display-username">👤
         <strong>{{user.username}}</strong>
       </li>
       <li v-if="user">
