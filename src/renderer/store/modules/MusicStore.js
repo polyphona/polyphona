@@ -7,7 +7,7 @@ import http from '../../utils/http'
 
 // NOTE: synthesizer cannot be in the store because Tone modifies this value
 // (and does so outside of a mutation, which Vuex does not like).
-const synthesizer = new Tone.Synth().toMaster()
+const synthesizer = new Tone.PolySynth().toMaster()
 Tone.Transport.bpm.value = 120
 
 class RenderContext {
@@ -16,7 +16,7 @@ class RenderContext {
   }
 
   get percentPerTick () {
-    return 100 / (4 * this.musicContext.division)
+    return 100 / this.musicContext.bars / (4 * this.musicContext.division)
   }
 
   get percentPerInterval () {
@@ -29,15 +29,18 @@ class MusicContext {
     this.division = 4
     this.scale = SCALE
     this.octave = 2
+    this.bars = 2
     this.playing = false
   }
 
   toTransportTime (canvasTime) {
     // Notation: "bar:quarter:sixteenth"
     // See: https://github.com/Tonejs/Tone.js/wiki/Time#transport-time
-    const quarter = Math.floor(canvasTime / this.division)
+    let quarter = Math.floor(canvasTime / this.division)
+    const bars = Math.floor(quarter / 4)
+    quarter -= 4 * bars
     const sixteenth = 4 / this.division * (canvasTime % this.division)
-    return `0:${quarter}:${sixteenth}`
+    return `${bars}:${quarter}:${sixteenth}`
   }
 }
 
@@ -122,11 +125,10 @@ const actions = {
     context.dispatch('restart')
     context.state.saved = false
   },
-  play ({commit}, offset) {
+  play ({commit, state}, offset) {
     commit('START')
     commit('SCHEDULE_NOTES')
-    // Loop one measure ad eternam
-    Tone.Transport.loopEnd = '1m'
+    Tone.Transport.loopEnd = `${state.musicContext.bars}m`
     Tone.Transport.loop = true
     // Start the song now, but offset by `offset`.
     Tone.Transport.start(Tone.Transport.now(), offset)
