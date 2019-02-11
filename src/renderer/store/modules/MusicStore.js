@@ -28,7 +28,7 @@ class MusicContext {
   constructor () {
     this.division = 4
     this.scale = SCALE
-    this.octave = 2
+    this.octave = 4
     this.bars = 2
     this.playing = false
   }
