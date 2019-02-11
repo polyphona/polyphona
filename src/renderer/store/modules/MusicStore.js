@@ -50,8 +50,9 @@ const mutations = {
   SCHEDULE_NOTES (state) {
     state.currentTrack.notes.forEach((note) => {
       const pitch = (
-        state.musicContext.scale[note.pitch] + state.musicContext.octave
+        state.musicContext.scale[note.pitch] + (Number(state.musicContext.octave) + (note.pitch === 12 ? 1 : 0))
       )
+      console.log(pitch)
       Tone.Transport.schedule(
         (time) => {
           synthesizer.triggerAttackRelease(
