@@ -1,8 +1,9 @@
-import Tone from 'tone'
-import {remote} from 'electron'
-import {Track, SCALE} from '../Music'
 import fs from 'fs'
+import {remote} from 'electron'
 import * as MidiConvert from 'simonadcock-midiconvert'
+import Tone from 'tone'
+import {Track, SCALE, TrackLoader} from '../Music'
+import http from '../../utils/http'
 
 // NOTE: synthesizer cannot be in the store because Tone modifies this value
 // (and does so outside of a mutation, which Vuex does not like).
@@ -45,6 +46,8 @@ class State {
     this.currentTrack = new Track()
     this.musicContext = new MusicContext()
     this.renderContext = new RenderContext(this.musicContext)
+    this.savedTracks = []
+    this.saved = false
   }
 }
 
@@ -62,9 +65,11 @@ const getters = {
 const mutations = {
   ADD_NOTE (state, note) {
     state.currentTrack.addNote(note)
+    state.saved = false
   },
   DELETE_NOTE (state, note) {
     state.currentTrack.deleteNote(note)
+    state.saved = false
   },
   SCHEDULE_NOTES (state) {
     state.currentTrack.notes.forEach((note) => {
@@ -92,6 +97,17 @@ const mutations = {
   },
   SET_OCTAVE (state, octave) {
     state.musicContext.octave = octave
+  },
+  SAVE (state, res) {
+    state.currentTrack.remoteId = res.id
+    state.saved = true
+  },
+  SAVED_TRACKS (state, savedTracks) {
+    state.savedTracks = savedTracks
+  },
+  LOAD_TRACK (state, {track, id}) {
+    state.currentTrack = TrackLoader.toTrack(track)
+    state.currentTrack.remoteId = id
   }
 }
 
@@ -99,10 +115,12 @@ const actions = {
   addNote (context, note) {
     context.commit('ADD_NOTE', note)
     context.dispatch('restart')
+    context.state.saved = false
   },
   deleteNote (context, note) {
     context.commit('DELETE_NOTE', note)
     context.dispatch('restart')
+    context.state.saved = false
   },
   play ({commit}, offset) {
     commit('START')
@@ -137,6 +155,22 @@ const actions = {
   updateOctave (context, octave) {
     context.commit('SET_OCTAVE', octave)
     context.dispatch('restart')
+  },
+  async saveTrack ({state, commit}) {
+    const data = {
+      'name': state.currentTrack.name,
+      'tracks': [state.currentTrack]
+    }
+    const {data: res} = state.currentTrack.remoteId ? await http.put('songs/' + state.currentTrack.remoteId, data) : await http.post('songs', data)
+    commit('SAVE', res)
+  },
+  async getSavedTracks ({state, commit, rootState}) {
+    const {data: res} = await http.get('users/' + rootState.auth.user.username + '/songs')
+    commit('SAVED_TRACKS', res)
+  },
+  loadSavedTrack ({state, commit}, id) {
+    const track = state.savedTracks.find(track => track.id === id)
+    commit('LOAD_TRACK', {track: track.tracks[0], id}) // Not good but necessary, will change when we upgrade the local song model
   },
   exportMidi ({state}) {
     const midi = MidiConvert.create()

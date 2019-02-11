@@ -63,9 +63,11 @@ export class NoteCanvasAdapter {
 }
 
 export class Track {
-  constructor () {
+  constructor (remoteId = null, name = 'Test') {
     this.notes = []
     this.lastId = 0
+    this.remoteId = remoteId
+    this.name = name
   }
 
   addNote = (note) => {
@@ -77,6 +79,16 @@ export class Track {
   deleteNote = (note) => {
     const index = this.notes.indexOf(note)
     this.notes.splice(index, 1)
+  }
+}
+
+export class TrackLoader {
+  static toTrack (data) {
+    let track = new Track(data.id, data.name)
+    for (const note of data.notes) {
+      track.addNote(new Note(note.startTime, note.duration, note.pitch))
+    }
+    return track
   }
 }
 

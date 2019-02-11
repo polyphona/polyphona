@@ -1,5 +1,3 @@
-'use strict'
-
 import {app, BrowserWindow, Menu} from 'electron'
 
 /**
@@ -25,6 +23,8 @@ function createWindow () {
     useContentSize: true,
     width: 1000
   })
+
+  mainWindow.loadURL(winURL)
 
   const menuTemplate = [
     // Add app menu on macOS
@@ -58,11 +58,18 @@ function createWindow () {
         },
         {
           label: 'Save',
-          accelerator: 'CmdOrCtrl+S'
+          accelerator: 'CmdOrCtrl+S',
+          click: () => {
+            console.log('saving')
+            mainWindow.webContents.send('saving')
+          }
         },
         {
           label: 'Open',
-          accelerator: 'CmdOrCtrl+O'
+          accelerator: 'CmdOrCtrl+O',
+          click: () => {
+            mainWindow.webContents.send('load')
+          }
         },
         {
           type: 'separator'
@@ -74,7 +81,7 @@ function createWindow () {
         {
           type: 'separator'
         },
-        isMac ? {role: 'close'} : {role: 'quit'}
+        isMac ? { role: 'close' } : { role: 'quit' }
       ]
     },
     {
@@ -92,8 +99,6 @@ function createWindow () {
   ]
   const menu = Menu.buildFromTemplate(menuTemplate)
   Menu.setApplicationMenu(menu)
-
-  mainWindow.loadURL(winURL)
 
   mainWindow.on('closed', () => {
     mainWindow = null
@@ -120,16 +125,4 @@ app.on('activate', () => {
  * Uncomment the following code below and install `electron-updater` to
  * support auto updating. Code Signing with a valid certificate is required.
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-electron-builder.html#auto-updating
- */
-
-/*
-import { autoUpdater } from 'electron-updater'
-
-autoUpdater.on('update-downloaded', () => {
-  autoUpdater.quitAndInstall()
-})
-
-app.on('ready', () => {
-  if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
-})
  */
