@@ -64,6 +64,6 @@
 
 <style lang="scss" scoped>
   #home {
-    height: 100%;
+    height: 70%;
   }
 </style>

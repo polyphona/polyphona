@@ -79,7 +79,7 @@
 </script>
 <style lang="scss" scoped>
     #song-editor {
-        height: 70%;
+        height: 100%;
     }
 
     #song-tools {
