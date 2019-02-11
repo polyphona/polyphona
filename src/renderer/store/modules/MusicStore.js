@@ -1,9 +1,10 @@
-import fs from 'fs'
-import {remote} from 'electron'
-import * as MidiConvert from 'simonadcock-midiconvert'
 import Tone from 'tone'
-import {Track, SCALE, TrackLoader} from '../Music'
+import {remote} from 'electron'
+import {Track, SCALE, INVERSESCALE, Note, TrackLoader} from '../Music'
+import fs from 'fs'
+import * as MidiConvert from 'simonadcock-midiconvert'
 import http from '../../utils/http'
+const inverseScale = INVERSESCALE
 
 // NOTE: synthesizer cannot be in the store because Tone modifies this value
 // (and does so outside of a mutation, which Vuex does not like).
@@ -217,6 +218,43 @@ const actions = {
     dispatch('alerts/add', {
       kind: 'success',
       message: `Le morceau a été exporté sous ${path}.`
+    }, {root: true})
+  },
+
+  importMidi (context) {
+    const toCanvasTime = (midiTime) => (
+      midiTime *
+      context.state.musicContext.division *
+      (Tone.Transport.bpm.value / 60)
+    )
+    const toCanvasPitch = (n) => {
+      var matches = /([a-g])(#+|b+)?([0-9]+)$/i.exec(n)
+      var note = matches[1].toUpperCase() + (matches[2] || '')
+      var octave = parseInt(matches[3], 10)
+      return [note, octave]
+    }
+    const path = remote.dialog.showOpenDialog({
+      'filters': [
+        {
+          'name': 'MIDI',
+          'extensions': ['midi']
+        }
+      ]
+    })
+    fs.readFile(path.toString(), 'binary', function (err, midiBlob) {
+      if (!err) {
+        var midi = MidiConvert.parse(midiBlob)
+        var midiNotes = midi.tracks[0].notes
+        for (var i = 0; i < midiNotes.length; i++) {
+          var midiNote = midiNotes[i]
+          var name = midiNote.name
+          context.commit('ADD_NOTE', new Note(toCanvasTime(midiNote.time), toCanvasTime(midiNote.duration), inverseScale[toCanvasPitch(name)[0]], midiNote.velocity))
+        }
+      }
+    })
+    context.dispatch('alerts/add', {
+      kind: 'success',
+      message: `Le morceau a été importé.`
     }, {root: true})
   }
 }
