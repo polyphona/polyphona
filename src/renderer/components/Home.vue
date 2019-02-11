@@ -1,6 +1,5 @@
 <template>
   <div id="home">
-    <h1>Polyphona</h1>
     <div class="alert alert-primary alert-dismissable fade show" role="alert" v-if="isSaved">Le morceau est bien sauvé !
       <button type="button" class="close" @click="hideSuccessAlert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
@@ -12,12 +11,6 @@
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
-    <p>
-      <router-link to="login">Login</router-link>
-    </p>
-    <p>
-      <router-link to="register">Create an account</router-link>
-    </p>
     <load-dialog v-if="showLoadDialog" v-on:close="showLoadDialog = false"></load-dialog>
     <song-editor></song-editor>
   </div>
