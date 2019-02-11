@@ -4,11 +4,18 @@
       <span class="form-field">
         <button class="btn btn-light" @click="togglePlay" type="button">{{ playing ? '❙❙' : '►️'}}️</button>
         <button class="btn btn-light" @click="exportMidi" type="button">📂 Export</button>
-        <button class="btn btn-light" @click="importMidi" type="button">📂 Import</button>
+        <button class="btn btn-light" @click="importMidi" type="button">📥 Import</button>
       </span>
       <span class="form-group">
         <label for="title">Title:</label>
-        <input id="title" class="form-control" type="text" required v-model="title">
+        <input
+          id="title"
+          class="form-control"
+          type="text"
+          required
+          placeholder="Enter a song title…"
+          v-model="title"
+        >
       </span>
       <span class="form-group">
         <label for="octave">Octave:</label>

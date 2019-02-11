@@ -32,6 +32,8 @@ const mutations = {
 const actions = {
   add (context, alert) {
     context.commit('ADD', alert)
+    const alertId = context.state.alerts[context.state.alerts.length - 1].id
+    setTimeout(() => context.dispatch('remove', alertId), 3000)
   },
   remove (context, alertId) {
     context.commit('REMOVE', alertId)

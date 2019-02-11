@@ -60,14 +60,14 @@ function createWindow () {
           label: 'Save',
           accelerator: 'CmdOrCtrl+S',
           click: () => {
-            mainWindow.webContents.send('saving')
+            BrowserWindow.getFocusedWindow().webContents.send('saving')
           }
         },
         {
           label: 'Open',
           accelerator: 'CmdOrCtrl+O',
           click: () => {
-            mainWindow.webContents.send('load')
+            BrowserWindow.getFocusedWindow().webContents.send('load')
           }
         },
         {
@@ -77,14 +77,14 @@ function createWindow () {
           label: 'Export to MIDI',
           accelerator: 'CmdOrCtrl+E',
           click: () => {
-            mainWindow.webContents.send('exportMidi')
+            BrowserWindow.getFocusedWindow().webContents.send('exportMidi')
           }
         },
         {
           label: 'Import MIDI',
           accelerator: 'CmdOrCtrl+I',
           click: () => {
-            mainWindow.webContents.send('importMidi')
+            BrowserWindow.getFocusedWindow().webContents.send('importMidi')
           }
         },
         {

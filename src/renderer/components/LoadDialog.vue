@@ -13,7 +13,7 @@
                 <span
                   style="cursor: pointer;"
                   @click="loadTrack(track.id); $emit('close');"
-                >{{ track.id }} - {{ track.name }}</span>
+                >{{ track.id }} - {{ track.name || '[Untitled]' }}</span>
                 <button class="btn btn-sm btn-light text-danger" @click="deleteTrack(track.id)">
                   <small>Remove</small>
                 </button>
@@ -24,7 +24,7 @@
 
         <div class="modal-footer">
           <slot name="footer">
-            <button class="modal-default-button" @click="$emit('close')">Cancel</button>
+            <button class="modal-default-button" @click="$emit('close')">Close</button>
           </slot>
         </div>
       </div>
