@@ -105,6 +105,10 @@ class SongResource(object):
 
         # Process request
         database.update_song(song_id, json_in["name"], json.dumps(json_in["tracks"]))
+        json_out = {
+            "id": song_id
+        }
+        resp.body = json.dumps(json_out, ensure_ascii=False)
         resp.status = falcon.HTTP_200
 
     def on_post(self, req, resp):
@@ -122,6 +126,10 @@ class SongResource(object):
         # Process request
         song_id = database.create_song(json_in["name"], json.dumps(json_in["tracks"]))
         database.create_song_user_link(song_id, database.is_token_valid(token))
+        json_out = {
+            "id": song_id
+        }
+        resp.body = json.dumps(json_out, ensure_ascii=False)
         resp.status = falcon.HTTP_201
 
     def on_delete(self, req, resp, song_id_str):
