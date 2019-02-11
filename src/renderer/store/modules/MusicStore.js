@@ -106,12 +106,22 @@ const mutations = {
     state.currentTrack.remoteId = res.id
     state.saved = true
   },
+  SET_TRACK_NAME (state, name) {
+    state.currentTrack.name = name
+  },
   SAVED_TRACKS (state, savedTracks) {
     state.savedTracks = savedTracks
   },
   LOAD_TRACK (state, {track, id}) {
     state.currentTrack = TrackLoader.toTrack(track)
     state.currentTrack.remoteId = id
+  },
+  REMOVE_TRACK (state, id) {
+    const index = state.savedTracks.findIndex((track) => track.id === id)
+    state.savedTracks.splice(index, 1)
+    if (id === state.currentTrack.remoteId) {
+      state.currentTrack = new Track()
+    }
   }
 }
 
@@ -159,6 +169,9 @@ const actions = {
     context.commit('SET_OCTAVE', octave)
     context.dispatch('restart')
   },
+  setTrackName (context, name) {
+    context.commit('SET_TRACK_NAME', name)
+  },
   async saveTrack ({state, commit}) {
     const data = {
       'name': state.currentTrack.name,
@@ -174,6 +187,10 @@ const actions = {
   loadSavedTrack ({state, commit}, id) {
     const track = state.savedTracks.find(track => track.id === id)
     commit('LOAD_TRACK', {track: track.tracks[0], id}) // Not good but necessary, will change when we upgrade the local song model
+  },
+  async deleteTrack (context, id) {
+    await http.delete(`/songs/${id}`)
+    context.commit('REMOVE_TRACK', id)
   },
   exportMidi ({dispatch, state}) {
     const midi = MidiConvert.create()

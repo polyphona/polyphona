@@ -7,6 +7,10 @@
         <button class="btn btn-light" @click="importMidi" type="button">📂 Import</button>
       </span>
       <span class="form-group">
+        <label for="title">Title:</label>
+        <input id="title" class="form-control" type="text" required v-model="title">
+      </span>
+      <span class="form-group">
         <label for="octave">Octave:</label>
         <input
           id="octave"
@@ -44,6 +48,14 @@
       }
     },
     computed: {
+      title: {
+        get () {
+          return this.$store.getters['MusicStore/getTrack'].name
+        },
+        set (value) {
+          this.$store.dispatch('MusicStore/setTrackName', value)
+        }
+      },
       octave: {
         get () {
           return this.$store.getters['MusicStore/getOctave']
