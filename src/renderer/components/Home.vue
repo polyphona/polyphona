@@ -1,28 +1,6 @@
 <template>
   <div id="home">
-    <div class="alert alert-primary alert-dismissable fade show" role="alert" v-if="isSaved">
-      Le morceau est bien sauvé !
-      <button
-        type="button"
-        class="close"
-        @click="hideSuccessAlert"
-        aria-label="Close"
-      >
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-    <div class="alert alert-danger alert-dismissable fade show" role="alert" v-if="hasError">
-      Le morceau n'a pas pu être
-      sauvé !
-      <button
-        type="button"
-        class="close"
-        @click="hideErrorAlert"
-        aria-label="Close"
-      >
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
+    <alerts-list></alerts-list>
     <load-dialog v-if="showLoadDialog" v-on:close="showLoadDialog = false"></load-dialog>
     <song-editor></song-editor>
   </div>
@@ -31,10 +9,11 @@
 <script>
   import SongEditor from './SongEditor/SongEditor.vue'
   import LoadDialog from './LoadDialog'
+  import AlertsList from './AlertsList.vue'
 
   export default {
     name: 'Home',
-    components: {SongEditor, LoadDialog},
+    components: {SongEditor, LoadDialog, AlertsList},
     mounted () {
       this.$electron.ipcRenderer.on('saving', () => {
         this.save()
@@ -58,20 +37,21 @@
     },
     methods: {
       async save () {
-        await this.$store.dispatch('MusicStore/saveTrack').catch(() => {
-          this.hasError = true
-        })
-        this.isSaved = this.$store.state.MusicStore.saved
+        await this.$store.dispatch('MusicStore/saveTrack')
+          .then(() => this.$store.dispatch('alerts/add', {
+            kind: 'success',
+            message: 'Le morceau est bien sauvé !'
+          }))
+          .catch(() => {
+            this.$store.dispatch('alerts/add', {
+              kind: 'danger',
+              message: "Le morceau n'a pas pu être sauvé !"
+            })
+          })
       },
       load () {
         this.$store.dispatch('MusicStore/getSavedTracks')
         this.showLoadDialog = true
-      },
-      hideSuccessAlert () {
-        this.isSaved = false
-      },
-      hideErrorAlert () {
-        this.hasError = false
       },
       exportMidi () {
         // (A)

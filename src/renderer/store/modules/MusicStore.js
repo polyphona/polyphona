@@ -158,7 +158,7 @@ const actions = {
     const track = state.savedTracks.find(track => track.id === id)
     commit('LOAD_TRACK', {track: track.tracks[0], id}) // Not good but necessary, will change when we upgrade the local song model
   },
-  exportMidi ({state}) {
+  exportMidi ({dispatch, state}) {
     const midi = MidiConvert.create()
 
     // TODO: make channel/instrument customizable
@@ -194,8 +194,13 @@ const actions = {
     if (!path) {
       return
     }
-    // write the output in the path chosen by the user
+
     fs.writeFileSync(path, midi.encode(), 'binary')
+
+    dispatch('alerts/add', {
+      kind: 'success',
+      message: `Le morceau a été exporté sous ${path}.`
+    }, {root: true})
   }
 }
 
