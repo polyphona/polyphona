@@ -121,8 +121,8 @@
         }).then(() => {
           this.$router.push('/')
         }).catch((e) => {
-          console.error(e)
           this.error = 'An error occurred while trying to create your account.'
+          console.error(e)
         })
       }
     }
