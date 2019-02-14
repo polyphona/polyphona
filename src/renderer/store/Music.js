@@ -9,10 +9,11 @@ const clip = (value, increment) => Math.floor(value / increment) * increment
 
 export class Note {
   constructor (startTime, duration, pitch, velocity = 0.8) {
+    // NOTE: will be set when the note is added to a `Track`.
+    this.id = undefined
     this.startTime = startTime
     this.duration = duration
     this.pitch = pitch
-    this.id = undefined
     this.velocity = velocity
   }
 
