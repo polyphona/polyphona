@@ -1,5 +1,4 @@
-export const NoteTooSmallException = () => {
-}
+export const NoteTooSmallException = () => {}
 
 /* Examples:
 clip(10.3, 1) => 10
@@ -17,14 +16,15 @@ export class Note {
     this.velocity = velocity
   }
 
-  /*
-  Returns true if this note collides in any manner with the argument note
-   */
+  /* Whether this note collides in any manner with the given note. */
   disturbs (note) {
-    var samePitch = Boolean(note.pitch === this.pitch)
-    var disturbs = Boolean(!(this.startTime + this.duration < note.startTime || this.startTime > note.startTime + note.duration))
-    var juxtaposed = Boolean(this.startTime === note.startTime + note.duration || this.startTime + this.duration === note.startTime)
-    return (samePitch && disturbs) && !juxtaposed
+    const samePitch = Boolean(note.pitch === this.pitch)
+
+    const overlapsRight = this.startTime < note.startTime + note.duration
+    const overlapsLeft = this.startTime + this.duration > note.startTime
+    const overlaps = overlapsRight && overlapsLeft
+
+    return samePitch && overlaps
   }
 }
 
@@ -48,7 +48,9 @@ export class NoteCanvasAdapter {
     return new Note(
       Math.floor(box.x / renderContext.percentPerTick),
       duration,
-      Math.floor((100 - (box.y + box.height)) / renderContext.percentPerInterval)
+      Math.floor(
+        (100 - (box.y + box.height)) / renderContext.percentPerInterval
+      )
     )
   }
 
@@ -70,13 +72,13 @@ export class Track {
     this.name = name
   }
 
-  addNote = (note) => {
+  addNote = note => {
     note.id = this.lastId
     this.lastId++
     this.notes.push(note)
   }
 
-  deleteNote = (note) => {
+  deleteNote = note => {
     const index = this.notes.indexOf(note)
     this.notes.splice(index, 1)
   }
@@ -109,16 +111,16 @@ export const SCALE = {
 }
 
 export const INVERSESCALE = {
-  'C': 0,
+  C: 0,
   'C#': 1,
-  'D': 2,
+  D: 2,
   'D#': 3,
-  'E': 4,
-  'F': 5,
+  E: 4,
+  F: 5,
   'F#': 6,
-  'G': 7,
+  G: 7,
   'G#': 8,
-  'A': 9,
+  A: 9,
   'A#': 10,
-  'B': 11
+  B: 11
 }
