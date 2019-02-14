@@ -18,7 +18,7 @@ export class Note {
 
   /* Whether this note collides in any manner with the given note. */
   disturbs (note) {
-    const samePitch = Boolean(note.pitch === this.pitch)
+    const samePitch = note.pitch === this.pitch
 
     const overlapsRight = this.startTime < note.startTime + note.duration
     const overlapsLeft = this.startTime + this.duration > note.startTime
