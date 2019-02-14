@@ -26,21 +26,23 @@ class SongResource:
 
     @authenticated
     @require_fields("name", "tracks")
-    def on_put(self, req: Request, _, pk: str):
+    def on_put(self, req: Request, resp: Response, pk: str):
         self.db.update_song(
             id=parse_int(pk),
             name=req.media["name"],
             tracks=req.media["tracks"],
             username=req.username,
         )
+        resp.media = {"id": pk}
 
     @authenticated
     @require_fields("name", "tracks")
     def on_post(self, req: Request, resp: Response):
-        song_id = self.db.create_song(
+        pk = self.db.create_song(
             name=req.media["name"], tracks=req.media["tracks"]
         )
-        self.db.create_song_user_link(song_id, req.username)
+        self.db.create_song_user_link(pk, req.username)
+        resp.media = {"id": pk}
         resp.status = falcon.HTTP_201
 
     @authenticated

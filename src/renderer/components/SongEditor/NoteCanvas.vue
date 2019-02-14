@@ -4,7 +4,7 @@
     <ol id="note-pitches">
       <li v-for="pitch in pitches" :key="'pitch-' + pitch.id">{{ pitch.name }}</li>
     </ol>
-    <div class="canvas-wrapper">
+    <div ref="canvas-container" class="canvas-wrapper">
       <!-- Canvas layers. -->
       <canvas ref="background" class="background"></canvas>
       <canvas ref="notes" class="layer"></canvas>
@@ -36,7 +36,7 @@
         :y="delimiter.y"
         :vertical="delimiter.vertical"
         :width="delimiter.width"
-        :key="'delimiter-' + delimiter.id"
+        :key="canvasId + '-delimiter-' + delimiter.id"
         layer="background"
       ></canvas-line>
 
@@ -54,7 +54,7 @@
       <!-- Notes in the song. -->
       <note-box
         v-for="box in noteBoxes"
-        :key="'note-' + box.id"
+        :key="canvasId + '-note-' + box.id"
         :x="box.x"
         :y="box.y"
         :width="box.width"
@@ -99,12 +99,17 @@
         progress: Tone.Transport.progress,
         progressInterval: null,
         // For `:key` on canvas delimiters
-        delimiterId: 0
+        delimiterId: 0,
+        // Gets incremented when the canvas needs to be re-rendered.
+        // This is why we use it in the canvas components' `:key`.
+        canvasId: 0
       }
     },
     mounted () {
       // Canvas are only accessible once the component is mounted in the DOM
       Object.keys(this.layers).forEach((layer) => this.setUpCanvas(layer))
+      // Listen to window resize events to resize the canvases accordingly.
+      window.addEventListener('resize', this.onWindowResize)
     },
     provide () {
       // Allow child components to access the layers via `inject: ['layers']`.
@@ -223,10 +228,10 @@
         }
         box = canvasAdapter.clip(this.renderContext, box)
         const note = canvasAdapter.toNote(this.renderContext, box)
-        const collidingNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.collides(value))
-        if (collidingNotes.length > 0) {
-          collidingNotes.forEach((note) => this.$store.dispatch('MusicStore/deleteNote', note))
-        } else {
+        const existingNote = this.$store.getters['MusicStore/listNotes'].filter((value) => note.disturbs(value))
+        if (existingNote.length > 0) { // There is an existing note : we delete note
+          this.$store.dispatch('MusicStore/deleteNote', existingNote[0])
+        } else { // there are no problematic notes : we add a new note
           this.addNoteFromBox(box)
         }
         this.clicking = false
@@ -276,7 +281,24 @@
       },
       onMouseUp (event) {
         if (this.dragging) {
-          this.addNoteFromBox(this.newBox)
+          try {
+            let box = this.newBox
+            if (box.width < 0) {
+              // This is the case if we dragged the note to the left.
+              box.width *= -1
+              box.x -= box.width
+            }
+            const note = canvasAdapter.toNote(this.renderContext, box)
+            const problematicNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.disturbs(value))
+            if (problematicNotes.length === 0) {
+              // there are no problematic notes => we can add a new note
+              this.addNoteFromBox(box)
+            }
+            this.newBox = null
+          } catch (e) {
+            if (e instanceof NoteTooSmallException) {
+            }
+          }
         }
         this.dragging = false
         this.newBox = null
@@ -285,45 +307,63 @@
         this.dragging = false
         this.clicking = false
         this.newBox = null
+      },
+      onWindowResize () {
+        const container = this.$refs['canvas-container']
+        // Update each layer's width and height to match that of the container.
+        Object.values(this.layers).forEach((ctx) => {
+          ctx.canvas.width = container.clientWidth
+          ctx.canvas.height = container.clientHeight
+        })
+        // Increment the canvas ID so that components that use it in
+        // their `:key` get re-rendered by Vue.
+        this.canvasId++
       }
+    },
+    destroyed () {
+      window.removeEventListener('resize', this.onWindowResize)
     }
   }
 </script>
 
 <style lang="scss" scoped>
-  @import "../../styles/_bootstrap_override.scss";
-  .wrapper {
-    // position: relative;
-    display: flex;
-  }
-  #note-pitches {
-    display: flex;
-    flex-flow: column;
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    text-align: center;
-    color: map-get($theme-colors, "light");
-    background: map-get($theme-colors, "dark");
-    li {
-      padding: 0 .5em;
-      margin: auto 0;
-    }
-  }
-  .canvas-wrapper {
-    position: relative;
-    height: 100%;
-    flex: 1;
+    @import "../../styles/_bootstrap_override.scss";
 
-    .background {
-      background: map-get($theme-colors, "light");
+    .wrapper {
+        // position: relative;
+        display: flex;
     }
 
-    .layer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      background: transparent;
+    #note-pitches {
+        display: flex;
+        flex-flow: column;
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        text-align: center;
+        color: map-get($theme-colors, "light");
+        background: map-get($theme-colors, "dark");
+
+        li {
+            padding: 0 .5em;
+            margin: auto 0;
+        }
     }
-  }
+
+    .canvas-wrapper {
+        position: relative;
+        height: 100%;
+        width: 100%;
+
+        .background {
+            background: map-get($theme-colors, "light");
+        }
+
+        .layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: transparent;
+        }
+    }
 </style>

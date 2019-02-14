@@ -1,4 +1,4 @@
-import http from '@/utils/http'
+import http from '../../utils/http'
 
 const TOKEN_STORAGE_ITEM = 'polyphona-token'
 const USER_STORAGE_ITEM = 'polyphona-user'
@@ -14,6 +14,7 @@ const mutations = {
   },
   setToken (state, token) {
     localStorage.setItem(TOKEN_STORAGE_ITEM, token)
+    http.defaults.headers.common['Authorization'] = 'Token ' + token
     state.token = token
   },
   discardToken (state) {
@@ -36,14 +37,19 @@ const actions = {
   },
   logout (context) {
     context.commit('discardToken')
+    context.commit('setUser', null)
   }
 }
 
 // Initial state
 const rawUser = localStorage.getItem(USER_STORAGE_ITEM)
+const token = localStorage.getItem(TOKEN_STORAGE_ITEM)
+if (token) {
+  http.defaults.headers.common['Authorization'] = 'Token ' + token
+}
 const state = {
   user: rawUser ? JSON.parse(rawUser) : null,
-  token: localStorage.getItem(TOKEN_STORAGE_ITEM)
+  token
 }
 
 export default {namespaced: true, getters, actions, mutations, state}

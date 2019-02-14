@@ -10,6 +10,7 @@ Make sure you have [Node] ad [npm] installed, then run:
 
 ``` bash
 npm install
+npm install simonadcock-midiconvert
 ```
 
 ### Server
