@@ -28,7 +28,7 @@
     },
     methods: {
       save () {
-        this.$store.dispatch('MusicStore/saveTrack')
+        this.$store.dispatch('music/saveTrack')
           .then(() => {
             this.$store.dispatch('alerts/add', {
               kind: 'success',
@@ -43,14 +43,14 @@
           })
       },
       load () {
-        this.$store.dispatch('MusicStore/getSavedTracks')
+        this.$store.dispatch('music/getSavedTracks')
         this.showLoadDialog = true
       },
       exportMidi () {
-        this.$store.dispatch('MusicStore/exportMidi')
+        this.$store.dispatch('music/exportMidi')
       },
       importMidi () {
-        this.$store.dispatch('MusicStore/importMidi')
+        this.$store.dispatch('music/importMidi')
       }
     },
     destroyed () {

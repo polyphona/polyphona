@@ -130,18 +130,18 @@
     },
     computed: {
       noteBoxes () {
-        return this.$store.getters['MusicStore/listNotes'].map(
+        return this.$store.getters['music/listNotes'].map(
           (note) => canvasAdapter.toBox(this.renderContext, note)
         )
       },
       musicContext () {
-        return this.$store.getters['MusicStore/getMusicContext']
+        return this.$store.getters['music/getMusicContext']
       },
       renderContext () {
-        return this.$store.getters['MusicStore/getRenderContext']
+        return this.$store.getters['music/getRenderContext']
       },
       playing () {
-        return this.$store.getters['MusicStore/getPlaying']
+        return this.$store.getters['music/getPlaying']
       },
       progressX () {
         return 100 * this.progress
@@ -208,7 +208,7 @@
       addNoteFromBox (box) {
         try {
           const note = canvasAdapter.toNote(this.renderContext, box)
-          this.$store.dispatch('MusicStore/addNote', note)
+          this.$store.dispatch('music/addNote', note)
           return note
         } catch (e) {
           if (e instanceof NoteTooSmallException) {
@@ -228,9 +228,9 @@
         }
         box = canvasAdapter.clip(this.renderContext, box)
         const note = canvasAdapter.toNote(this.renderContext, box)
-        const existingNote = this.$store.getters['MusicStore/listNotes'].filter((value) => note.disturbs(value))
+        const existingNote = this.$store.getters['music/listNotes'].filter((value) => note.disturbs(value))
         if (existingNote.length > 0) { // There is an existing note : we delete note
-          this.$store.dispatch('MusicStore/deleteNote', existingNote[0])
+          this.$store.dispatch('music/deleteNote', existingNote[0])
         } else { // there are no problematic notes : we add a new note
           this.addNoteFromBox(box)
         }
@@ -289,7 +289,7 @@
               box.x -= box.width
             }
             const note = canvasAdapter.toNote(this.renderContext, box)
-            const problematicNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.disturbs(value))
+            const problematicNotes = this.$store.getters['music/listNotes'].filter((value) => note.disturbs(value))
             if (problematicNotes.length === 0) {
               // there are no problematic notes => we can add a new note
               this.addNoteFromBox(box)
