@@ -3,12 +3,12 @@ import json
 import sqlite3
 
 vars = dict()
-'''
+def create_database_table(database_path):
+    '''
 Function to create a local database given a path
     :param database_path: path where to create the database
     :return: True when the process has run correctly
     '''
-def create_database_table(database_path):
     print("Connecting to SQLite...")
     vars['conn'] = sqlite3.connect(database_path)
     vars['cursor'] = vars['conn'].cursor()
@@ -39,13 +39,13 @@ def create_database_table(database_path):
     return True
 
 
-'''
+def create_song(song_name, tracks_json):
+    '''
 Function to add a song to the songs database given its name and JSON information
     :param song_name: The name of the song
     :param tracks_json: track information, based on the JSON Specification
     :return: song if the process is successful, None otherwise
     '''
-def create_song(song_name, tracks_json):
     current_time = datetime.datetime.now()
     vars['cursor'].execute('''INSERT INTO songs (SongName, Created, Updated, TracksJson)
                       VALUES (?,?,?,?)''', (song_name, current_time, current_time, tracks_json))
@@ -57,14 +57,14 @@ def create_song(song_name, tracks_json):
     else:
         return None
 
-'''
+def update_song(song_id, song_name, tracks_json):
+    '''
 Function to update song information
     :param song_id: id of song in database
     :param song_name: name of the song
     :param tracks_json: track information, based on the JSON Specification
     :return: modified song if the process is successful, None otherwise (song doesn't already exist)
     '''
-def update_song(song_id, song_name, tracks_json):
     current_time = datetime.datetime.now()
     if song_id_exists(song_id):
         vars['cursor'].execute('''UPDATE songs
@@ -78,12 +78,12 @@ def update_song(song_id, song_name, tracks_json):
         return None
 
 
-'''
+def delete_song(song_id):
+    '''
 Function to delete song from database
   :param song_id: id of the song in the database
   :return: True if successful, False otherwise
   '''
-def delete_song(song_id):
 
     vars['cursor'].execute("SELECT SongID FROM songs WHERE SongID = ?", (song_id,))
     result = vars['cursor'].fetchall()
@@ -96,15 +96,15 @@ def delete_song(song_id):
         return False
 
 
-'''
+def create_user(user_name, first_name, last_name, password):
+    '''
 Function to create a user in the users database
  :param user_name: username - Primary Key
  :param first_name: firstname
  :param last_name: lastname
  :param password: password
  :return: True if successful, False otherwise
- '''
-def create_user(user_name, first_name, last_name, password):
+    '''
     if is_user_name_free(user_name):
         vars['cursor'].execute('''INSERT INTO users (UserName, FirstName, LastName, Password)
                           VALUES (?,?,?,?)''', (user_name, first_name, last_name, password))
@@ -113,12 +113,12 @@ def create_user(user_name, first_name, last_name, password):
     else:
         return False
 
+def get_user_info(user_name):
     '''
 Function to get user information giver its username
     :param user_name: primary key - username
     :return: (username, firstname, lastname) when successfull, "" otherwise
     '''
-def get_user_info(user_name):
     vars['cursor'].execute("SELECT UserName, FirstName, LastName FROM users WHERE UserName=?", [user_name])
     result = vars['cursor'].fetchone()
     if result is not None:
@@ -130,13 +130,13 @@ def get_user_info(user_name):
         return output
     return ""
 
+def create_song_user_link(song_id, user_name):
     '''
 Function to link a song to its user by inserting song and user to to the songs by user database
     :param song_id: song id - PK
     :param user_name: user's username - PK
     :return: True if successful, False otherwise
     '''
-def create_song_user_link(song_id, user_name):
     if song_id_exists(song_id) and not (is_user_name_free(user_name)):
         vars['cursor'].execute('''INSERT INTO song_user_links (SongID, UserName)
                           VALUES (?,?)''', (song_id, user_name))
@@ -145,13 +145,13 @@ def create_song_user_link(song_id, user_name):
     else:
         return False
 
+def create_token(user_name, token):
     '''
 Function creating a token per user for his logging session
     :param user_name: user's username
     :param token: token
     :return: True when successful, False otherwise
     '''
-def create_token(user_name, token):
     if not is_user_name_free(user_name) and is_token_valid(token) is None:
         vars['cursor'].execute('''INSERT INTO tokens (Token, UserName, RefreshDate)
                           VALUES (?,?,?)''',
@@ -161,12 +161,12 @@ def create_token(user_name, token):
     else:
         return False
 
+def delete_token(token):
     '''
 Function to delete token when disconnected
     :param token: token
     :return: True when successful, False otherwise
     '''
-def delete_token(token):
     vars['cursor'].execute("SELECT Token FROM tokens WHERE Token = ?", [token])
     result = vars['cursor'].fetchall()
     if len(result) == 1:
@@ -176,21 +176,21 @@ def delete_token(token):
     else:
         return False
 
+def delete_obsolete_tokens():
     '''
 Function to delete obsolete tokens
     :return: True when successful
     '''
-def delete_obsolete_tokens():
     vars['cursor'].execute('''DELETE FROM tokens WHERE RefreshDate <=  ?''', datetime.datetime.now())
     vars['conn'].commit()
     return True
 
+def get_song_by_id(song_id):
     '''
 Function to get song information given its id
     :param song_id: 
     :return: song information when successful, None otherwise
     '''
-def get_song_by_id(song_id):
     if song_id_exists(song_id):
         vars['cursor'].execute("SELECT * FROM songs WHERE SongID = ? ", (song_id,))
         result = vars['cursor'].fetchone()
@@ -198,12 +198,12 @@ def get_song_by_id(song_id):
     else:
         return None
 
-'''
+def get_songs_by_user(user_name):
+    '''
 Function that returns the list of songs possessed by a user
     user_name : string, Name of user
     Returns: list of dictionaries
-'''
-def get_songs_by_user(user_name):
+    '''
     if not (is_user_name_free(user_name)):
         vars['cursor'].execute('''SELECT *
                           FROM songs, song_user_links
@@ -217,13 +217,13 @@ def get_songs_by_user(user_name):
     else:
         return None
 
+def check_user(user_name, password):
     '''
 Function that checks user's credentials
     :param user_name: username
     :param password: password
     :return: True if the credentials are correct, False otherwise
     '''
-def check_user(user_name, password):
     if is_user_name_free(user_name):
         return False
     else:
@@ -233,36 +233,36 @@ def check_user(user_name, password):
         else:
             return False
 
+def song_id_exists(song_id):
     '''
 Funtion to check if song id already exists
     :param song_id: song id
     :return: True when already exists, False ow
     '''
-def song_id_exists(song_id):
     vars['cursor'].execute("SELECT count(SongID) FROM songs WHERE SongID=?", (song_id,))
     if vars['cursor'].fetchone()[0] == 1:
         return True
     else:
         return False
 
+def is_user_name_free(user_name):
     '''
 Function to check that the username isn't already taken during registration
     :param user_name: username
     :return: True if the username isn't associated to any other user, False ow
     '''
-def is_user_name_free(user_name):
     vars['cursor'].execute("SELECT count(UserName) FROM users WHERE UserName=?", [user_name])
     if vars['cursor'].fetchone()[0] == 0:
         return True
     else:
         return False
 
+def is_token_valid(token):
     '''
 Function to check the validity of a token 
     :param token: token
     :return: True if a user is associated to the token
     '''
-def is_token_valid(token):
     vars['cursor'].execute("SELECT UserName FROM tokens WHERE Token=?", [token])
     result = vars['cursor'].fetchall()
     if len(result) == 1:
@@ -270,12 +270,12 @@ def is_token_valid(token):
     else:
         return None
 
+def check_user_token(user_name):
     '''
 Function to check a token was created for a username
     :param user_name: 
     :return: token if already created, None if not
     '''
-def check_user_token(user_name):
     vars['cursor'].execute("SELECT Token, RefreshDate FROM tokens WHERE UserName=?", [user_name])
     result = vars['cursor'].fetchall()
     if len(result) > 0:
@@ -289,6 +289,7 @@ def check_user_token(user_name):
     else:
         return None
 
+def strings2dict(song_id, song_name, created, updated, tracks):
     '''
 Function to create dictionnary from string input
     :param song_id: 
@@ -298,7 +299,6 @@ Function to create dictionnary from string input
     :param tracks: 
     :return: dictionnary
     '''
-def strings2dict(song_id, song_name, created, updated, tracks):
     output = {}
     output['id'] = song_id
     output['name'] = song_name
