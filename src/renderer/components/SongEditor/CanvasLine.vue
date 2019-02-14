@@ -1,6 +1,6 @@
 <script>
   /* NOTE: this is a JS-only component. */
-  import { MouseCanvasAdapter } from './adapters'
+  import { MouseCanvasAdapter } from '@/models'
 
   const adapter = new MouseCanvasAdapter()
 
