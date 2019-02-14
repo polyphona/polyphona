@@ -1,8 +1,8 @@
 {
   "name": "polyphona",
-  "version": "0.0.1",
-  "author": "cloune <rachel@nebulae.co>",
-  "description": "An electron-vue project",
+  "version": "1.0.0",
+  "author": "Jihane Bennis, Alexandre de Boutray, Rachel Guibert, Florimond Manca, Etienne Paternoster, Selim Tirellil",
+  "description": "Le bloc-notes musical à la portée de tous",
   "main": "./dist/electron/main.js",
   "scripts": {
     "start": "npm run dev",
@@ -19,8 +19,8 @@
     "postinstall": "npm run lint:fix"
   },
   "build": {
-    "productName": "polyphona",
-    "appId": "com.polyphona.polyphona",
+    "productName": "Polyphona",
+    "appId": "cs.devlog.polyphona",
     "directories": {
       "output": "build"
     },
@@ -57,6 +57,7 @@
     "bootstrap": "^4.1.3",
     "bootstrap-vue": "^2.0.0-rc.11",
     "http-utils": "0.0.99",
+    "jquery": "^3.3.1",
     "jsmidgen": "^0.1.5",
     "simonadcock-midiconvert": "0.0.2",
     "tone": "^0.12.80",
@@ -84,7 +85,7 @@
     "del": "^3.0.0",
     "devtron": "^1.4.0",
     "electron": "^2.0.4",
-    "electron-builder": "^20.19.2",
+    "electron-builder": "^20.38.5",
     "electron-debug": "^1.5.0",
     "electron-devtools-installer": "^2.2.4",
     "eslint": "^4.19.1",
