@@ -122,6 +122,10 @@ const mutations = {
     if (id === state.currentTrack.remoteId) {
       state.currentTrack = new Track()
     }
+  },
+  RESET_TRACK (state) {
+    state.currentTrack = new Track()
+    state.saved = false
   }
 }
 

@@ -38,6 +38,7 @@ const actions = {
   logout (context) {
     context.commit('discardToken')
     context.commit('setUser', null)
+    context.commit('music/RESET_TRACK', null, {root: true})
   }
 }
 
