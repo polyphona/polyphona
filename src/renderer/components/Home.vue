@@ -29,7 +29,7 @@
     },
     methods: {
       save () {
-        this.$store.dispatch('MusicStore/saveTrack')
+        this.$store.dispatch('music/saveTrack')
           .then(() => {
             this.$store.dispatch('alerts/add', {
               kind: 'success',
@@ -44,10 +44,10 @@
           })
       },
       load () {
-        this.$store.dispatch('MusicStore/getSavedTracks')
+        this.$store.dispatch('music/getSavedTracks')
         this.showLoadDialog = true
       },
-      ...mapActions('MusicStore', ['exportMidi', 'importMidi'])
+      ...mapActions('music', ['exportMidi', 'importMidi'])
     },
     destroyed () {
       this.$electron.ipcRenderer.removeAllListeners('saving')
