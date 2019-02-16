@@ -37,15 +37,15 @@
     name: 'LoadDialog',
     computed: {
       savedTracks () {
-        return this.$store.state.MusicStore.savedTracks
+        return this.$store.state.music.savedTracks
       }
     },
     methods: {
       loadTrack (id) {
-        this.$store.dispatch('MusicStore/loadSavedTrack', id)
+        this.$store.dispatch('music/loadSavedTrack', id)
       },
       deleteTrack (id) {
-        this.$store.dispatch('MusicStore/deleteTrack', id)
+        this.$store.dispatch('music/deleteTrack', id)
       }
     }
   }
