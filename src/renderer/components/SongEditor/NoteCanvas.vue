@@ -19,15 +19,7 @@
         @mouseleave="onMouseLeave"
       ></canvas>
 
-      <!-- Progress bar -->
-      <canvas-line
-        v-if="playing"
-        :x="progressX"
-        :vertical="true"
-        :width="3"
-        color="red"
-        layer="decorations"
-      ></canvas-line>
+      <progress-bar layer="decorations"></progress-bar>
 
       <!-- Delimiters of notes on the canvas -->
       <canvas-line
@@ -67,11 +59,10 @@
 </template>
 
 <script>
-  import Tone from 'tone'
-
   import {NoteCanvasAdapter, SCALE, NoteTooSmallException} from '@/store/Music'
   import NoteBox from './NoteBox'
   import CanvasLine from './CanvasLine.vue'
+  import ProgressBar from './ProgressBar.vue'
 
   const canvasAdapter = new NoteCanvasAdapter()
 
@@ -81,7 +72,7 @@
 
   export default {
     name: 'NoteCanvas',
-    components: {NoteBox, CanvasLine},
+    components: {NoteBox, CanvasLine, ProgressBar},
     data () {
       return {
         newBox: null,
@@ -96,8 +87,6 @@
           decorations: null,
           foreground: null
         },
-        progress: Tone.Transport.progress,
-        progressInterval: null,
         // For `:key` on canvas delimiters
         delimiterId: 0,
         // Gets incremented when the canvas needs to be re-rendered.
@@ -117,17 +106,6 @@
         layers: this.layers
       }
     },
-    watch: {
-      playing (value) {
-        if (value) {
-          this.progressInterval = setInterval(() => {
-            this.progress = Tone.Transport.progress
-          }, 16) // 60 FPS
-        } else {
-          clearInterval(this.progressInterval)
-        }
-      }
-    },
     computed: {
       noteBoxes () {
         return this.$store.getters['MusicStore/listNotes'].map(
@@ -139,12 +117,6 @@
       },
       renderContext () {
         return this.$store.getters['MusicStore/getRenderContext']
-      },
-      playing () {
-        return this.$store.getters['MusicStore/getPlaying']
-      },
-      progressX () {
-        return 100 * this.progress
       },
       delimiters () {
         const division = this.musicContext.division
