@@ -4,22 +4,18 @@
     <ol id="note-pitches">
       <li v-for="pitch in pitches" :key="'pitch-' + pitch.id">{{ pitch.name }}</li>
     </ol>
-    <div ref="canvas-container" class="canvas-wrapper">
-      <!-- Canvas layers. -->
-      <canvas ref="background" class="background"></canvas>
-      <canvas ref="notes" class="layer"></canvas>
-      <canvas ref="decorations" class="layer"></canvas>
-      <canvas
-        ref="foreground"
-        class="layer"
-        @click="onClick"
-        @mousedown="onMouseDown"
-        @mouseup="onMouseUp"
-        @mousemove="onMouseMove"
-        @mouseleave="onMouseLeave"
-      ></canvas>
 
-      <!-- Progress bar -->
+    <canvas-layers
+      class="canvas-wrapper"
+      :names="layerNames"
+      @resized="canvasId++"
+      @click="onClick"
+      @mousedown="onMouseDown"
+      @mouseup="onMouseUp"
+      @mousemove="onMouseMove"
+      @mouseleave="onMouseLeave"
+    >
+      <!-- Progress bar-->
       <canvas-line
         v-if="playing"
         :x="progressX"
@@ -62,7 +58,7 @@
         :color="'#f6cd4c'"
         layer="notes"
       ></note-box>
-    </div>
+    </canvas-layers>
   </div>
 </template>
 
@@ -70,6 +66,7 @@
   import Tone from 'tone'
 
   import {NoteCanvasAdapter, SCALE, NoteTooSmallException} from '@/store/Music'
+  import CanvasLayers from './CanvasLayers.vue'
   import NoteBox from './NoteBox'
   import CanvasLine from './CanvasLine.vue'
 
@@ -81,7 +78,7 @@
 
   export default {
     name: 'NoteCanvas',
-    components: {NoteBox, CanvasLine},
+    components: {NoteBox, CanvasLine, CanvasLayers},
     data () {
       return {
         newBox: null,
@@ -89,32 +86,14 @@
         // and in which direction.
         dragging: false,
         clicking: false,
-        canvasDimensions: null,
-        layers: {
-          background: null,
-          notes: null,
-          decorations: null,
-          foreground: null
-        },
+        layerNames: ['background', 'notes', 'decorations', 'foreground'],
         progress: Tone.Transport.progress,
         progressInterval: null,
         // For `:key` on canvas delimiters
         delimiterId: 0,
-        // Gets incremented when the canvas needs to be re-rendered.
-        // This is why we use it in the canvas components' `:key`.
+        // Gets incremented when the canvas has been resized and
+        // needs to be re-rendered.
         canvasId: 0
-      }
-    },
-    mounted () {
-      // Canvas are only accessible once the component is mounted in the DOM
-      Object.keys(this.layers).forEach((layer) => this.setUpCanvas(layer))
-      // Listen to window resize events to resize the canvases accordingly.
-      window.addEventListener('resize', this.onWindowResize)
-    },
-    provide () {
-      // Allow child components to access the layers via `inject: ['layers']`.
-      return {
-        layers: this.layers
       }
     },
     watch: {
@@ -179,32 +158,6 @@
       }
     },
     methods: {
-      setUpCanvas (layer) {
-        const canvas = this.$refs[layer]
-        this.layers[layer] = canvas.getContext('2d')
-        // Store the first layer's parent's dimensions to use the same dimensions
-        // for all layers.
-        if (!this.canvasDimensions) {
-          this.canvasDimensions = {
-            width: canvas.parentElement.clientWidth,
-            height: canvas.parentElement.clientHeight
-          }
-        }
-        // Resize canvas to fit its parent's width and height
-        canvas.width = this.canvasDimensions.width
-        canvas.height = this.canvasDimensions.height
-      },
-      toCanvasPercentPosition (event) {
-        // NOTE: canvas layers should have the same size and same top-left position,
-        // so it does not matter which layer we choose here
-        const canvas = this.$refs['background']
-        const canvasLeft = canvas.parentElement.offsetLeft
-        const canvasTop = canvas.parentElement.offsetTop
-        return {
-          x: 100 * (event.pageX - canvasLeft) / canvas.width,
-          y: 100 * (event.pageY - canvasTop) / canvas.height
-        }
-      },
       addNoteFromBox (box) {
         try {
           const note = canvasAdapter.toNote(this.renderContext, box)
@@ -217,12 +170,13 @@
           throw e
         }
       },
-      onClick (event) {
+      onClick ({x, y}) {
         if (!this.clicking) {
           return
         }
         let box = {
-          ...this.toCanvasPercentPosition(event),
+          x,
+          y,
           width: this.renderContext.percentPerTick,
           height: this.renderContext.percentPerInterval
         }
@@ -236,21 +190,21 @@
         }
         this.clicking = false
       },
-      onMouseDown (event) {
+      onMouseDown ({x, y}) {
         this.clicking = true
         this.dragging = DRAG_NONE
         const height = this.renderContext.percentPerInterval
         const width = this.renderContext.percentPerTick
-        const box = {...this.toCanvasPercentPosition(event), width, height}
+        const box = {x, y, width, height}
         this.newBox = canvasAdapter.clip(this.renderContext, box)
       },
-      onMouseMove (event) {
+      onMouseMove ({x, y}) {
         this.clicking = false
         if (this.dragging === false) {
           return
         }
 
-        const eventX = this.toCanvasPercentPosition(event).x
+        const eventX = x
         // Perform a bit of logic to keep track of which way we are
         // dragging the note.
         // This is necessary in order to correctly draw the new note,
@@ -279,7 +233,7 @@
 
         this.newBox = canvasAdapter.clip(this.renderContext, this.newBox)
       },
-      onMouseUp (event) {
+      onMouseUp () {
         if (this.dragging) {
           try {
             let box = this.newBox
@@ -303,25 +257,11 @@
         this.dragging = false
         this.newBox = null
       },
-      onMouseLeave (event) {
+      onMouseLeave () {
         this.dragging = false
         this.clicking = false
         this.newBox = null
-      },
-      onWindowResize () {
-        const container = this.$refs['canvas-container']
-        // Update each layer's width and height to match that of the container.
-        Object.values(this.layers).forEach((ctx) => {
-          ctx.canvas.width = container.clientWidth
-          ctx.canvas.height = container.clientHeight
-        })
-        // Increment the canvas ID so that components that use it in
-        // their `:key` get re-rendered by Vue.
-        this.canvasId++
       }
-    },
-    destroyed () {
-      window.removeEventListener('resize', this.onWindowResize)
     }
   }
 </script>
@@ -354,16 +294,5 @@
         position: relative;
         height: 100%;
         width: 100%;
-
-        .background {
-            background: map-get($theme-colors, "light");
-        }
-
-        .layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            background: transparent;
-        }
     }
 </style>
