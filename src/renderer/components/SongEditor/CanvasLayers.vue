@@ -11,6 +11,10 @@
 </template>
 
 <script>
+import {MouseCanvasAdapter} from './adapters'
+
+const mouseAdapter = new MouseCanvasAdapter()
+
 export default {
   name: 'canvas-layers',
   props: {
@@ -69,12 +73,12 @@ export default {
     toCanvasPercentPosition (event) {
       // NOTE: canvas layers have the same size and same top-left position
       // by construction, so it does not matter which layer we choose here.
-      const canvas = this.layers[this.names[0]].canvas
-      const canvasLeft = canvas.parentElement.offsetLeft
-      const canvasTop = canvas.parentElement.offsetTop
+      const ctx = this.layers[this.names[0]]
+      const canvasLeft = ctx.canvas.parentElement.offsetLeft
+      const canvasTop = ctx.canvas.parentElement.offsetTop
       return {
-        x: 100 * (event.pageX - canvasLeft) / canvas.width,
-        y: 100 * (event.pageY - canvasTop) / canvas.height
+        x: mouseAdapter.pixWidthToPercent(event.pageX - canvasLeft, ctx),
+        y: mouseAdapter.pixHeightToPercent(event.pageY - canvasTop, ctx)
       }
     },
     setUpCanvas (name) {

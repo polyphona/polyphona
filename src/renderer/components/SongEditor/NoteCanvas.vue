@@ -64,9 +64,10 @@
 
 <script>
   import Tone from 'tone'
-
-  import {NoteCanvasAdapter, SCALE, NoteTooSmallException} from '@/store/Music'
+  import {SCALE} from '@/store/music'
   import CanvasLayers from './CanvasLayers.vue'
+  import {NoteCanvasAdapter} from './adapters'
+  import {NoteTooSmallException} from './errors'
   import NoteBox from './NoteBox'
   import CanvasLine from './CanvasLine.vue'
 
