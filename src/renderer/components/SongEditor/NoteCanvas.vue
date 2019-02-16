@@ -1,9 +1,7 @@
 <template>
   <div class="wrapper">
-    <!-- Show the names of the notes in a column. -->
-    <ol id="note-pitches">
-      <li v-for="pitch in pitches" :key="'pitch-' + pitch.id">{{ pitch.name }}</li>
-    </ol>
+    <pitch-header></pitch-header>
+
     <div ref="canvas-container" class="canvas-wrapper">
       <!-- Canvas layers. -->
       <canvas ref="background" class="background"></canvas>
@@ -50,11 +48,12 @@
 </template>
 
 <script>
-  import {NoteCanvasAdapter, SCALE, NoteTooSmallException} from '@/store/Music'
+  import {NoteCanvasAdapter, NoteTooSmallException} from '@/store/Music'
   import NoteBox from './NoteBox'
   import CanvasLine from './CanvasLine.vue'
   import ProgressBar from './ProgressBar.vue'
   import NoteGrid from './NoteGrid.vue'
+  import PitchHeader from './PitchHeader.vue'
 
   const canvasAdapter = new NoteCanvasAdapter()
 
@@ -64,7 +63,7 @@
 
   export default {
     name: 'NoteCanvas',
-    components: {NoteBox, CanvasLine, ProgressBar, NoteGrid},
+    components: {NoteBox, CanvasLine, ProgressBar, NoteGrid, PitchHeader},
     data () {
       return {
         newBox: null,
@@ -104,12 +103,6 @@
       },
       renderContext () {
         return this.$store.getters['MusicStore/getRenderContext']
-      },
-      pitches () {
-        return Object.keys(SCALE).map((index) => ({
-          id: index,
-          name: SCALE[index]
-        })).reverse()
       }
     },
     methods: {
@@ -264,24 +257,7 @@
     @import "../../styles/_bootstrap_override.scss";
 
     .wrapper {
-        // position: relative;
         display: flex;
-    }
-
-    #note-pitches {
-        display: flex;
-        flex-flow: column;
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-        text-align: center;
-        color: map-get($theme-colors, "light");
-        background: map-get($theme-colors, "dark");
-
-        li {
-            padding: 0 .5em;
-            margin: auto 0;
-        }
     }
 
     .canvas-wrapper {
