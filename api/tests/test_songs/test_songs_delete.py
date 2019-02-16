@@ -1,6 +1,6 @@
 import pytest
 
-from api.db import Database
+from api.db import Database, DoesNotExist
 
 
 @pytest.fixture
@@ -22,7 +22,10 @@ def test_if_song_does_not_exist_then_not_found(
     assert result.status_code == 404
 
 
-def test_delete_song(client, db: Database, auth_headers: dict, song_id):
+def test_delete_song(client, db: Database, auth_headers: dict, song_id: int):
     db.create_song_user_link(song_id=song_id, username="admin")
     result = client.simulate_delete(f"/songs/{song_id}", headers=auth_headers)
     assert result.status_code == 204
+
+    with pytest.raises(DoesNotExist):
+        db.get_song_by_id(id=song_id)
