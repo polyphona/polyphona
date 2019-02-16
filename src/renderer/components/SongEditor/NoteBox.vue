@@ -6,30 +6,16 @@
   note box to the canvas.
   */
 
-  import {MouseCanvasAdapter} from '@/models'
+  import {Box, MouseCanvasAdapter} from '@/models'
 
   const adapter = new MouseCanvasAdapter()
 
   export default {
     inject: ['layers'],
     props: {
-      // Top-left corner coordinates (percentage of canvas dimensions)
-      x: {
-        type: Number,
-        default: 0
-      },
-      y: {
-        type: Number,
-        default: 0
-      },
-      // Width and height (percentage of canvas dimensions)
-      width: {
-        type: Number,
-        default: 0
-      },
-      height: {
-        type: Number,
-        default: 0
+      box: {
+        // See: models/note.js
+        type: Object
       },
       // Color of the box
       color: {
@@ -44,12 +30,12 @@
     data () {
       return {
         strokeWidth: 1,
-        oldBox: {
+        oldBox: new Box({
           x: 0,
           y: 0,
           width: 0,
           height: 0
-        }
+        })
       }
     },
     computed: {
@@ -58,12 +44,12 @@
       },
       calculatedBox () {
         const ctx = this.context
-        const box = {
-          x: adapter.percentWidthToPix(this.x, ctx),
-          y: adapter.percentHeightToPix(this.y, ctx),
-          width: adapter.percentWidthToPix(this.width, ctx),
-          height: adapter.percentHeightToPix(this.height, ctx)
-        }
+        const box = new Box({
+          x: adapter.percentWidthToPix(this.box.x, ctx),
+          y: adapter.percentHeightToPix(this.box.y, ctx),
+          width: adapter.percentWidthToPix(this.box.width, ctx),
+          height: adapter.percentHeightToPix(this.box.height, ctx)
+        })
         this.oldBox = box
         return box
       }

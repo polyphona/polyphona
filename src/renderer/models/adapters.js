@@ -1,6 +1,7 @@
 import { clip } from './utils'
 import { NoteTooSmallException } from './errors'
 import { Note } from './note'
+import { Box } from './box'
 
 /* Convert canvas percentages to pixels and vice-versa. */
 export class MouseCanvasAdapter {
@@ -26,13 +27,13 @@ export class NoteCanvasAdapter {
   /* Convert a ``Note`` to a box. */
   toBox (renderContext, note) {
     const height = renderContext.percentPerInterval
-    return {
+    return new Box({
       id: note.id,
       x: renderContext.percentPerTick * note.startTime,
       y: 100 - (height + renderContext.percentPerInterval * note.pitch),
       width: renderContext.percentPerTick * note.duration,
       height
-    }
+    })
   }
 
   /* Convert a box to a ``Note``. */
@@ -52,11 +53,12 @@ export class NoteCanvasAdapter {
 
   /* Clip a box to unit note dimensions. */
   clip (renderContext, box) {
-    return {
+    return new Box({
+      id: box.id,
       x: clip(box.x, renderContext.percentPerTick),
       y: clip(box.y, renderContext.percentPerInterval),
       width: clip(box.width, renderContext.percentPerTick),
       height: clip(box.height, renderContext.percentPerInterval)
-    }
+    })
   }
 }
