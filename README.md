@@ -1,6 +1,6 @@
 # Polyphona
 
-A familiar, portable music editor for your desktop. 
+A familiar, portable music editor for your desktop.
 
 ## Install
 
@@ -8,9 +8,8 @@ A familiar, portable music editor for your desktop.
 
 Make sure you have [Node] ad [npm] installed, then run:
 
-``` bash
+```bash
 npm install
-npm install simonadcock-midiconvert
 ```
 
 ### Server
@@ -66,9 +65,9 @@ To run the test suite, run `$ pytest` from the project root directory.
 
 To get started with Electron, read [Writing your first Electron app](https://electronjs.org/docs/tutorial/first-app).
 
-[Node]: https://nodejs.org/en/
+[node]: https://nodejs.org/en/
 [npm]: https://www.npmjs.com/get-npm
-[Falcon]: https://falcon.readthedocs.io/en/stable/
+[falcon]: https://falcon.readthedocs.io/en/stable/
 [gunicorn]: https://gunicorn.org/
 [sqlite3]: https://docs.python.org/3.4/library/sqlite3.html
 [pytest]: https://docs.pytest.org/en/latest/

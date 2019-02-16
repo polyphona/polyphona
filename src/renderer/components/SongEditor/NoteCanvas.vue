@@ -1,44 +1,20 @@
 <template>
   <div class="wrapper">
-    <!-- Show the names of the notes in a column. -->
-    <ol id="note-pitches">
-      <li v-for="pitch in pitches" :key="'pitch-' + pitch.id">{{ pitch.name }}</li>
-    </ol>
-    <div ref="canvas-container" class="canvas-wrapper">
-      <!-- Canvas layers. -->
-      <canvas ref="background" class="background"></canvas>
-      <canvas ref="notes" class="layer"></canvas>
-      <canvas ref="decorations" class="layer"></canvas>
-      <canvas
-        ref="foreground"
-        class="layer"
-        @click="onClick"
-        @mousedown="onMouseDown"
-        @mouseup="onMouseUp"
-        @mousemove="onMouseMove"
-        @mouseleave="onMouseLeave"
-      ></canvas>
+    <pitch-header></pitch-header>
 
-      <!-- Progress bar -->
-      <canvas-line
-        v-if="playing"
-        :x="progressX"
-        :vertical="true"
-        :width="3"
-        color="red"
-        layer="decorations"
-      ></canvas-line>
+    <canvas-layers
+      class="canvas-wrapper"
+      :names="layerNames"
+      @resized="canvasId++"
+      @click="onClick"
+      @mousedown="onMouseDown"
+      @mouseup="onMouseUp"
+      @mousemove="onMouseMove"
+      @mouseleave="onMouseLeave"
+    >
+      <progress-bar layer="decorations"></progress-bar>
 
-      <!-- Delimiters of notes on the canvas -->
-      <canvas-line
-        v-for="delimiter in delimiters"
-        :x="delimiter.x"
-        :y="delimiter.y"
-        :vertical="delimiter.vertical"
-        :width="delimiter.width"
-        :key="canvasId + '-delimiter-' + delimiter.id"
-        layer="background"
-      ></canvas-line>
+      <note-grid layer="background" :key="canvasId"></note-grid>
 
       <!-- Note being created (if any) -->
       <note-box
@@ -62,16 +38,18 @@
         :color="'#f6cd4c'"
         layer="notes"
       ></note-box>
-    </div>
+    </canvas-layers>
   </div>
 </template>
 
 <script>
-  import Tone from 'tone'
-
-  import {NoteCanvasAdapter, SCALE, NoteTooSmallException} from '@/store/Music'
+  import {NoteCanvasAdapter, NoteTooSmallException} from '@/models'
+  import CanvasLayers from './CanvasLayers.vue'
   import NoteBox from './NoteBox'
   import CanvasLine from './CanvasLine.vue'
+  import ProgressBar from './ProgressBar.vue'
+  import NoteGrid from './NoteGrid.vue'
+  import PitchHeader from './PitchHeader.vue'
 
   const canvasAdapter = new NoteCanvasAdapter()
 
@@ -81,7 +59,7 @@
 
   export default {
     name: 'NoteCanvas',
-    components: {NoteBox, CanvasLine},
+    components: {CanvasLayers, NoteBox, CanvasLine, ProgressBar, NoteGrid, PitchHeader},
     data () {
       return {
         newBox: null,
@@ -89,126 +67,27 @@
         // and in which direction.
         dragging: false,
         clicking: false,
-        canvasDimensions: null,
-        layers: {
-          background: null,
-          notes: null,
-          decorations: null,
-          foreground: null
-        },
-        progress: Tone.Transport.progress,
-        progressInterval: null,
-        // For `:key` on canvas delimiters
-        delimiterId: 0,
-        // Gets incremented when the canvas needs to be re-rendered.
-        // This is why we use it in the canvas components' `:key`.
+        layerNames: ['background', 'notes', 'decorations', 'foreground'],
+        // Gets incremented when the canvas has been resized and
+        // needs to be re-rendered.
         canvasId: 0
-      }
-    },
-    mounted () {
-      // Canvas are only accessible once the component is mounted in the DOM
-      Object.keys(this.layers).forEach((layer) => this.setUpCanvas(layer))
-      // Listen to window resize events to resize the canvases accordingly.
-      window.addEventListener('resize', this.onWindowResize)
-    },
-    provide () {
-      // Allow child components to access the layers via `inject: ['layers']`.
-      return {
-        layers: this.layers
-      }
-    },
-    watch: {
-      playing (value) {
-        if (value) {
-          this.progressInterval = setInterval(() => {
-            this.progress = Tone.Transport.progress
-          }, 16) // 60 FPS
-        } else {
-          clearInterval(this.progressInterval)
-        }
       }
     },
     computed: {
       noteBoxes () {
-        return this.$store.getters['MusicStore/listNotes'].map(
+        return this.$store.getters['music/listNotes'].map(
           (note) => canvasAdapter.toBox(this.renderContext, note)
         )
       },
-      musicContext () {
-        return this.$store.getters['MusicStore/getMusicContext']
-      },
       renderContext () {
-        return this.$store.getters['MusicStore/getRenderContext']
-      },
-      playing () {
-        return this.$store.getters['MusicStore/getPlaying']
-      },
-      progressX () {
-        return 100 * this.progress
-      },
-      delimiters () {
-        const division = this.musicContext.division
-        const stepX = this.renderContext.percentPerTick
-        const stepY = this.renderContext.percentPerInterval
-        const verticalDelimiters = []
-        for (let i = 0; i < 100 / stepX; i++) {
-          verticalDelimiters.push({
-            id: this.delimiterId,
-            x: stepX * i,
-            vertical: true,
-            width: i % division === 0 ? 4 : 1
-          })
-          this.delimiterId++
-        }
-        const horizontalDelimiters = []
-        for (let i = 0; i < 100 / stepY; i++) {
-          horizontalDelimiters.push({
-            id: this.delimiterId,
-            y: stepY * i,
-            vertical: false
-          })
-          this.delimiterId++
-        }
-        return [...horizontalDelimiters, ...verticalDelimiters]
-      },
-      pitches () {
-        return Object.keys(SCALE).map((index) => ({
-          id: index,
-          name: SCALE[index]
-        })).reverse()
+        return this.$store.getters['music/getRenderContext']
       }
     },
     methods: {
-      setUpCanvas (layer) {
-        const canvas = this.$refs[layer]
-        this.layers[layer] = canvas.getContext('2d')
-        // Store the first layer's parent's dimensions to use the same dimensions
-        // for all layers.
-        if (!this.canvasDimensions) {
-          this.canvasDimensions = {
-            width: canvas.parentElement.clientWidth,
-            height: canvas.parentElement.clientHeight
-          }
-        }
-        // Resize canvas to fit its parent's width and height
-        canvas.width = this.canvasDimensions.width
-        canvas.height = this.canvasDimensions.height
-      },
-      toCanvasPercentPosition (event) {
-        // NOTE: canvas layers should have the same size and same top-left position,
-        // so it does not matter which layer we choose here
-        const canvas = this.$refs['background']
-        const canvasLeft = canvas.parentElement.offsetLeft
-        const canvasTop = canvas.parentElement.offsetTop
-        return {
-          x: 100 * (event.pageX - canvasLeft) / canvas.width,
-          y: 100 * (event.pageY - canvasTop) / canvas.height
-        }
-      },
       addNoteFromBox (box) {
         try {
           const note = canvasAdapter.toNote(this.renderContext, box)
-          this.$store.dispatch('MusicStore/addNote', note)
+          this.$store.dispatch('music/addNote', note)
           return note
         } catch (e) {
           if (e instanceof NoteTooSmallException) {
@@ -217,40 +96,41 @@
           throw e
         }
       },
-      onClick (event) {
+      onClick ({x, y}) {
         if (!this.clicking) {
           return
         }
         let box = {
-          ...this.toCanvasPercentPosition(event),
+          x,
+          y,
           width: this.renderContext.percentPerTick,
           height: this.renderContext.percentPerInterval
         }
         box = canvasAdapter.clip(this.renderContext, box)
         const note = canvasAdapter.toNote(this.renderContext, box)
-        const existingNote = this.$store.getters['MusicStore/listNotes'].filter((value) => note.disturbs(value))
+        const existingNote = this.$store.getters['music/listNotes'].filter((value) => note.disturbs(value))
         if (existingNote.length > 0) { // There is an existing note : we delete note
-          this.$store.dispatch('MusicStore/deleteNote', existingNote[0])
+          this.$store.dispatch('music/deleteNote', existingNote[0])
         } else { // there are no problematic notes : we add a new note
           this.addNoteFromBox(box)
         }
         this.clicking = false
       },
-      onMouseDown (event) {
+      onMouseDown ({x, y}) {
         this.clicking = true
         this.dragging = DRAG_NONE
         const height = this.renderContext.percentPerInterval
         const width = this.renderContext.percentPerTick
-        const box = {...this.toCanvasPercentPosition(event), width, height}
+        const box = {x, y, width, height}
         this.newBox = canvasAdapter.clip(this.renderContext, box)
       },
-      onMouseMove (event) {
+      onMouseMove ({x, y}) {
         this.clicking = false
         if (this.dragging === false) {
           return
         }
 
-        const eventX = this.toCanvasPercentPosition(event).x
+        const eventX = x
         // Perform a bit of logic to keep track of which way we are
         // dragging the note.
         // This is necessary in order to correctly draw the new note,
@@ -279,7 +159,7 @@
 
         this.newBox = canvasAdapter.clip(this.renderContext, this.newBox)
       },
-      onMouseUp (event) {
+      onMouseUp () {
         if (this.dragging) {
           try {
             let box = this.newBox
@@ -289,7 +169,7 @@
               box.x -= box.width
             }
             const note = canvasAdapter.toNote(this.renderContext, box)
-            const problematicNotes = this.$store.getters['MusicStore/listNotes'].filter((value) => note.disturbs(value))
+            const problematicNotes = this.$store.getters['music/listNotes'].filter((value) => note.disturbs(value))
             if (problematicNotes.length === 0) {
               // there are no problematic notes => we can add a new note
               this.addNoteFromBox(box)
@@ -303,25 +183,11 @@
         this.dragging = false
         this.newBox = null
       },
-      onMouseLeave (event) {
+      onMouseLeave () {
         this.dragging = false
         this.clicking = false
         this.newBox = null
-      },
-      onWindowResize () {
-        const container = this.$refs['canvas-container']
-        // Update each layer's width and height to match that of the container.
-        Object.values(this.layers).forEach((ctx) => {
-          ctx.canvas.width = container.clientWidth
-          ctx.canvas.height = container.clientHeight
-        })
-        // Increment the canvas ID so that components that use it in
-        // their `:key` get re-rendered by Vue.
-        this.canvasId++
       }
-    },
-    destroyed () {
-      window.removeEventListener('resize', this.onWindowResize)
     }
   }
 </script>
@@ -330,40 +196,12 @@
     @import "../../styles/_bootstrap_override.scss";
 
     .wrapper {
-        // position: relative;
         display: flex;
-    }
-
-    #note-pitches {
-        display: flex;
-        flex-flow: column;
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-        text-align: center;
-        color: map-get($theme-colors, "light");
-        background: map-get($theme-colors, "dark");
-
-        li {
-            padding: 0 .5em;
-            margin: auto 0;
-        }
     }
 
     .canvas-wrapper {
         position: relative;
         height: 100%;
         width: 100%;
-
-        .background {
-            background: map-get($theme-colors, "light");
-        }
-
-        .layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            background: transparent;
-        }
     }
 </style>
