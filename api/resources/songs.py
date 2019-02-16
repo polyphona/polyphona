@@ -10,6 +10,7 @@ class UserSongsResource:
     def __init__(self, db: Database):
         self.db = db
 
+    @authenticated
     def on_get(self, _, resp: Response, username: str):
         if self.db.user_exists(username):
             raise falcon.HTTPNotFound(title=f"No user named {username}.")
