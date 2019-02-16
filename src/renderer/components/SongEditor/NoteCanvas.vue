@@ -21,16 +21,7 @@
 
       <progress-bar layer="decorations"></progress-bar>
 
-      <!-- Delimiters of notes on the canvas -->
-      <canvas-line
-        v-for="delimiter in delimiters"
-        :x="delimiter.x"
-        :y="delimiter.y"
-        :vertical="delimiter.vertical"
-        :width="delimiter.width"
-        :key="canvasId + '-delimiter-' + delimiter.id"
-        layer="background"
-      ></canvas-line>
+      <note-grid layer="background" :key="canvasId"></note-grid>
 
       <!-- Note being created (if any) -->
       <note-box
@@ -63,6 +54,7 @@
   import NoteBox from './NoteBox'
   import CanvasLine from './CanvasLine.vue'
   import ProgressBar from './ProgressBar.vue'
+  import NoteGrid from './NoteGrid.vue'
 
   const canvasAdapter = new NoteCanvasAdapter()
 
@@ -72,7 +64,7 @@
 
   export default {
     name: 'NoteCanvas',
-    components: {NoteBox, CanvasLine, ProgressBar},
+    components: {NoteBox, CanvasLine, ProgressBar, NoteGrid},
     data () {
       return {
         newBox: null,
@@ -87,8 +79,6 @@
           decorations: null,
           foreground: null
         },
-        // For `:key` on canvas delimiters
-        delimiterId: 0,
         // Gets incremented when the canvas needs to be re-rendered.
         // This is why we use it in the canvas components' `:key`.
         canvasId: 0
@@ -112,36 +102,8 @@
           (note) => canvasAdapter.toBox(this.renderContext, note)
         )
       },
-      musicContext () {
-        return this.$store.getters['MusicStore/getMusicContext']
-      },
       renderContext () {
         return this.$store.getters['MusicStore/getRenderContext']
-      },
-      delimiters () {
-        const division = this.musicContext.division
-        const stepX = this.renderContext.percentPerTick
-        const stepY = this.renderContext.percentPerInterval
-        const verticalDelimiters = []
-        for (let i = 0; i < 100 / stepX; i++) {
-          verticalDelimiters.push({
-            id: this.delimiterId,
-            x: stepX * i,
-            vertical: true,
-            width: i % division === 0 ? 4 : 1
-          })
-          this.delimiterId++
-        }
-        const horizontalDelimiters = []
-        for (let i = 0; i < 100 / stepY; i++) {
-          horizontalDelimiters.push({
-            id: this.delimiterId,
-            y: stepY * i,
-            vertical: false
-          })
-          this.delimiterId++
-        }
-        return [...horizontalDelimiters, ...verticalDelimiters]
       },
       pitches () {
         return Object.keys(SCALE).map((index) => ({
