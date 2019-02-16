@@ -1,5 +1,5 @@
 <template>
-  <canvas-line v-if="playing" :x="xPos" :vertical="true" :width="3" color="red" :layer="layer"></canvas-line>
+  <canvas-line v-if="playing" :x="xPos" :vertical="true" :stroke="3" color="red" :layer="layer"></canvas-line>
 </template>
 
 <script>

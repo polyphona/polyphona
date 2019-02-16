@@ -5,7 +5,7 @@
       :x="delimiter.x"
       :y="delimiter.y"
       :vertical="delimiter.vertical"
-      :width="delimiter.width"
+      :stroke="delimiter.stroke"
       :key="'delimiter-' + delimiter.id"
       :layer="layer"
     ></canvas-line>
@@ -46,7 +46,7 @@ export default {
           id: this.delimiterId,
           x: stepX * i,
           vertical: true,
-          width: i % division === 0 ? 4 : 1
+          stroke: i % division === 0 ? 4 : 1
         })
         this.delimiterId++
       }
