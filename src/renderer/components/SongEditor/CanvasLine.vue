@@ -36,8 +36,7 @@
     },
     computed: {
       context () {
-        const ctx = this.layers[this.layer]
-        return ctx
+        return this.layers[this.layer]
       },
       line () {
         const ctx = this.context
