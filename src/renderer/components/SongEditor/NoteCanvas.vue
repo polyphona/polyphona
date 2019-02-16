@@ -43,8 +43,7 @@
 </template>
 
 <script>
-  import {NoteCanvasAdapter} from './adapters'
-  import {NoteTooSmallException} from './errors'
+  import {NoteCanvasAdapter, NoteTooSmallException} from '@/models'
   import CanvasLayers from './CanvasLayers.vue'
   import NoteBox from './NoteBox'
   import CanvasLine from './CanvasLine.vue'

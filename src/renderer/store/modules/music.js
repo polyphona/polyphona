@@ -1,6 +1,6 @@
 import Tone from 'tone'
 import {remote} from 'electron'
-import {Track, SCALE, INVERSESCALE, Note, TrackLoader} from '../music'
+import {Track, SCALE, INVERSESCALE, Note, TrackLoader} from '@/models'
 import fs from 'fs'
 import * as MidiConvert from 'midiconvert'
 import http from '../../utils/http'

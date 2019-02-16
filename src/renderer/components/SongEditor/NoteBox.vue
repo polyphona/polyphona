@@ -6,7 +6,7 @@
   note box to the canvas.
   */
 
-  import {MouseCanvasAdapter} from './adapters'
+  import {MouseCanvasAdapter} from '@/models'
 
   const adapter = new MouseCanvasAdapter()
 

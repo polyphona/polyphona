@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import {MouseCanvasAdapter} from './adapters'
+import {MouseCanvasAdapter} from '@/models'
 
 const mouseAdapter = new MouseCanvasAdapter()
 

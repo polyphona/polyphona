@@ -1,6 +1,6 @@
 import { clip } from './utils'
 import { NoteTooSmallException } from './errors'
-import { Note } from '@/store/music'
+import { Note } from './note'
 
 /* Convert canvas percentages to pixels and vice-versa. */
 export class MouseCanvasAdapter {
