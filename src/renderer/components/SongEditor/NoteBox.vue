@@ -14,7 +14,7 @@
     inject: ['layers'],
     props: {
       box: {
-        // See: models/note.js
+        // See: models/box.js
         type: Object
       },
       // Color of the box
