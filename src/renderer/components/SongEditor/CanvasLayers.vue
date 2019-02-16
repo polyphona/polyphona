@@ -43,23 +43,25 @@ export default {
     this.names.forEach((name) => this.setUpCanvas(name))
     // Listen to window resize events to resize the canvases accordingly.
     window.addEventListener('resize', this.onWindowResize)
-    this.listenToEventsOnTopCanvas()
+    this.listenToEvents()
   },
   destroyed () {
     window.removeEventListener('resize', this.onWindowResize)
   },
   methods: {
-    listenToEventsOnTopCanvas () {
-      const topName = this.names[this.names.length - 1]
-
-      if (!topName) {
-        return
-      }
-
-      const topCanvas = this.$refs[topName][0]
-
+    listenToEvents () {
+      /*
+      NOTE:
+      - Events on the container are not propagated to
+      the parent component (possibly because of an issue with slots),
+      e.g. if we don't manually bind them, the parent component cannot use
+      `@click` or `@mousemove`.
+      - We bind the events programmatically because it would be repetitive
+      to do position conversion and re-emission on the container directly.
+      */
+      const container = this.$refs.container
       this.events.forEach((event) => {
-        topCanvas['on' + event] = (e) => {
+        container['on' + event] = (e) => {
           this.$emit(event, this.toCanvasPercentPosition(e))
         }
       })
