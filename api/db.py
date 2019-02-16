@@ -5,10 +5,8 @@ import sqlite3
 from contextlib import suppress
 from typing import List, Optional
 
-import falcon
 
-
-class DoesNotExist(falcon.HTTPNotFound):
+class DoesNotExist(Exception):
     def __init__(self, obj_type: str, **kwargs: str):
         if kwargs:
             attrs = " with " + ", ".join(
@@ -16,7 +14,8 @@ class DoesNotExist(falcon.HTTPNotFound):
             )
         else:
             attrs = ""
-        super().__init__(title=f"{obj_type}{attrs} does not exist.")
+        self.message = f"{obj_type}{attrs} does not exist."
+        super().__init__(self.message)
 
 
 class Database:
