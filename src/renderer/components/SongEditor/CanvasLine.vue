@@ -1,6 +1,8 @@
 <script>
   /* NOTE: this is a JS-only component. */
-  import { percentWidthToPix, percentHeightToPix } from './utils'
+  import { MouseCanvasAdapter } from './adapters'
+
+  const adapter = new MouseCanvasAdapter()
 
   export default {
     inject: ['layers'],
@@ -42,12 +44,12 @@
         const ctx = this.context
         const line = {
           start: {
-            x: percentWidthToPix(this.vertical ? this.x : 0, ctx),
-            y: percentHeightToPix(this.vertical ? 0 : this.y, ctx)
+            x: adapter.percentWidthToPix(this.vertical ? this.x : 0, ctx),
+            y: adapter.percentHeightToPix(this.vertical ? 0 : this.y, ctx)
           },
           end: {
-            x: percentWidthToPix(this.vertical ? this.x : 100, ctx),
-            y: percentHeightToPix(this.vertical ? 100 : this.y, ctx)
+            x: adapter.percentWidthToPix(this.vertical ? this.x : 100, ctx),
+            y: adapter.percentHeightToPix(this.vertical ? 100 : this.y, ctx)
           }
         }
         // NOTE: this only works for vertical lines.
