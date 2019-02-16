@@ -13,23 +13,29 @@ from .error_handlers import on_does_not_exist
 
 
 def create_api(db: Database) -> API:
+    # Middleware.
     cors = CORS(
         allow_all_origins=True, allow_all_methods=True, allow_all_headers=True
     )
+
+    # Application instance.
     api = API(middleware=[cors.middleware])
 
+    # Error handlers.
     api.add_error_handler(DoesNotExist, on_does_not_exist)
 
-    api.add_route("/users/", UserResource(db))
+    # Resources.
+    users = UserResource(db)
+    user_songs = UserSongsResource(db)
+    song = SongResource(db)
+    token = TokenResource(db)
 
-    api.add_route("/users/{username}/songs", UserSongsResource(db))
-
-    song_resource = SongResource(db)
-    api.add_route("/songs/{pk}", song_resource)
-    api.add_route("/songs/", song_resource)
-
-    token_resource = TokenResource(db)
-    api.add_route("/tokens/{token}", TokenResource(db))
-    api.add_route("/tokens/", token_resource)
+    # Routes.
+    api.add_route("/users/", users)
+    api.add_route("/users/{username}/songs", user_songs)
+    api.add_route("/songs/{pk}", song)
+    api.add_route("/songs/", song)
+    api.add_route("/tokens/{token}", token)
+    api.add_route("/tokens/", token)
 
     return api
