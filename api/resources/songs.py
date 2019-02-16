@@ -21,12 +21,9 @@ class SongResource:
     def __init__(self, db: Database):
         self.db: Database = db
 
-    def _get_song(self, pk: int):
-        return self.db.get_song_by_id(id=pk)
-
     @authenticated
     def on_get(self, _, resp: Response, pk: str):
-        resp.media = self._get_song(parse_int(pk))
+        resp.media = self.db.get_song_by_id(id=parse_int(pk))
 
     @authenticated
     @require_fields("name", "tracks")
@@ -38,7 +35,7 @@ class SongResource:
             tracks=req.media["tracks"],
             username=req.username,
         )
-        resp.media = self._get_song(pk)
+        resp.media = self.db.get_song_by_id(id=pk)
 
     @authenticated
     @require_fields("name", "tracks")
@@ -47,7 +44,7 @@ class SongResource:
             name=req.media["name"], tracks=req.media["tracks"]
         )
         self.db.create_song_user_link(pk, req.username)
-        resp.media = self._get_song(pk)
+        resp.media = self.db.get_song_by_id(id=pk)
         resp.status = falcon.HTTP_201
 
     @authenticated
