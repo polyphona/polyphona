@@ -1,9 +1,9 @@
-// Helper functions to convert a percentage of canvas area to pixels.
-
-export function percentWidthToPix (percent, ctx) {
-  return Math.floor((ctx.canvas.width / 100) * percent)
-}
-
-export function percentHeightToPix (percent, ctx) {
-  return Math.floor((ctx.canvas.height / 100) * percent)
+/* Clip a value by increment.
+Examples:
+clip(10.3, 1) => 10
+clip(12, 5) => 10
+clip(15.01, 2.5) => 15.0
+*/
+export function clip (value, increment) {
+  return Math.floor(value / increment) * increment
 }

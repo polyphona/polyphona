@@ -48,13 +48,15 @@
 </template>
 
 <script>
-  import {NoteCanvasAdapter, NoteTooSmallException} from '@/store/Music'
+  import {NoteCanvasAdapter, MouseCanvasAdapter} from './adapters'
+  import {NoteTooSmallException} from './errors'
   import NoteBox from './NoteBox'
   import CanvasLine from './CanvasLine.vue'
   import ProgressBar from './ProgressBar.vue'
   import NoteGrid from './NoteGrid.vue'
   import PitchHeader from './PitchHeader.vue'
 
+  const mouseAdapter = new MouseCanvasAdapter()
   const canvasAdapter = new NoteCanvasAdapter()
 
   const DRAG_RIGHT = 1
@@ -124,12 +126,12 @@
       toCanvasPercentPosition (event) {
         // NOTE: canvas layers should have the same size and same top-left position,
         // so it does not matter which layer we choose here
-        const canvas = this.$refs['background']
-        const canvasLeft = canvas.parentElement.offsetLeft
-        const canvasTop = canvas.parentElement.offsetTop
+        const ctx = this.layers.background
+        const canvasLeft = ctx.canvas.parentElement.offsetLeft
+        const canvasTop = ctx.canvas.parentElement.offsetTop
         return {
-          x: 100 * (event.pageX - canvasLeft) / canvas.width,
-          y: 100 * (event.pageY - canvasTop) / canvas.height
+          x: mouseAdapter.pixWidthToPercent(event.pageX - canvasLeft, ctx),
+          y: mouseAdapter.pixHeightToPercent(event.pageY - canvasTop, ctx)
         }
       },
       addNoteFromBox (box) {

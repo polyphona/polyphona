@@ -17,11 +17,9 @@
   @import './styles/_bootstrap_override.scss';
 
   html, body {
+    // Use the entire viewport width and height.
     width: 100vw;
     height: 100vh;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    font-family: $font-family-titles;
   }
   #app {
     width: 100%;

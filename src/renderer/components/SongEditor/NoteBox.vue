@@ -1,11 +1,14 @@
 <script>
   /*
-  NOTE: NoteBox is not a "real" Vue component; it has no template nor styles, so it does
-  not render to the DOM.
-  Instead, it provides a render() function directly which draws the note box to the canvas.
-   */
+  NOTE: NoteBox is not a "real" Vue component; it has no template
+  nor styles, so it does not render to the DOM.
+  Instead, it provides a render() function directly which draws the
+  note box to the canvas.
+  */
 
-  import {percentWidthToPix, percentHeightToPix} from './utils'
+  import {MouseCanvasAdapter} from './adapters'
+
+  const adapter = new MouseCanvasAdapter()
 
   export default {
     inject: ['layers'],
@@ -56,10 +59,10 @@
       calculatedBox () {
         const ctx = this.context
         const box = {
-          x: percentWidthToPix(this.x, ctx),
-          y: percentHeightToPix(this.y, ctx),
-          width: percentWidthToPix(this.width, ctx),
-          height: percentHeightToPix(this.height, ctx)
+          x: adapter.percentWidthToPix(this.x, ctx),
+          y: adapter.percentHeightToPix(this.y, ctx),
+          width: adapter.percentWidthToPix(this.width, ctx),
+          height: adapter.percentHeightToPix(this.height, ctx)
         }
         this.oldBox = box
         return box

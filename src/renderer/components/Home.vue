@@ -1,12 +1,13 @@
 <template>
   <div id="home">
     <alerts-list></alerts-list>
-    <load-dialog v-if="showLoadDialog" v-on:close="showLoadDialog = false"></load-dialog>
+    <load-dialog v-if="showLoadDialog" @close="showLoadDialog = false"></load-dialog>
     <song-editor></song-editor>
   </div>
 </template>
 
 <script>
+  import {mapActions} from 'vuex'
   import SongEditor from './SongEditor/SongEditor.vue'
   import LoadDialog from './LoadDialog'
   import AlertsList from './AlertsList.vue'
@@ -15,6 +16,7 @@
     name: 'Home',
     components: {SongEditor, LoadDialog, AlertsList},
     mounted () {
+      // See: https://electronjs.org/docs/api/ipc-renderer
       this.$electron.ipcRenderer.on('saving', this.save)
       this.$electron.ipcRenderer.on('load', this.load)
       this.$electron.ipcRenderer.on('exportMidi', this.exportMidi)
@@ -22,7 +24,6 @@
     },
     data () {
       return {
-        hasError: false,
         showLoadDialog: false
       }
     },
@@ -38,7 +39,7 @@
           .catch(() => {
             this.$store.dispatch('alerts/add', {
               kind: 'danger',
-              message: "Le morceau n'a pas pu être sauvé !"
+              message: "Le morceau n'a pas pu être sauvé…"
             })
           })
       },
@@ -46,12 +47,7 @@
         this.$store.dispatch('MusicStore/getSavedTracks')
         this.showLoadDialog = true
       },
-      exportMidi () {
-        this.$store.dispatch('MusicStore/exportMidi')
-      },
-      importMidi () {
-        this.$store.dispatch('MusicStore/importMidi')
-      }
+      ...mapActions('MusicStore', ['exportMidi', 'importMidi'])
     },
     destroyed () {
       this.$electron.ipcRenderer.removeAllListeners('saving')
