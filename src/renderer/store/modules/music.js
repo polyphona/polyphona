@@ -2,7 +2,7 @@ import Tone from 'tone'
 import {remote} from 'electron'
 import {Track, SCALE, INVERSESCALE, Note, TrackLoader} from '../music'
 import fs from 'fs'
-import * as MidiConvert from 'simonadcock-midiconvert'
+import * as MidiConvert from 'midiconvert'
 import http from '../../utils/http'
 const inverseScale = INVERSESCALE
 
