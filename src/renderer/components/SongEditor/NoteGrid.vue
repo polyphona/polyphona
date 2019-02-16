@@ -31,10 +31,10 @@ export default {
   },
   computed: {
     musicContext () {
-      return this.$store.getters['MusicStore/getMusicContext']
+      return this.$store.getters['music/getMusicContext']
     },
     renderContext () {
-      return this.$store.getters['MusicStore/getRenderContext']
+      return this.$store.getters['music/getRenderContext']
     },
     delimiters () {
       const division = this.musicContext.division

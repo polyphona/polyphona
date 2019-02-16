@@ -26,7 +26,7 @@ export default {
   },
   computed: {
     playing () {
-      return this.$store.getters['MusicStore/getPlaying']
+      return this.$store.getters['music/getPlaying']
     },
     xPos () {
       return 100 * this.progress

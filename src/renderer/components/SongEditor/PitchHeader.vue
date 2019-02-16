@@ -9,7 +9,7 @@ export default {
   name: 'pitch-header',
   computed: {
     scale () {
-      return this.$store.getters['MusicStore/getMusicContext'].scale
+      return this.$store.getters['music/getMusicContext'].scale
     },
     pitches () {
       return Object.keys(this.scale).map((index) => ({

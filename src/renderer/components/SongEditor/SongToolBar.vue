@@ -39,30 +39,30 @@ export default {
   computed: {
     title: {
       get () {
-        return this.$store.getters['MusicStore/getTrack'].name
+        return this.$store.getters['music/getTrack'].name
       },
       set (value) {
-        this.$store.dispatch('MusicStore/setTrackName', value)
+        this.$store.dispatch('music/setTrackName', value)
       }
     },
     octave: {
       get () {
-        return this.$store.getters['MusicStore/getOctave']
+        return this.$store.getters['music/getOctave']
       },
       set (value) {
-        this.$store.dispatch('MusicStore/updateOctave', value)
+        this.$store.dispatch('music/updateOctave', value)
       }
     },
     playing () {
-      return this.$store.getters['MusicStore/getPlaying']
+      return this.$store.getters['music/getPlaying']
     }
   },
   methods: {
-    ...mapActions('MusicStore', ['togglePlay', 'exportMidi', 'importMidi'])
+    ...mapActions('music', ['togglePlay', 'exportMidi', 'importMidi'])
   },
   destroyed () {
     // Prevent music from keeping playing when navigating to another page.
-    this.$store.dispatch('MusicStore/stop')
+    this.$store.dispatch('music/stop')
   }
 }
 </script>
