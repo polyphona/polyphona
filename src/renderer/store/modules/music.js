@@ -263,6 +263,7 @@ const actions = {
     })
     fs.readFile(path.toString(), 'binary', function (err, midiBlob) {
       if (!err) {
+        context.commit('RESET_TRACK')
         var midi = MidiConvert.parse(midiBlob)
         var midiNotes = midi.tracks[0].notes
         for (var i = 0; i < midiNotes.length; i++) {
