@@ -47,7 +47,7 @@
         this.$store.dispatch('MusicStore/getSavedTracks')
         this.showLoadDialog = true
       },
-      ...mapActions('MusicStore', ['exportMidi', 'importMidi']),
+      ...mapActions('MusicStore', ['exportMidi', 'importMidi'])
     },
     destroyed () {
       this.$electron.ipcRenderer.removeAllListeners('saving')
