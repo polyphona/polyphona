@@ -1,9 +1,6 @@
 <template>
   <div class="wrapper">
-    <!-- Show the names of the notes in a column. -->
-    <ol id="note-pitches">
-      <li v-for="pitch in pitches" :key="'pitch-' + pitch.id">{{ pitch.name }}</li>
-    </ol>
+    <pitch-header></pitch-header>
 
     <canvas-layers
       class="canvas-wrapper"
@@ -15,26 +12,9 @@
       @mousemove="onMouseMove"
       @mouseleave="onMouseLeave"
     >
-      <!-- Progress bar-->
-      <canvas-line
-        v-if="playing"
-        :x="progressX"
-        :vertical="true"
-        :width="3"
-        color="red"
-        layer="decorations"
-      ></canvas-line>
+      <progress-bar layer="decorations"></progress-bar>
 
-      <!-- Delimiters of notes on the canvas -->
-      <canvas-line
-        v-for="delimiter in delimiters"
-        :x="delimiter.x"
-        :y="delimiter.y"
-        :vertical="delimiter.vertical"
-        :width="delimiter.width"
-        :key="canvasId + '-delimiter-' + delimiter.id"
-        layer="background"
-      ></canvas-line>
+      <note-grid layer="background" :key="canvasId"></note-grid>
 
       <!-- Note being created (if any) -->
       <note-box
@@ -63,13 +43,14 @@
 </template>
 
 <script>
-  import Tone from 'tone'
-  import {SCALE} from '@/store/music'
-  import CanvasLayers from './CanvasLayers.vue'
   import {NoteCanvasAdapter} from './adapters'
   import {NoteTooSmallException} from './errors'
+  import CanvasLayers from './CanvasLayers.vue'
   import NoteBox from './NoteBox'
   import CanvasLine from './CanvasLine.vue'
+  import ProgressBar from './ProgressBar.vue'
+  import NoteGrid from './NoteGrid.vue'
+  import PitchHeader from './PitchHeader.vue'
 
   const canvasAdapter = new NoteCanvasAdapter()
 
@@ -79,7 +60,7 @@
 
   export default {
     name: 'NoteCanvas',
-    components: {NoteBox, CanvasLine, CanvasLayers},
+    components: {CanvasLayers, NoteBox, CanvasLine, ProgressBar, NoteGrid, PitchHeader},
     data () {
       return {
         newBox: null,
@@ -88,24 +69,9 @@
         dragging: false,
         clicking: false,
         layerNames: ['background', 'notes', 'decorations', 'foreground'],
-        progress: Tone.Transport.progress,
-        progressInterval: null,
-        // For `:key` on canvas delimiters
-        delimiterId: 0,
         // Gets incremented when the canvas has been resized and
         // needs to be re-rendered.
         canvasId: 0
-      }
-    },
-    watch: {
-      playing (value) {
-        if (value) {
-          this.progressInterval = setInterval(() => {
-            this.progress = Tone.Transport.progress
-          }, 16) // 60 FPS
-        } else {
-          clearInterval(this.progressInterval)
-        }
       }
     },
     computed: {
@@ -114,48 +80,8 @@
           (note) => canvasAdapter.toBox(this.renderContext, note)
         )
       },
-      musicContext () {
-        return this.$store.getters['music/getMusicContext']
-      },
       renderContext () {
         return this.$store.getters['music/getRenderContext']
-      },
-      playing () {
-        return this.$store.getters['music/getPlaying']
-      },
-      progressX () {
-        return 100 * this.progress
-      },
-      delimiters () {
-        const division = this.musicContext.division
-        const stepX = this.renderContext.percentPerTick
-        const stepY = this.renderContext.percentPerInterval
-        const verticalDelimiters = []
-        for (let i = 0; i < 100 / stepX; i++) {
-          verticalDelimiters.push({
-            id: this.delimiterId,
-            x: stepX * i,
-            vertical: true,
-            width: i % division === 0 ? 4 : 1
-          })
-          this.delimiterId++
-        }
-        const horizontalDelimiters = []
-        for (let i = 0; i < 100 / stepY; i++) {
-          horizontalDelimiters.push({
-            id: this.delimiterId,
-            y: stepY * i,
-            vertical: false
-          })
-          this.delimiterId++
-        }
-        return [...horizontalDelimiters, ...verticalDelimiters]
-      },
-      pitches () {
-        return Object.keys(SCALE).map((index) => ({
-          id: index,
-          name: SCALE[index]
-        })).reverse()
       }
     },
     methods: {
@@ -271,24 +197,7 @@
     @import "../../styles/_bootstrap_override.scss";
 
     .wrapper {
-        // position: relative;
         display: flex;
-    }
-
-    #note-pitches {
-        display: flex;
-        flex-flow: column;
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-        text-align: center;
-        color: map-get($theme-colors, "light");
-        background: map-get($theme-colors, "dark");
-
-        li {
-            padding: 0 .5em;
-            margin: auto 0;
-        }
     }
 
     .canvas-wrapper {
