@@ -1,12 +1,3 @@
-export const NoteTooSmallException = () => {}
-
-/* Examples:
-clip(10.3, 1) => 10
-clip(12, 5) => 10
-clip(15.01, 2.5) => 15.0
-*/
-const clip = (value, increment) => Math.floor(value / increment) * increment
-
 export class Note {
   constructor (startTime, duration, pitch, velocity = 0.8) {
     // NOTE: will be set when the note is added to a `Track`.
@@ -26,42 +17,6 @@ export class Note {
     const overlaps = overlapsRight && overlapsLeft
 
     return samePitch && overlaps
-  }
-}
-
-export class NoteCanvasAdapter {
-  toBox (renderContext, note) {
-    const height = renderContext.percentPerInterval
-    return {
-      id: note.id,
-      x: renderContext.percentPerTick * note.startTime,
-      y: 100 - (height + renderContext.percentPerInterval * note.pitch),
-      width: renderContext.percentPerTick * note.duration,
-      height
-    }
-  }
-
-  toNote (renderContext, box) {
-    const duration = Math.floor(box.width / renderContext.percentPerTick)
-    if (!duration) {
-      throw new NoteTooSmallException()
-    }
-    return new Note(
-      Math.floor(box.x / renderContext.percentPerTick),
-      duration,
-      Math.floor(
-        (100 - (box.y + box.height)) / renderContext.percentPerInterval
-      )
-    )
-  }
-
-  clip (renderContext, box) {
-    return {
-      x: clip(box.x, renderContext.percentPerTick),
-      y: clip(box.y, renderContext.percentPerInterval),
-      width: clip(box.width, renderContext.percentPerTick),
-      height: clip(box.height, renderContext.percentPerInterval)
-    }
   }
 }
 
