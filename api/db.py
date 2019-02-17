@@ -376,7 +376,7 @@ class Database:
             self.connection.commit()
 
     def get_user(self, username: str) -> dict:
-        """Retrieve an user.
+        """Retrieve a user.
 
         Parameters
         ----------
