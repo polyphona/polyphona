@@ -168,7 +168,7 @@ class Database:
             self.connection.commit()
             return self.get_song_by_id(id)
 
-    def delete_song(self, id: int, username: str) -> bool:
+    def delete_song(self, id: int, username: str):
         with self:
             self.cursor.execute(
                 """
@@ -189,7 +189,7 @@ class Database:
             )
             self.connection.commit()
 
-    def user_exists(self, username) -> bool:
+    def user_exists(self, username: str) -> bool:
         with self:
             self.cursor.execute(
                 "SELECT count(UserName) FROM users WHERE UserName=?",
