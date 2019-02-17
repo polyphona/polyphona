@@ -403,7 +403,7 @@ class Database:
             }
 
     def create_song_user_link(self, song_id: int, username: str):
-        """Attach a song to an user.
+        """Attach a song to a user.
 
         Parameters
         ----------
