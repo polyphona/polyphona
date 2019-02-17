@@ -1,6 +1,6 @@
 <script>
   /* NOTE: this is a JS-only component. */
-  import { MouseCanvasAdapter } from '@/models'
+  import { Box, MouseCanvasAdapter } from '@/models'
 
   const adapter = new MouseCanvasAdapter()
 
@@ -19,7 +19,7 @@
         type: Boolean,
         default: true
       },
-      width: {
+      stroke: {
         type: Number,
         default: 1
       },
@@ -42,6 +42,7 @@
       },
       line () {
         const ctx = this.context
+
         const line = {
           start: {
             x: adapter.percentWidthToPix(this.vertical ? this.x : 0, ctx),
@@ -52,13 +53,14 @@
             y: adapter.percentHeightToPix(this.vertical ? 100 : this.y, ctx)
           }
         }
-        // NOTE: this only works for vertical lines.
-        this.box = {
-          x: line.start.x - this.width,
+
+        this.box = new Box({
+          x: line.start.x - this.stroke,
           y: line.start.y,
-          width: 2 * this.width,
+          width: 2 * this.stroke,
           height: line.end.y - line.start.y
-        }
+        })
+
         return line
       }
     },
@@ -87,7 +89,7 @@
       ctx.moveTo(start.x, start.y)
       ctx.lineTo(end.x, end.y)
       ctx.strokeStyle = this.color
-      ctx.lineWidth = this.width
+      ctx.lineWidth = this.stroke
       ctx.stroke()
       ctx.restore()
     },

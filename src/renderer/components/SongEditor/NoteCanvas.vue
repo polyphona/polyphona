@@ -17,24 +17,13 @@
       <note-grid layer="background" :key="canvasId"></note-grid>
 
       <!-- Note being created (if any) -->
-      <note-box
-        v-if="newBox"
-        :x="newBox.x"
-        :y="newBox.y"
-        :width="newBox.width"
-        :height="newBox.height"
-        :color="'#ffe17f'"
-        layer="foreground"
-      ></note-box>
+      <note-box v-if="newBox" :box="newBox" :color="'#ffe17f'" layer="foreground"></note-box>
 
       <!-- Notes in the song. -->
       <note-box
-        v-for="box in noteBoxes"
+        v-for="box in boxes"
         :key="canvasId + '-note-' + box.id"
-        :x="box.x"
-        :y="box.y"
-        :width="box.width"
-        :height="box.height"
+        :box="box"
         :color="'#f6cd4c'"
         layer="notes"
       ></note-box>
@@ -43,7 +32,7 @@
 </template>
 
 <script>
-  import {NoteCanvasAdapter, NoteTooSmallException} from '@/models'
+  import {Box, NoteCanvasAdapter, NoteTooSmallException} from '@/models'
   import CanvasLayers from './CanvasLayers.vue'
   import NoteBox from './NoteBox'
   import CanvasLine from './CanvasLine.vue'
@@ -74,7 +63,7 @@
       }
     },
     computed: {
-      noteBoxes () {
+      boxes () {
         return this.$store.getters['music/listNotes'].map(
           (note) => canvasAdapter.toBox(this.renderContext, note)
         )
@@ -100,12 +89,12 @@
         if (!this.clicking) {
           return
         }
-        let box = {
+        let box = new Box({
           x,
           y,
           width: this.renderContext.percentPerTick,
           height: this.renderContext.percentPerInterval
-        }
+        })
         box = canvasAdapter.clip(this.renderContext, box)
         const note = canvasAdapter.toNote(this.renderContext, box)
         const existingNote = this.$store.getters['music/listNotes'].filter((value) => note.disturbs(value))
@@ -121,7 +110,7 @@
         this.dragging = DRAG_NONE
         const height = this.renderContext.percentPerInterval
         const width = this.renderContext.percentPerTick
-        const box = {x, y, width, height}
+        const box = new Box({x, y, width, height})
         this.newBox = canvasAdapter.clip(this.renderContext, box)
       },
       onMouseMove ({x, y}) {
@@ -130,12 +119,11 @@
           return
         }
 
-        const eventX = x
         // Perform a bit of logic to keep track of which way we are
         // dragging the note.
         // This is necessary in order to correctly draw the new note,
         // especially for it to have a correct X coordinate.
-        if (eventX - this.newBox.x > 0) {
+        if (x - this.newBox.x > 0) {
           // Now dragging to the right.
           if (this.dragging === DRAG_LEFT) {
             // Fix the X coordinate.
@@ -152,8 +140,7 @@
         }
 
         this.newBox.width = (
-          eventX -
-          this.newBox.x +
+          (x - this.newBox.x) +
           (this.dragging > 0 ? 1 : 0) * this.renderContext.percentPerTick
         )
 

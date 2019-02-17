@@ -29,21 +29,21 @@ to display and manipulate data.
 
 It consists in:
 
-- A web application server, written in Python using Falcon and running on Gunicorn (or a similar process manager);
-- A database module, also written in Python and backed by SQLite3.
+- A web application server, written in Python using Falcon (a REST API framework) and running on Gunicorn (or a similar process manager);
+- A database module, also written in Python and backed by SQLite and the `sqlite3` module.
 
 The database itself is stored in a file named `server/polyphona_db.db`.
 If no file is found a new one will be created upon the launch of the server.
 
 ### Running the server
 
-To run the server locally, `cd` to the `server` directory and use:
+To run the server locally, run the following command from the project root directory:
 
 ```bash
-gunicorn server:app
+gunicorn api:app
 ```
 
-For more advanced use cases, please refer to the gunicorn documentation or whatever service you want to use instead.
+For more advanced use cases, please refer to the Gunicorn documentation or the process manager you are using.
 
 ### Running the desktop app
 
@@ -57,13 +57,9 @@ in the root directory.
 
 ## Tests
 
-The server includes a `server_test.py` file, that allows for thorough testing through pytest.
+The server comes with a test suite written with Pytest.
 
-To run the test, you need to first delete the database file (or rename it if it is contains valuable data), then run:
-
-```bash
-pytest
-```
+To run the test suite, run `$ pytest` from the project root directory.
 
 ## Resources
 
