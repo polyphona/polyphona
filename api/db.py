@@ -3,7 +3,7 @@ import json
 import os
 import sqlite3
 from contextlib import suppress
-from typing import List, Optional
+from typing import Any, List, Optional
 
 
 class DoesNotExist(Exception):
@@ -13,11 +13,11 @@ class DoesNotExist(Exception):
     ----------
     obj_type : str
         A label that indicates what type the object should have been.
-    **kwargs : dict of str to str
+    **kwargs : any
         Attribute names and values that the object should have had.
     """
 
-    def __init__(self, obj_type: str, **kwargs: str):
+    def __init__(self, obj_type: str, **kwargs: Any):
         if kwargs:
             attrs = " with " + ", ".join(
                 [f"{key}={value}" for key, value in kwargs.items()]
@@ -42,8 +42,8 @@ class Database:
 
     def __init__(self, path: str):
         self.path = path
-        self._connections: List[sqlite3.Connection] = []
-        self._cursors: List[sqlite3.Cursor] = []
+        self.__connections: List[sqlite3.Connection] = []
+        self.__cursors: List[sqlite3.Cursor] = []
 
     # Context manager implementation.
     # Allows to use `with self:` to acquire a new connection/cursor.
@@ -54,16 +54,16 @@ class Database:
     def __enter__(self):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
-        self._connections.append(conn)
-        self._cursors.append(cursor)
+        self.__connections.append(conn)
+        self.__cursors.append(cursor)
         return self
 
     def __exit__(self, *args):
         with suppress(IndexError):
-            self._cursors.pop().close()
+            self.__cursors.pop().close()
 
         with suppress(IndexError):
-            self._connections.pop().close()
+            self.__connections.pop().close()
 
     @property
     def cursor(self) -> sqlite3.Cursor:
@@ -81,7 +81,7 @@ class Database:
         IndexError :
             If no cursor is available.
         """
-        return self._cursors[-1]
+        return self.__cursors[-1]
 
     @property
     def connection(self) -> sqlite3.Connection:
@@ -99,7 +99,7 @@ class Database:
         IndexError :
             If no connection is available.
         """
-        return self._connections[-1]
+        return self.__connections[-1]
 
     def generate_schema(self):
         """Generate the database schema.
