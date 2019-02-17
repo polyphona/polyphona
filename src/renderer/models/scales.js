@@ -10,8 +10,7 @@ export const SCALE = {
   8: 'G#',
   9: 'A',
   10: 'A#',
-  11: 'B',
-  12: 'C'
+  11: 'B'
 }
 
 export const INVERSESCALE = {
