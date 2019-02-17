@@ -10,11 +10,7 @@ const getters = {
 
 const mutations = {
   setUser (state, user) {
-    if (user) {
-      localStorage.setItem(USER_STORAGE_ITEM, JSON.stringify(user))
-    } else {
-      localStorage.removeItem(USER_STORAGE_ITEM)
-    }
+    localStorage.setItem(USER_STORAGE_ITEM, JSON.stringify(user))
     state.user = user
   },
   setToken (state, token) {
@@ -24,6 +20,10 @@ const mutations = {
   },
   discardToken () {
     localStorage.removeItem(TOKEN_STORAGE_ITEM)
+  },
+  discardUser (state) {
+    localStorage.removeItem(USER_STORAGE_ITEM)
+    state.user = null
   }
 }
 
@@ -51,8 +51,8 @@ const actions = {
   },
   logout (context) {
     context.commit('discardToken')
-    context.commit('setUser', null)
-    context.commit('music/RESET_TRACK', null, {root: true})
+    context.commit('discardUser')
+    context.commit('music/RESET_TRACK', null, { root: true })
   }
 }
 
