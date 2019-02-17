@@ -15,6 +15,10 @@ class UserSongsResource:
     """
 
     def __init__(self, db: Database):
+        # NOTE: this attribute must be public so that `@authenticated`
+        # can perform the auth check.
+        # This is true for any resource that uses `@authenticated` in this
+        # code base.
         self.db = db
 
     @authenticated
