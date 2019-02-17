@@ -156,6 +156,11 @@ class Database:
         Returns
         -------
         song : dict
+
+        Raises
+        ------
+        DoesNotExist :
+            If no song exists for the given ``id``.
         """
         with self:
             self.cursor.execute(
@@ -255,6 +260,11 @@ class Database:
         Returns
         -------
         song : dict
+
+        Raises
+        ------
+        DoesNotExist :
+            If the user ``username`` has no song with id ``id``.
         """
         with self:
             self.cursor.execute(
