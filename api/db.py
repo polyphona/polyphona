@@ -7,6 +7,16 @@ from typing import List, Optional
 
 
 class DoesNotExist(Exception):
+    """Raised when an object could not be found is the database.
+
+    Parameters
+    ----------
+    obj_type : str
+        A label that indicates what type the object should have been.
+    **kwargs : dict of str to str
+        Attribute names and values that the object should have had.
+    """
+
     def __init__(self, obj_type: str, **kwargs: str):
         if kwargs:
             attrs = " with " + ", ".join(
@@ -19,6 +29,17 @@ class DoesNotExist(Exception):
 
 
 class Database:
+    """The single entry point to the database.
+
+    This class exposes methods to interact with the database and manages
+    connections and cursors itself.
+
+    Parameters
+    ----------
+    path : str
+        The path to the SQLite database file (that exists or should be created).
+    """
+
     def __init__(self, path: str):
         self.path = path
         self.connections: List[sqlite3.Connection] = []
@@ -47,6 +68,11 @@ class Database:
         return self.connections[-1]
 
     def generate_schema(self):
+        """Generate the database schema.
+
+        It is safe to call this multiple times: tables will only be
+        created if they don't exist already.
+        """
         with self:
             self.cursor.execute(
                 """CREATE TABLE IF NOT EXISTS songs (
@@ -85,6 +111,17 @@ class Database:
         os.remove(self.path)
 
     def get_song_by_id(self, id: int) -> dict:
+        """Retrieve a song by ID.
+
+        Parameters
+        ----------
+        id : int
+            The ID of the song.
+        
+        Returns
+        -------
+        song : dict
+        """
         with self:
             self.cursor.execute(
                 """
@@ -108,6 +145,16 @@ class Database:
                 }
 
     def get_songs_by_user(self, username: str) -> List[dict]:
+        """Return the list of songs for a given user.
+
+        Parameters
+        ----------
+        username : str
+
+        Returns
+        -------
+        songs : list of dict
+        """
         with self:
             self.cursor.execute(
                 """
@@ -122,6 +169,21 @@ class Database:
             return [strings2dict(*song) for song in result]
 
     def create_song(self, name: str, tracks: List[dict]) -> int:
+        """Save a new song to the database.
+
+        Parameters
+        ----------
+        name : str
+            The name of the song.
+        tracks : list of dict
+            A list of JSON-serializable dictionaries.
+
+        Returns
+        -------
+        song_id : int
+            The ID of the song newly created. The full data can be fetched
+            using ``.get_song_by_id()``.
+        """
         with self:
             now = datetime.datetime.now()
             self.cursor.execute(
@@ -142,6 +204,23 @@ class Database:
     def update_song(
         self, id: int, name: str, tracks: List[dict], username: str
     ) -> dict:
+        """Update a song.
+
+        Parameters
+        ----------
+        id : int
+            The ID of the song to update.
+        name : str
+            The new name for this song.
+        tracks : list of dict
+            The new list of tracks for this song.
+        username : str
+            The user this song belongs to.
+        
+        Returns
+        -------
+        song : dict
+        """
         with self:
             self.cursor.execute(
                 """
@@ -169,6 +248,20 @@ class Database:
             return self.get_song_by_id(id)
 
     def delete_song(self, id: int, username: str):
+        """Delete a song.
+
+        Parameters
+        ----------
+        id : int
+            The ID of the song to delete.
+        username : str
+            The user the song belongs to.
+        
+        Raises
+        ------
+        DoesNotExist :
+            If no song exists for ``id`` and ``username``.
+        """
         with self:
             self.cursor.execute(
                 """
@@ -190,6 +283,16 @@ class Database:
             self.connection.commit()
 
     def user_exists(self, username: str) -> bool:
+        """Return whether a user already exists in the database.
+
+        Parameters
+        ----------
+        username : str
+
+        Returns
+        -------
+        exists : bool
+        """
         with self:
             self.cursor.execute(
                 "SELECT count(UserName) FROM users WHERE UserName=?",
@@ -201,6 +304,15 @@ class Database:
     def create_user(
         self, username: str, first_name: str, last_name: str, password: str
     ):
+        """Save a new user to the database.
+
+        Parameters
+        ----------
+        username : str
+        first_name : str
+        last_name : str
+        password: str
+        """
         with self:
             self.cursor.execute(
                 """INSERT INTO users (UserName, FirstName, LastName, Password)
@@ -210,6 +322,16 @@ class Database:
             self.connection.commit()
 
     def get_user(self, username: str) -> dict:
+        """Retrieve an user.
+
+        Parameters
+        ----------
+        username : str
+
+        Returns
+        -------
+        user : dict
+        """
         with self:
             self.cursor.execute(
                 """
@@ -227,6 +349,13 @@ class Database:
             }
 
     def create_song_user_link(self, song_id: int, username: str):
+        """Attach a song to an user.
+
+        Parameters
+        ----------
+        song_id : int
+        username : str
+        """
         with self:
             self.cursor.execute(
                 """
@@ -238,6 +367,15 @@ class Database:
             self.connection.commit()
 
     def save_token(self, username: str, token: str):
+        """Save a new token to the database.
+
+        The token's refresh date will be set to 15mins ahead from now.
+
+        Parameters
+        ----------
+        username : str
+        token : str
+        """
         with self:
             refresh = datetime.datetime.now() + datetime.timedelta(minutes=15)
             self.cursor.execute(
@@ -250,6 +388,17 @@ class Database:
             self.connection.commit()
 
     def reverse_token(self, token: str) -> Optional[str]:
+        """Retrieve the username corresponding to a token, if any.
+
+        Parameters
+        ----------
+        token : str
+
+        Returns
+        -------
+        username : str or None
+            This is ``None`` if ``token`` does not correspond to any user.
+        """
         with self:
             self.cursor.execute(
                 "SELECT UserName FROM tokens WHERE Token=?", (token,)
@@ -262,6 +411,17 @@ class Database:
                 return None
 
     def delete_token(self, token: str):
+        """Delete a token from the database.
+
+        Parameters
+        ----------
+        token : str
+
+        Raises
+        ------
+        DoesNotExist :
+            If no token identified by ``token`` exists.
+        """
         with self:
             count = self.cursor.execute(
                 """DELETE FROM tokens WHERE Token = ?""", (token,)
@@ -271,6 +431,17 @@ class Database:
             self.connection.commit()
 
     def check_user(self, username: str, password: str) -> bool:
+        """Check that the given credentials match those stored in database.
+
+        Parameters
+        ----------
+        username : str
+        password : str
+
+        Returns
+        -------
+        correct : bool
+        """
         if self.user_exists(username):
             return False
 
