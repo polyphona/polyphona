@@ -1,10 +1,18 @@
 from functools import wraps
+from typing import Callable
 
 import falcon
 
 
-def authenticated(responder):
-    """Require the client to provide a valid token to access the endpoint."""
+def authenticated(responder: Callable) -> Callable:
+    """Require the client to provide a valid token to access the endpoint.
+
+    The token should be given in the ``Authorization`` header in the following
+    format: ``Token {token}``.
+
+    If the token was not given or it is invalid, a ``401 Unauthorized`` error
+    response is sent.
+    """
 
     @wraps(responder)
     def with_auth(self, req, resp, *args, **kwargs):
@@ -25,8 +33,19 @@ def authenticated(responder):
     return with_auth
 
 
-def require_fields(*fields: str):
-    def decorate(responder):
+def require_fields(*fields: str) -> Callable:
+    """Require the client to provide the specified fields.
+
+    This is meant to be used as a decorator of responder methods.
+
+    Parameters
+    ----------
+    *fields : str
+        Fields that the inbound JSON *must* contain. If it doesn't,
+        A ``400 Bad Request`` response is returned.
+    """
+
+    def decorate(responder: Callable) -> Callable:
         @wraps(responder)
         def with_fields_required(self, req, resp, *args, **kwargs):
             for field in fields:

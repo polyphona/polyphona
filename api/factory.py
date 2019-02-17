@@ -13,6 +13,22 @@ from .error_handlers import on_does_not_exist
 
 
 def create_api(db: Database) -> API:
+    """Create a new application instance.
+
+    - For simplicity, CORS is enabled for all origins,
+      all methods and all headers.
+    - ``DoesNotExist`` exceptions are caught and converted
+      to ``404 Not Found`` error responses.
+
+    Parameters
+    ----------
+    db : Database
+        An instance of the ``Database``.
+    
+    Returns
+    -------
+    api : API
+    """
     # Middleware.
     cors = CORS(
         allow_all_origins=True, allow_all_methods=True, allow_all_headers=True
