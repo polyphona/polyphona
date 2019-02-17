@@ -205,8 +205,17 @@ class Database:
                 """,
                 (username,),
             )
-            result = self.cursor.fetchall()
-            return [strings2dict(*song) for song in result]
+            rows = self.cursor.fetchall()
+            return [
+                {
+                    "id": id,
+                    "name": name,
+                    "created": str(created),
+                    "updated": str(updated),
+                    "tracks": json.loads(tracks),
+                }
+                for id, name, created, updated, tracks in rows
+            ]
 
     def create_song(self, name: str, tracks: List[dict]) -> int:
         """Save a new song to the database.
@@ -495,13 +504,3 @@ class Database:
                 "SELECT Password FROM users WHERE UserName=?", (username,)
             )
             return self.cursor.fetchone()[0] == password
-
-
-def strings2dict(song_id, song_name, created, updated, tracks):
-    output = {}
-    output["id"] = song_id
-    output["name"] = song_name
-    output["created"] = str(created)
-    output["updated"] = str(updated)
-    output["tracks"] = json.loads(tracks)
-    return output
