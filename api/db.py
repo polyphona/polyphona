@@ -42,30 +42,64 @@ class Database:
 
     def __init__(self, path: str):
         self.path = path
-        self.connections: List[sqlite3.Connection] = []
-        self.cursors: List[sqlite3.Cursor] = []
+        self._connections: List[sqlite3.Connection] = []
+        self._cursors: List[sqlite3.Cursor] = []
+
+    # Context manager implementation.
+    # Allows to use `with self:` to acquire a new connection/cursor.
+    # The connections and cursors are stored in a stack-like manner, so it
+    # is safe to enter the database context multiple times
+    # (i.e. perform nested queries.)
 
     def __enter__(self):
         conn = sqlite3.connect(self.path)
         cursor = conn.cursor()
-        self.connections.append(conn)
-        self.cursors.append(cursor)
+        self._connections.append(conn)
+        self._cursors.append(cursor)
         return self
 
     def __exit__(self, *args):
         with suppress(IndexError):
-            self.cursors.pop().close()
+            self._cursors.pop().close()
 
         with suppress(IndexError):
-            self.connections.pop().close()
+            self._connections.pop().close()
 
     @property
     def cursor(self) -> sqlite3.Cursor:
-        return self.cursors[-1]
+        """Returns the current cursor.
+
+        Note: a cursor can only be available when inside the context
+        of the database.
+    
+        Returns
+        -------
+        cursor : sqlite3.Cursor
+
+        Raises
+        ------
+        IndexError :
+            If no cursor is available.
+        """
+        return self._cursors[-1]
 
     @property
     def connection(self) -> sqlite3.Connection:
-        return self.connections[-1]
+        """Returns the current database connection.
+
+        Note: a connection can only be available when inside the context
+        of the database.
+
+        Returns
+        -------
+        connection : sqlite3.Connection
+
+        Raises
+        ------
+        IndexError :
+            If no connection is available.
+        """
+        return self._connections[-1]
 
     def generate_schema(self):
         """Generate the database schema.
@@ -108,6 +142,7 @@ class Database:
             self.connection.commit()
 
     def remove(self):
+        """Delete the SQLite database file."""
         os.remove(self.path)
 
     def get_song_by_id(self, id: int) -> dict:
