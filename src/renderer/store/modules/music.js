@@ -253,7 +253,6 @@ const actions = {
       var matches = /([a-g])(#+|b+)?([0-9]+)$/i.exec(n)
       var note = matches[1].toUpperCase() + (matches[2] || '')
       var octave = parseInt(matches[3], 10)
-      console.log(note, octave)
       return [note, octave]
     }
     const path = remote.dialog.showOpenDialog({
