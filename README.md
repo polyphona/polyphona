@@ -32,8 +32,7 @@ It consists in:
 - A web application server, written in Python using Falcon (a REST API framework) and running on Gunicorn (or a similar process manager);
 - A database module, also written in Python and backed by SQLite and the `sqlite3` module.
 
-The database itself is stored in a file named `server/polyphona_db.db`.
-If no file is found a new one will be created upon the launch of the server.
+The database itself is stored in a file named `polyphona_db.db`. If no file is found a new one will be created upon the launch of the server.
 
 ### Running the server
 
