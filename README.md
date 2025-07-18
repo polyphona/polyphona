@@ -2,6 +2,8 @@
 
 A familiar, portable music editor for your desktop.
 
+![](./img/preview.png)
+
 ## Install
 
 ### Client
